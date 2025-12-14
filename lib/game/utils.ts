@@ -121,6 +121,7 @@ export function initializeCharacters(): {
       damageBoost: 0,
       movementBoost: 0,
       attacksRemaining: 2,
+      initiative: 10,
     },
     {
       id: 'player-mage',
@@ -135,6 +136,7 @@ export function initializeCharacters(): {
       damageBoost: 0,
       movementBoost: 0,
       attacksRemaining: 1,
+      initiative: 11,
     },
     {
       id: 'player-thief',
@@ -149,6 +151,7 @@ export function initializeCharacters(): {
       damageBoost: 0,
       movementBoost: 0,
       attacksRemaining: 1,
+      initiative: 8,
     },
   ];
   
@@ -166,6 +169,7 @@ export function initializeCharacters(): {
       damageBoost: 0,
       movementBoost: 0,
       attacksRemaining: 2,
+      initiative: 10,
     },
     {
       id: 'enemy-mage',
@@ -180,6 +184,7 @@ export function initializeCharacters(): {
       damageBoost: 0,
       movementBoost: 0,
       attacksRemaining: 1,
+      initiative: 11,
     },
     {
       id: 'enemy-thief',
@@ -194,9 +199,31 @@ export function initializeCharacters(): {
       damageBoost: 0,
       movementBoost: 0,
       attacksRemaining: 1,
+      initiative: 8,
     },
   ];
   
   return { playerTeam, enemyTeam };
+}
+
+// Génère l'ordre de jeu basé sur l'initiative
+export function generateTurnOrder(playerTeam: Character[], enemyTeam: Character[]): string[] {
+  const allCharacters = [...playerTeam, ...enemyTeam].filter(c => c.isAlive);
+  
+  // Trier par initiative (plus bas = joue en premier)
+  // En cas d'égalité: joueur d'abord, puis aléatoire si même équipe
+  allCharacters.sort((a, b) => {
+    if (a.initiative !== b.initiative) {
+      return a.initiative - b.initiative;
+    }
+    // Initiative égale
+    if (a.team !== b.team) {
+      return a.team === 'player' ? -1 : 1; // Joueur d'abord
+    }
+    // Même équipe, même initiative: aléatoire
+    return Math.random() - 0.5;
+  });
+  
+  return allCharacters.map(c => c.id);
 }
 

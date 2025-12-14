@@ -26,11 +26,13 @@ export function initializeGame(): GameState {
     enemyTeam,
     currentTurn: 'player',
     currentCharacterIndex: 0,
+    selectedCharacter: null,
     specialTiles,
     gameOver: false,
     winner: null,
     turnCount: 0,
     moveCount: 0,
+    movementCount: 0,
   };
 }
 
@@ -58,12 +60,12 @@ export function moveCharacter(
     return gameState;
   }
   
-  // VÃ©rifier si la case est libre
+  // Vérifier si la case est libre
   if (gameState.board[newPosition.y][newPosition.x] !== null) {
     return gameState;
   }
   
-  // Mettre Ã  jour la position
+  // Mettre à jour la position
   const newBoard = gameState.board.map(row => [...row]);
   newBoard[character.position.y][character.position.x] = null;
   newBoard[newPosition.y][newPosition.x] = character;
@@ -72,10 +74,10 @@ export function moveCharacter(
     ...character,
     position: newPosition,
     movement: character.movement - distance,
-    movementBoost: 0, // ConsommÃ© aprÃ¨s le mouvement
+    movementBoost: 0, // Consommé après le mouvement
   };
   
-  // Appliquer les effets des cases spÃ©ciales
+  // Appliquer les effets des cases spéciales
   const specialTile = gameState.specialTiles.find(
     tile => tile.position.x === newPosition.x &&
             tile.position.y === newPosition.y &&
@@ -101,7 +103,7 @@ export function moveCharacter(
     specialTile.used = true;
   }
   
-  // Mettre Ã  jour l'Ã©quipe
+  // Mettre à jour l'équipe
   const team = character.team === 'player' ? 'playerTeam' : 'enemyTeam';
   const updatedTeam = gameState[team].map(c =>
     c.id === characterId ? updatedCharacter : c
@@ -136,14 +138,14 @@ export function performAttack(
   const isAreaAttack = attacker.type === 'mage';
   const allCharacters = [...gameState.playerTeam, ...gameState.enemyTeam].filter(c => c.isAlive);
   
-  // Pour les attaques ciblÃ©es, trouver les cibles autour de la position cliquÃ©e
+  // Pour les attaques ciblées, trouver les cibles autour de la position cliquée
   let targets: Character[] = [];
   
   if (isAreaAttack) {
     // Attaque de zone autour de l'attaquant
     targets = getAttackTargets(attacker, allCharacters, attackRange, true);
   } else {
-    // Attaque ciblÃ©e : trouver les personnages autour de la position cliquÃ©e
+    // Attaque ciblée : trouver les personnages autour de la position cliquée
     const charactersAtPosition = allCharacters.filter(char => {
       const distance = getDistance(char.position, targetPosition);
       return distance <= (isMelee ? 1 : attackRange);
@@ -152,7 +154,7 @@ export function performAttack(
     if (charactersAtPosition.length > 0) {
       targets = charactersAtPosition;
     } else {
-      // Attaque dans le vide - ne consomme pas les bonus de dÃ©gÃ¢ts
+      // Attaque dans le vide - ne consomme pas les bonus de dégâts
       return { gameState, attackResult: null };
     }
   }
@@ -161,12 +163,12 @@ export function performAttack(
     return { gameState, attackResult: null };
   }
   
-  // Calculer les dÃ©gÃ¢ts
+  // Calculer les dégâts
   const attackResults = targets.map(target => {
     let damage = calculateDamage(attacker.type, target.type, attacker.damageBoost);
     let isCritical = false;
     
-    // Critique pour le voleur en corps Ã  corps
+    // Critique pour le voleur en corps à corps
     if (attacker.type === 'thief' && isMelee && Math.random() < 0.5) {
       damage *= 2;
       isCritical = true;
@@ -186,7 +188,7 @@ export function performAttack(
     };
   });
   
-  // Mettre Ã  jour les personnages
+  // Mettre à jour les personnages
   const newBoard = gameState.board.map(row => [...row]);
   const updatedPlayerTeam = gameState.playerTeam.map(char => {
     const result = attackResults.find(r => r.character.id === char.id);
@@ -208,7 +210,7 @@ export function performAttack(
     return char;
   });
   
-  // RÃ©initialiser le bonus de dÃ©gÃ¢ts aprÃ¨s l'attaque
+  // Réinitialiser le bonus de dégâts après l'attaque
   const updatedAttacker = {
     ...attacker,
     damageBoost: 0,
@@ -232,7 +234,7 @@ export function performAttack(
     [team]: finalTeam,
   };
   
-  // VÃ©rifier si le jeu est terminÃ©
+  // Vérifier si le jeu est terminé
   const playerAlive = updatedPlayerTeam.some(c => c.isAlive);
   const enemyAlive = updatedEnemyTeam.some(c => c.isAlive);
   
@@ -245,19 +247,19 @@ export function performAttack(
 }
 
 export function endTurn(gameState: GameState): GameState {
-  // Passer au prochain personnage de l'Ã©quipe actuelle
+  // Passer au prochain personnage de l'équipe actuelle
   const currentTeam = gameState.currentTurn === 'player' 
     ? gameState.playerTeam 
     : gameState.enemyTeam;
   
   let nextCharacterIndex = gameState.currentCharacterIndex + 1;
   
-  // Si on a fini tous les personnages de l'Ã©quipe, passer Ã  l'autre Ã©quipe
+  // Si on a fini tous les personnages de l'équipe, passer à l'autre équipe
   if (nextCharacterIndex >= currentTeam.length) {
     nextCharacterIndex = 0;
     const nextTurn: Team = gameState.currentTurn === 'player' ? 'enemy' : 'player';
     
-    // RÃ©initialiser les points de mouvement pour la nouvelle Ã©quipe
+    // Réinitialiser les points de mouvement pour la nouvelle équipe
     const nextTeam = nextTurn === 'player' ? 'playerTeam' : 'enemyTeam';
     const resetTeam = gameState[nextTeam].map(char => ({
       ...char,

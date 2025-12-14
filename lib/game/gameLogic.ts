@@ -1,7 +1,7 @@
 // Logique principale du jeu
 
 import { GameState, Character, Position, AttackResult, Team } from '../types/game';
-import { initializeCharacters, generateSpecialTiles, getDistance, isValidPosition, calculateDamage, canAttack, getAttackTargets } from './utils';
+import { initializeCharacters, generateSpecialTiles, getDistance, isValidPosition, calculateDamage, canAttack, getAttackTargets, generateTurnOrder } from './utils';
 import { ATTACK_RANGES, ATTACKS_PER_TURN, SPECIAL_TILE_EFFECTS } from './constants';
 import { BOARD_SIZE } from './constants';
 
@@ -20,19 +20,26 @@ export function initializeGame(): GameState {
     board[char.position.y][char.position.x] = char;
   });
   
+  // Générer l'ordre de jeu basé sur l'initiative
+  const turnOrder = generateTurnOrder(playerTeam, enemyTeam);
+  const firstCharId = turnOrder[0];
+  const firstChar = [...playerTeam, ...enemyTeam].find(c => c.id === firstCharId);
+  
   return {
     board,
     playerTeam,
     enemyTeam,
-    currentTurn: 'player',
+    currentTurn: firstChar?.team || 'player',
     currentCharacterIndex: 0,
     selectedCharacter: null,
     specialTiles,
     gameOver: false,
     winner: null,
-    turnCount: 0,
+    turnCount: 1, // Tour global 1
     moveCount: 0,
     movementCount: 0,
+    turnOrder,
+    currentTurnOrderIndex: 0,
   };
 }
 
@@ -264,22 +271,17 @@ export function performAttack(
 }
 
 export function endTurn(gameState: GameState, usedCharacterId?: string): GameState {
-  // Alterner immédiatement entre joueur et adversaire après chaque tour
-  const nextTurn: Team = gameState.currentTurn === 'player' ? 'enemy' : 'player';
-  
-  const currentTeamKey = gameState.currentTurn === 'player' ? 'playerTeam' : 'enemyTeam';
-  const nextTeamKey = nextTurn === 'player' ? 'playerTeam' : 'enemyTeam';
-  
-  // Appliquer les effets des cases spéciales au personnage qui vient de jouer
-  let updatedCurrentTeam = [...gameState[currentTeamKey]];
+  let updatedPlayerTeam = [...gameState.playerTeam];
+  let updatedEnemyTeam = [...gameState.enemyTeam];
   let updatedSpecialTiles = [...gameState.specialTiles];
   let newBoard = gameState.board.map(row => [...row]);
   
+  // Appliquer les effets des cases spéciales au personnage qui vient de jouer
   if (usedCharacterId) {
-    const charIndex = updatedCurrentTeam.findIndex(c => c.id === usedCharacterId);
-    if (charIndex !== -1) {
-      const character = updatedCurrentTeam[charIndex];
-      
+    const allChars = [...updatedPlayerTeam, ...updatedEnemyTeam];
+    const character = allChars.find(c => c.id === usedCharacterId);
+    
+    if (character) {
       // Trouver si le personnage est sur une case spéciale non utilisée
       const tileIndex = updatedSpecialTiles.findIndex(
         tile => tile.position.x === character.position.x &&
@@ -302,36 +304,79 @@ export function endTurn(gameState: GameState, usedCharacterId?: string): GameSta
             updatedChar.damageBoost += SPECIAL_TILE_EFFECTS.DAMAGE_BOOST;
             break;
           case 'movement_boost':
-            // Le bonus sera appliqué au prochain tour
             updatedChar.movementBoost = SPECIAL_TILE_EFFECTS.MOVEMENT_BOOST;
             break;
         }
         
         // Marquer la case comme utilisée
         updatedSpecialTiles[tileIndex] = { ...specialTile, used: true };
-        updatedCurrentTeam[charIndex] = updatedChar;
+        
+        // Mettre à jour le personnage dans la bonne équipe
+        if (character.team === 'player') {
+          updatedPlayerTeam = updatedPlayerTeam.map(c => c.id === usedCharacterId ? updatedChar : c);
+        } else {
+          updatedEnemyTeam = updatedEnemyTeam.map(c => c.id === usedCharacterId ? updatedChar : c);
+        }
         newBoard[character.position.y][character.position.x] = updatedChar;
       }
     }
   }
   
-  // Réinitialiser le mouvement pour tous les personnages de la prochaine équipe
-  const resetNextTeam = gameState[nextTeamKey].map(char => ({
-    ...char,
-    movement: char.maxMovement + char.movementBoost, // Appliquer le bonus de mouvement
-    movementBoost: 0, // Réinitialiser après utilisation
-    attacksRemaining: char.type === 'warrior' ? 2 : 1,
-  }));
+  // Passer au prochain personnage dans l'ordre de tour
+  let nextIndex = gameState.currentTurnOrderIndex + 1;
+  let newTurnCount = gameState.turnCount;
+  let newTurnOrder = gameState.turnOrder;
+  
+  // Filtrer les personnages morts de l'ordre de tour
+  const allAlive = [...updatedPlayerTeam, ...updatedEnemyTeam].filter(c => c.isAlive);
+  newTurnOrder = gameState.turnOrder.filter(id => allAlive.some(c => c.id === id));
+  
+  // Si on a fait le tour de tous les personnages, nouveau tour global
+  if (nextIndex >= newTurnOrder.length) {
+    nextIndex = 0;
+    newTurnCount++;
+    
+    // Régénérer l'ordre de tour pour le nouveau tour global
+    newTurnOrder = generateTurnOrder(updatedPlayerTeam, updatedEnemyTeam);
+    
+    // Réinitialiser le mouvement et les attaques pour tous les personnages vivants
+    updatedPlayerTeam = updatedPlayerTeam.map(char => ({
+      ...char,
+      movement: char.isAlive ? char.maxMovement + char.movementBoost : char.movement,
+      movementBoost: 0,
+      attacksRemaining: char.isAlive ? (char.type === 'warrior' ? 2 : 1) : 0,
+    }));
+    
+    updatedEnemyTeam = updatedEnemyTeam.map(char => ({
+      ...char,
+      movement: char.isAlive ? char.maxMovement + char.movementBoost : char.movement,
+      movementBoost: 0,
+      attacksRemaining: char.isAlive ? (char.type === 'warrior' ? 2 : 1) : 0,
+    }));
+    
+    // Mettre à jour le plateau avec les personnages réinitialisés
+    [...updatedPlayerTeam, ...updatedEnemyTeam].forEach(char => {
+      if (char.isAlive) {
+        newBoard[char.position.y][char.position.x] = char;
+      }
+    });
+  }
+  
+  // Trouver le prochain personnage
+  const nextCharId = newTurnOrder[nextIndex];
+  const nextChar = [...updatedPlayerTeam, ...updatedEnemyTeam].find(c => c.id === nextCharId);
   
   return {
     ...gameState,
     board: newBoard,
-    [currentTeamKey]: updatedCurrentTeam,
-    [nextTeamKey]: resetNextTeam,
+    playerTeam: updatedPlayerTeam,
+    enemyTeam: updatedEnemyTeam,
     specialTiles: updatedSpecialTiles,
-    currentTurn: nextTurn,
-    currentCharacterIndex: 0,
-    turnCount: gameState.turnCount + 1,
+    currentTurn: nextChar?.team || 'player',
+    currentCharacterIndex: nextIndex,
+    turnCount: newTurnCount,
+    turnOrder: newTurnOrder,
+    currentTurnOrderIndex: nextIndex,
   };
 }
 

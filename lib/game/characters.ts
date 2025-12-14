@@ -1,4 +1,5 @@
 import { Character, CharacterType, Team, Position } from './types';
+import { CHARACTER_STATS } from './constants';
 
 export function createCharacter(
   type: CharacterType,
@@ -6,19 +7,22 @@ export function createCharacter(
   position: Position,
   id?: string
 ): Character {
+  const stats = CHARACTER_STATS[type.toUpperCase() as keyof typeof CHARACTER_STATS];
+  
   const baseCharacter: Character = {
     id: id || `${team}-${type}-${Date.now()}`,
     type,
     team,
     position,
-    health: 10,
-    maxHealth: 10,
-    movement: 5,
-    maxMovement: 5,
+    health: stats.health,
+    maxHealth: stats.health,
+    movement: stats.movement,
+    maxMovement: stats.movement,
     isAlive: true,
     damageBoost: 0,
     movementBoost: 0,
-    attacksRemaining: type === 'warrior' ? 2 : 1,
+    attacksRemaining: stats.attacksPerTurn,
+    initiative: stats.initiative,
   };
 
   return baseCharacter;

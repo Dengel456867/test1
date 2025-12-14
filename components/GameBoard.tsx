@@ -82,7 +82,7 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
           position={[0, 0.05, 0]}
           rotation={[-Math.PI / 2, 0, 0]}
           fontSize={isOutline ? 0.6 : 0.5}
-          color={isOutline ? 'transparent' : specialInfo.color}
+          color={isOutline ? baseColor : specialInfo.color}
           anchorX="center"
           anchorY="middle"
           outlineWidth={isOutline ? 0.03 : 0}
@@ -114,7 +114,7 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
           position={[0, 0.05, 0]}
           rotation={[-Math.PI / 2, 0, 0]}
           fontSize={isOutline ? 0.65 : 0.55}
-          color={isOutline ? 'transparent' : specialInfo.color}
+          color={isOutline ? baseColor : specialInfo.color}
           anchorX="center"
           anchorY="middle"
           outlineWidth={isOutline ? 0.035 : 0}

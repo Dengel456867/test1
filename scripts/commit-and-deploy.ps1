@@ -277,24 +277,67 @@ function Push-AllFilesToGitHub {
     return $uploadedCount -gt 0
 }
 
-# Fonction pour deployer sur Vercel via Deploy Hook
+# Fonction pour deployer directement sur Vercel via API
 function Invoke-VercelDeploy {
-    Write-Step "Deploiement sur Vercel via Deploy Hook..." "info"
+    Write-Step "Deploiement direct sur Vercel..." "info"
     
-    $deployHook = $config.vercel.deployHook
+    $projectRoot = Split-Path $PSScriptRoot -Parent
+    $excludePatterns = @("node_modules", ".next", ".git", ".vercel", "*.db", "data")
     
-    if (-not $deployHook) {
-        Write-Step "Aucun Deploy Hook configure dans config.json" "error"
-        return $false
+    # Collecter tous les fichiers
+    $files = Get-ChildItem -Path $projectRoot -Recurse -File | Where-Object {
+        $exclude = $false
+        foreach ($pattern in $excludePatterns) {
+            if ($_.FullName -like "*\$pattern\*" -or $_.FullName -like "*\$pattern") {
+                $exclude = $true
+                break
+            }
+        }
+        -not $exclude
     }
     
+    Write-Step "Preparation de $($files.Count) fichiers..." "info"
+    
+    # Construire la liste des fichiers pour l'API Vercel
+    $fileList = @()
+    foreach ($file in $files) {
+        $relativePath = $file.FullName.Substring($projectRoot.Length + 1).Replace("\", "/")
+        try {
+            $content = Get-Content -Path $file.FullName -Raw -ErrorAction Stop
+            if ($null -eq $content) { $content = "" }
+            $encoded = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($content))
+            $fileList += @{
+                file = $relativePath
+                data = $encoded
+                encoding = "base64"
+            }
+        } catch {
+            continue
+        }
+    }
+    
+    Write-Step "Upload vers Vercel..." "info"
+    
+    $headers = @{
+        "Authorization" = "Bearer $env:VERCEL_TOKEN"
+        "Content-Type" = "application/json"
+    }
+    
+    $deployBody = @{
+        name = $env:VERCEL_PROJECT_NAME
+        files = $fileList
+        projectSettings = @{
+            framework = "nextjs"
+        }
+        target = "production"
+    } | ConvertTo-Json -Depth 10 -Compress
+    
     try {
-        # Declencher le deploy hook
-        $response = Invoke-RestMethod -Uri $deployHook -Method Post -ErrorAction Stop
+        $response = Invoke-RestMethod -Uri "https://api.vercel.com/v13/deployments" -Method Post -Headers $headers -Body $deployBody -ContentType "application/json" -ErrorAction Stop
         
-        Write-Step "Deploiement declenche avec succes!" "success"
-        Write-Step "Job ID: $($response.job.id)" "info"
-        Write-Step "Suivez le deploiement sur: https://vercel.com" "info"
+        Write-Step "Deploiement cree avec succes!" "success"
+        Write-Step "URL: $($response.url)" "info"
+        Write-Step "Statut: $($response.readyState)" "info"
         return $true
     } catch {
         Write-Step "Erreur deploiement Vercel: $($_.Exception.Message)" "error"

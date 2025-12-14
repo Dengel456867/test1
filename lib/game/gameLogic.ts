@@ -213,9 +213,11 @@ export function performAttack(
     };
   });
   
-  // Mettre à jour les personnages
+  // Mettre à jour les personnages (y compris les alliés touchés par le mage)
   const newBoard = gameState.board.map(row => [...row]);
-  const updatedPlayerTeam = gameState.playerTeam.map(char => {
+  
+  // D'abord appliquer les dégâts à tous les personnages touchés
+  let updatedPlayerTeam = gameState.playerTeam.map(char => {
     const result = attackResults.find(r => r.character.id === char.id);
     if (result) {
       const updated = result.character;
@@ -225,7 +227,7 @@ export function performAttack(
     return char;
   });
   
-  const updatedEnemyTeam = gameState.enemyTeam.map(char => {
+  let updatedEnemyTeam = gameState.enemyTeam.map(char => {
     const result = attackResults.find(r => r.character.id === char.id);
     if (result) {
       const updated = result.character;
@@ -235,16 +237,21 @@ export function performAttack(
     return char;
   });
   
-  // Réinitialiser le bonus de dégâts après l'attaque
+  // Ensuite réinitialiser le bonus de dégâts de l'attaquant
+  if (attacker.team === 'player') {
+    updatedPlayerTeam = updatedPlayerTeam.map(c =>
+      c.id === attackerId ? { ...c, damageBoost: 0 } : c
+    );
+  } else {
+    updatedEnemyTeam = updatedEnemyTeam.map(c =>
+      c.id === attackerId ? { ...c, damageBoost: 0 } : c
+    );
+  }
+  
   const updatedAttacker = {
     ...attacker,
     damageBoost: 0,
   };
-  
-  const team = attacker.team === 'player' ? 'playerTeam' : 'enemyTeam';
-  const finalTeam = gameState[team].map(c =>
-    c.id === attackerId ? updatedAttacker : c
-  );
   
   const attackResult: AttackResult = {
     attacker: updatedAttacker,
@@ -256,7 +263,6 @@ export function performAttack(
     board: newBoard,
     playerTeam: updatedPlayerTeam,
     enemyTeam: updatedEnemyTeam,
-    [team]: finalTeam,
   };
   
   // Vérifier si le jeu est terminé

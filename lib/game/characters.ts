@@ -23,6 +23,9 @@ export function createCharacter(
     movementBoost: 0,
     attacksRemaining: stats.attacksPerTurn,
     initiative: stats.initiative,
+    armor: 0,
+    shield: 0,
+    regeneration: 0,
   };
 
   return baseCharacter;

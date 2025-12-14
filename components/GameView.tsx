@@ -70,10 +70,14 @@ function CharacterCard({
           style={{ width: `${healthPercent}%` }}
         />
       </div>
-      <div className="flex gap-2 text-xs text-gray-400">
+      <div className="flex gap-2 text-xs text-gray-400 flex-wrap">
         <span>❤️{char.health}/{char.maxHealth}</span>
         <span>👟{char.movement}</span>
         <span>⚔️{char.attacksRemaining}</span>
+        {char.shield > 0 && <span style={{color: '#60a5fa'}}>🛡{char.shield}</span>}
+        {char.armor > 0 && <span style={{color: '#f97316'}}>🦺{char.armor}</span>}
+        {char.regeneration > 0 && <span style={{color: '#22c55e'}}>+{char.regeneration}/t</span>}
+        {char.damageBoost > 0 && <span style={{color: '#ef4444'}}>✊+{char.damageBoost}</span>}
       </div>
     </div>
   );

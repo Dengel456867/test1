@@ -192,18 +192,18 @@ export default function GameBoard({ gameState, onTileClick, selectedCharacter }:
   
   return (
     <div 
-      className="w-full h-full"
       style={{ 
-        background: 'radial-gradient(ellipse at center, #1a1a3a 0%, #0a0a1a 70%, #050510 100%)',
-        minHeight: '500px'
+        width: '100%',
+        height: '100%',
+        background: 'radial-gradient(ellipse at center, #1a1a3a 0%, #0a0a1a 70%, #050510 100%)'
       }}
       onContextMenu={(e) => e.preventDefault()}
     >
-      <Canvas shadows>
+      <Canvas shadows style={{ width: '100%', height: '100%' }}>
         <PerspectiveCamera 
           makeDefault 
-          position={[0, 20, 14]} 
-          fov={50}
+          position={[0, 22, 16]} 
+          fov={45}
         />
         <ambientLight intensity={0.4} />
         <directionalLight 

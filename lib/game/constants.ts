@@ -30,15 +30,21 @@ export const SPECIAL_TILES_COUNT = {
   DAMAGE_BOOST: 10,
   MOVEMENT_BOOST: 10,
   INITIATIVE_BOOST: 10,
+  ARMOR: 10,
+  SHIELD: 10,
+  REGENERATION: 10,
 };
 
 // Effets des cases spéciales (tous permanents jusqu'à fin de partie)
 export const SPECIAL_TILE_EFFECTS = {
   HEAL_MAX_HP: 3,        // +3 PV max (permanent)
-  HEAL_AMOUNT: 6,        // Soigne 6 PV
+  HEAL_AMOUNT: 2,        // Soigne 2 PV (changé de 6 à 2)
   DAMAGE_BOOST: 1,       // +1 dégâts (permanent)
   MOVEMENT_BOOST: 1,     // +1 mouvement (permanent)
   INITIATIVE_BOOST: 1,   // -1 initiative (permanent)
+  ARMOR: 1,              // -1 dégâts subis (permanent, cumulable)
+  SHIELD: 4,             // +4 points de bouclier
+  REGENERATION: 1,       // +1 PV régénéré par tour (permanent, cumulable)
 };
 
 // Portées d'attaque

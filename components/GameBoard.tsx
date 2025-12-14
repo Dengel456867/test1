@@ -12,7 +12,7 @@ interface GameBoardProps {
   selectedCharacter: Character | null;
 }
 
-// Tuile plate
+// Tuile plate avec support bicolore
 function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRightClick }: {
   position: Position;
   isSpecial: boolean;
@@ -21,44 +21,97 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
   onClick: () => void;
   onRightClick: () => void;
 }) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  
-  const getColor = () => {
-    if (isHighlighted) return '#3b82f6'; // Bleu pour case sélectionnable
-    if (!isSpecial) {
-      // Damier classique
-      const isEven = (position.x + position.y) % 2 === 0;
-      return isEven ? '#2a2a3a' : '#1a1a2a';
-    }
+  const getSpecialColor = () => {
     switch (specialType) {
       case 'heal': return '#22c55e'; // Vert
       case 'damage_boost': return '#ef4444'; // Rouge
       case 'movement_boost': return '#a855f7'; // Violet
-      default: return '#2a2a3a';
+      default: return null;
     }
   };
   
+  const getBaseColor = () => {
+    const isEven = (position.x + position.y) % 2 === 0;
+    return isEven ? '#2a2a3a' : '#1a1a2a';
+  };
+  
+  const highlightColor = '#3b82f6'; // Bleu
+  const specialColor = getSpecialColor();
+  const baseColor = getBaseColor();
+  
+  // Cas: Case surlignée ET spéciale -> afficher moitié/moitié
+  const isSplitTile = isHighlighted && isSpecial && specialColor;
+  
+  const handleClick = (e: any) => {
+    e.stopPropagation();
+    onClick();
+  };
+  
+  const handleRightClick = (e: any) => {
+    if (e.button === 2) {
+      e.stopPropagation();
+      onRightClick();
+    }
+  };
+  
+  const xPos = position.x - 7.5;
+  const yPos = position.y - 7.5;
+  
+  if (isSplitTile) {
+    // Afficher deux demi-tuiles côte à côte
+    return (
+      <group position={[xPos, 0, yPos]} rotation={[-Math.PI / 2, 0, 0]}>
+        {/* Moitié gauche - Bleu (mouvement) */}
+        <mesh 
+          position={[-0.2375, 0, 0]}
+          onClick={handleClick}
+          onPointerDown={handleRightClick}
+        >
+          <planeGeometry args={[0.475, 0.95]} />
+          <meshStandardMaterial color={highlightColor} emissive={highlightColor} emissiveIntensity={0.3} />
+        </mesh>
+        {/* Moitié droite - Couleur spéciale */}
+        <mesh 
+          position={[0.2375, 0, 0]}
+          onClick={handleClick}
+          onPointerDown={handleRightClick}
+        >
+          <planeGeometry args={[0.475, 0.95]} />
+          <meshStandardMaterial color={specialColor} emissive={specialColor} emissiveIntensity={0.4} />
+        </mesh>
+        {/* Bordure lumineuse */}
+        <mesh position={[0, -0.01, 0]}>
+          <planeGeometry args={[0.98, 0.98]} />
+          <meshBasicMaterial color="#ffffff" transparent opacity={0.15} />
+        </mesh>
+      </group>
+    );
+  }
+  
+  // Cas normal: une seule couleur
+  let tileColor = baseColor;
+  let emissiveIntensity = 0;
+  
+  if (isHighlighted) {
+    tileColor = highlightColor;
+    emissiveIntensity = 0.3;
+  } else if (isSpecial && specialColor) {
+    tileColor = specialColor;
+    emissiveIntensity = 0.4;
+  }
+  
   return (
     <mesh
-      ref={meshRef}
-      position={[position.x - 7.5, 0, position.y - 7.5]}
+      position={[xPos, 0, yPos]}
       rotation={[-Math.PI / 2, 0, 0]}
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick();
-      }}
-      onPointerDown={(e) => {
-        if (e.button === 2) {
-          e.stopPropagation();
-          onRightClick();
-        }
-      }}
+      onClick={handleClick}
+      onPointerDown={handleRightClick}
     >
       <planeGeometry args={[0.95, 0.95]} />
       <meshStandardMaterial 
-        color={getColor()} 
-        transparent
-        opacity={isSpecial ? 0.9 : 1}
+        color={tileColor} 
+        emissive={isHighlighted || isSpecial ? tileColor : undefined}
+        emissiveIntensity={emissiveIntensity}
       />
     </mesh>
   );

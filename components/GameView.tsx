@@ -66,11 +66,18 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [attackResult, setAttackResult] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  // L'unité qui a été utilisée ce tour (ne peut plus être changée après action)
+  const [lockedCharacterId, setLockedCharacterId] = useState<string | null>(null);
+  // Compteur d'attaques restantes pour ce tour
+  const [attacksLeft, setAttacksLeft] = useState<number>(0);
   
   useEffect(() => {
     const newGame = initializeGame();
     setGameState(newGame);
-    setSelectedCharacter(newGame.playerTeam.find(c => c.isAlive) || null);
+    const firstAlive = newGame.playerTeam.find(c => c.isAlive);
+    setSelectedCharacter(firstAlive || null);
+    setLockedCharacterId(null);
+    setAttacksLeft(firstAlive?.attacksRemaining || 1);
   }, []);
   
   useEffect(() => {
@@ -113,8 +120,13 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
       setGameState(finalState);
       setIsProcessing(false);
       
+      // Réinitialiser pour le tour du joueur
+      setLockedCharacterId(null);
       const alivePlayer = finalState.playerTeam.find(c => c.isAlive);
-      if (alivePlayer) setSelectedCharacter(alivePlayer);
+      if (alivePlayer) {
+        setSelectedCharacter(alivePlayer);
+        setAttacksLeft(alivePlayer.attacksRemaining);
+      }
     };
     
     executeEnemyTurn();
@@ -146,21 +158,51 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
   const handleTileClick = (position: Position, isRightClick: boolean) => {
     if (!canPlayerAct || !selectedCharacter?.isAlive) return;
     
+    // Si un personnage est verrouillé, on ne peut agir qu'avec lui
+    if (lockedCharacterId && lockedCharacterId !== selectedCharacter.id) return;
+    
     if (isRightClick) {
+      // ATTAQUE
+      if (attacksLeft <= 0) return; // Plus d'attaques disponibles
+      
       const { gameState: newState, attackResult: result } = performAttack(
         gameState, selectedCharacter.id, position,
         selectedCharacter.type === 'warrior' || selectedCharacter.type === 'thief'
       );
+      
       if (result) {
         setAttackResult(result);
         setTimeout(() => setAttackResult(null), 1500);
+        
+        // Verrouiller ce personnage pour le tour
+        setLockedCharacterId(selectedCharacter.id);
+        
+        const newAttacksLeft = attacksLeft - 1;
+        setAttacksLeft(newAttacksLeft);
+        
+        // Si plus d'attaques restantes, fin du tour
+        if (newAttacksLeft <= 0) {
+          setGameState(endTurn(newState));
+          setLockedCharacterId(null);
+        } else {
+          setGameState(newState);
+          // Mettre à jour le personnage sélectionné avec les nouvelles stats
+          const updated = newState.playerTeam.find(c => c.id === selectedCharacter.id);
+          if (updated) setSelectedCharacter(updated);
+        }
       }
-      setGameState(endTurn(newState));
     } else {
+      // MOUVEMENT
       const newState = moveCharacter(gameState, selectedCharacter.id, position);
-      setGameState(newState);
+      
+      // Vérifier si le mouvement a eu lieu (position différente)
       const updated = newState.playerTeam.find(c => c.id === selectedCharacter.id);
-      if (updated) setSelectedCharacter(updated);
+      if (updated && (updated.position.x !== selectedCharacter.position.x || updated.position.y !== selectedCharacter.position.y)) {
+        // Verrouiller ce personnage pour le tour
+        setLockedCharacterId(selectedCharacter.id);
+        setGameState(newState);
+        setSelectedCharacter(updated);
+      }
     }
   };
 
@@ -185,11 +227,16 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
             {isEnemyTurn ? '🤖 Adversaire' : '🎮 Votre tour'} #{gameState.turnCount}
           </div>
           <button
-            onClick={() => canPlayerAct && setGameState(endTurn(gameState))}
+            onClick={() => {
+              if (canPlayerAct) {
+                setGameState(endTurn(gameState));
+                setLockedCharacterId(null);
+              }
+            }}
             disabled={!canPlayerAct}
             style={{ padding: '6px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', background: canPlayerAct ? 'linear-gradient(135deg, #6366f1, #ec4899)' : '#374151', color: 'white', border: 'none', cursor: canPlayerAct ? 'pointer' : 'not-allowed', opacity: canPlayerAct ? 1 : 0.5 }}
           >
-            Fin tour
+            Fin tour {attacksLeft > 0 && selectedCharacter?.type === 'warrior' && lockedCharacterId ? `(${attacksLeft}⚔️)` : ''}
           </button>
           <button onClick={onLogout} style={{ padding: '6px 12px', borderRadius: '8px', background: 'rgba(255,255,255,0.1)', color: '#f87171', border: 'none', cursor: 'pointer' }}>
             🚪
@@ -208,8 +255,14 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
             char={char}
             isPlayer={true}
             isSelected={selectedCharacter?.id === char.id}
-            onClick={() => setSelectedCharacter(char)}
-            canSelect={canPlayerAct}
+            onClick={() => {
+              // Ne peut pas changer de personnage si un autre est verrouillé
+              if (!lockedCharacterId || lockedCharacterId === char.id) {
+                setSelectedCharacter(char);
+                setAttacksLeft(char.attacksRemaining);
+              }
+            }}
+            canSelect={canPlayerAct && (!lockedCharacterId || lockedCharacterId === char.id)}
           />
         ))}
       </div>
@@ -220,7 +273,13 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
           gameState={gameState}
           onTileClick={handleTileClick}
           selectedCharacter={selectedCharacter}
-          onCharacterClick={(char) => canPlayerAct && setSelectedCharacter(char)}
+          onCharacterClick={(char) => {
+            // Ne peut sélectionner que les personnages du joueur, et pas changer si verrouillé
+            if (canPlayerAct && char.team === 'player' && (!lockedCharacterId || lockedCharacterId === char.id)) {
+              setSelectedCharacter(char);
+              setAttacksLeft(char.attacksRemaining);
+            }
+          }}
         />
         
         {isEnemyTurn && (

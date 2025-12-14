@@ -61,7 +61,7 @@ export function moveCharacter(
   }
   
   const distance = getDistance(character.position, newPosition);
-  const availableMovement = character.movement + character.movementBoost;
+  const availableMovement = character.movement; // movementBoost n'est plus utilisé (bonus permanent via maxMovement)
   
   if (distance > availableMovement || distance === 0) {
     return gameState;
@@ -81,7 +81,6 @@ export function moveCharacter(
     ...character,
     position: newPosition,
     movement: character.movement - distance,
-    movementBoost: 0, // Consommé après le mouvement
   };
   
   // NOTE: Les cases spéciales ne s'activent qu'en fin de tour (dans endTurn)
@@ -230,21 +229,7 @@ export function performAttack(
     return char;
   });
   
-  // Ensuite réinitialiser le bonus de dégâts de l'attaquant
-  if (attacker.team === 'player') {
-    updatedPlayerTeam = updatedPlayerTeam.map(c =>
-      c.id === attackerId ? { ...c, damageBoost: 0 } : c
-    );
-  } else {
-    updatedEnemyTeam = updatedEnemyTeam.map(c =>
-      c.id === attackerId ? { ...c, damageBoost: 0 } : c
-    );
-  }
-  
-  const updatedAttacker = {
-    ...attacker,
-    damageBoost: 0,
-  };
+  // Le bonus de dégâts est maintenant permanent, on ne le réinitialise plus
   
   const attackResult: AttackResult = {
     attacker: updatedAttacker,
@@ -295,19 +280,24 @@ export function endTurn(gameState: GameState, usedCharacterId?: string): GameSta
         
         switch (specialTile.type) {
           case 'heal':
+            // +3 PV max (permanent) et soigne 6 PV
+            updatedChar.maxHealth += SPECIAL_TILE_EFFECTS.HEAL_MAX_HP;
             updatedChar.health = Math.min(
               updatedChar.maxHealth,
-              updatedChar.health + SPECIAL_TILE_EFFECTS.HEAL
+              updatedChar.health + SPECIAL_TILE_EFFECTS.HEAL_AMOUNT
             );
             break;
           case 'damage_boost':
+            // +1 dégâts permanent
             updatedChar.damageBoost += SPECIAL_TILE_EFFECTS.DAMAGE_BOOST;
             break;
           case 'movement_boost':
-            updatedChar.movementBoost = SPECIAL_TILE_EFFECTS.MOVEMENT_BOOST;
+            // +1 mouvement permanent (augmente maxMovement)
+            updatedChar.maxMovement += SPECIAL_TILE_EFFECTS.MOVEMENT_BOOST;
+            updatedChar.movement += SPECIAL_TILE_EFFECTS.MOVEMENT_BOOST; // Aussi pour ce tour
             break;
           case 'initiative_boost':
-            // Réduire l'initiative de façon permanente (minimum 1)
+            // -1 initiative (permanent, minimum 1)
             updatedChar.initiative = Math.max(1, updatedChar.initiative - SPECIAL_TILE_EFFECTS.INITIATIVE_BOOST);
             break;
         }
@@ -346,15 +336,13 @@ export function endTurn(gameState: GameState, usedCharacterId?: string): GameSta
     // Réinitialiser le mouvement et les attaques pour tous les personnages vivants
     updatedPlayerTeam = updatedPlayerTeam.map(char => ({
       ...char,
-      movement: char.isAlive ? char.maxMovement + char.movementBoost : char.movement,
-      movementBoost: 0,
+      movement: char.isAlive ? char.maxMovement : char.movement,
       attacksRemaining: char.isAlive ? (char.type === 'warrior' ? 2 : 1) : 0,
     }));
     
     updatedEnemyTeam = updatedEnemyTeam.map(char => ({
       ...char,
-      movement: char.isAlive ? char.maxMovement + char.movementBoost : char.movement,
-      movementBoost: 0,
+      movement: char.isAlive ? char.maxMovement : char.movement,
       attacksRemaining: char.isAlive ? (char.type === 'warrior' ? 2 : 1) : 0,
     }));
     

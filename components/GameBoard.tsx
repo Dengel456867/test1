@@ -309,6 +309,76 @@ function BoardBorder() {
   );
 }
 
+// Coordonnées du plateau (A-P en colonnes, 1-16 en lignes)
+function BoardCoordinates() {
+  const columns = 'ABCDEFGHIJKLMNOP'.split('');
+  const rows = Array.from({ length: 16 }, (_, i) => i + 1);
+  
+  return (
+    <group>
+      {/* Colonnes A-P en bas du plateau */}
+      {columns.map((letter, i) => (
+        <Text
+          key={`col-${letter}`}
+          position={[i - 7.5, 0.1, 8.5]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          fontSize={0.4}
+          color="#9ca3af"
+          anchorX="center"
+          anchorY="middle"
+        >
+          {letter}
+        </Text>
+      ))}
+      
+      {/* Colonnes A-P en haut du plateau */}
+      {columns.map((letter, i) => (
+        <Text
+          key={`col-top-${letter}`}
+          position={[i - 7.5, 0.1, -8.5]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          fontSize={0.4}
+          color="#9ca3af"
+          anchorX="center"
+          anchorY="middle"
+        >
+          {letter}
+        </Text>
+      ))}
+      
+      {/* Lignes 1-16 à gauche du plateau */}
+      {rows.map((num, i) => (
+        <Text
+          key={`row-left-${num}`}
+          position={[-8.8, 0.1, i - 7.5]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          fontSize={0.35}
+          color="#9ca3af"
+          anchorX="center"
+          anchorY="middle"
+        >
+          {num.toString()}
+        </Text>
+      ))}
+      
+      {/* Lignes 1-16 à droite du plateau */}
+      {rows.map((num, i) => (
+        <Text
+          key={`row-right-${num}`}
+          position={[8.8, 0.1, i - 7.5]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          fontSize={0.35}
+          color="#9ca3af"
+          anchorX="center"
+          anchorY="middle"
+        >
+          {num.toString()}
+        </Text>
+      ))}
+    </group>
+  );
+}
+
 export default function GameBoard({ gameState, onTileClick, selectedCharacter, onCharacterClick }: GameBoardProps) {
   // Cases où le personnage sélectionné peut se déplacer
   const getHighlightedTiles = (): Set<string> => {
@@ -365,6 +435,7 @@ export default function GameBoard({ gameState, onTileClick, selectedCharacter, o
         {/* Sol */}
         <BoardFloor />
         <BoardBorder />
+        <BoardCoordinates />
         
         {/* Tuiles */}
         {Array.from({ length: 16 }, (_, y) =>

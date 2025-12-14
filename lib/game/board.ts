@@ -17,26 +17,23 @@ export function generateSpecialTiles(): SpecialTile[] {
   const tiles: SpecialTile[] = [];
   const usedPositions = new Set<string>();
   
-  // 10 cases de soin (vertes)
-  for (let i = 0; i < 10; i++) {
-    const pos = getRandomPosition(usedPositions);
-    tiles.push({ position: pos, type: 'heal', used: false });
-    usedPositions.add(`${pos.x},${pos.y}`);
-  }
+  const tileTypes: { type: SpecialTileType; count: number }[] = [
+    { type: 'heal', count: 10 },
+    { type: 'damage_boost', count: 10 },
+    { type: 'movement_boost', count: 10 },
+    { type: 'initiative_boost', count: 10 },
+    { type: 'armor', count: 10 },
+    { type: 'shield', count: 10 },
+    { type: 'regeneration', count: 10 },
+  ];
   
-  // 10 cases de bonus dégâts (rouges)
-  for (let i = 0; i < 10; i++) {
-    const pos = getRandomPosition(usedPositions);
-    tiles.push({ position: pos, type: 'damage_boost', used: false });
-    usedPositions.add(`${pos.x},${pos.y}`);
-  }
-  
-  // 10 cases de bonus mouvement (violettes)
-  for (let i = 0; i < 10; i++) {
-    const pos = getRandomPosition(usedPositions);
-    tiles.push({ position: pos, type: 'movement_boost', used: false });
-    usedPositions.add(`${pos.x},${pos.y}`);
-  }
+  tileTypes.forEach(({ type, count }) => {
+    for (let i = 0; i < count; i++) {
+      const pos = getRandomPosition(usedPositions);
+      tiles.push({ position: pos, type, used: false });
+      usedPositions.add(`${pos.x},${pos.y}`);
+    }
+  });
   
   return tiles;
 }
@@ -125,13 +122,27 @@ export function applySpecialTile(character: Character, tile: SpecialTile): Chara
   
   switch (tile.type) {
     case 'heal':
-      updated.health = Math.min(updated.maxHealth, updated.health + 3);
+      updated.maxHealth += 3;
+      updated.health = Math.min(updated.maxHealth, updated.health + 2);
       break;
     case 'damage_boost':
-      updated.damageBoost += 2;
+      updated.damageBoost += 1;
       break;
     case 'movement_boost':
-      updated.movementBoost = 3;
+      updated.maxMovement += 1;
+      updated.movement += 1;
+      break;
+    case 'initiative_boost':
+      updated.initiative = Math.max(1, updated.initiative - 1);
+      break;
+    case 'armor':
+      updated.armor += 1;
+      break;
+    case 'shield':
+      updated.shield += 4;
+      break;
+    case 'regeneration':
+      updated.regeneration += 1;
       break;
   }
   

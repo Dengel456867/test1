@@ -2,6 +2,9 @@
 
 import { GameState, Character } from '@/lib/game/types';
 
+// Version du jeu (mise Ã  jour automatiquement par le script de dÃ©ploiement)
+const APP_VERSION = '0.1.5';
+
 interface GameUIProps {
   gameState: GameState;
   onEndTurn: () => void;
@@ -12,6 +15,14 @@ export default function GameUI({ gameState, onEndTurn }: GameUIProps) {
 
   return (
     <div className="absolute top-4 left-4 right-4 z-10">
+      {/* Bandeau de version */}
+      <div className="flex justify-between items-center mb-2">
+        <h1 className="text-2xl font-bold text-white drop-shadow-lg">Test 1</h1>
+        <div className="bg-purple-600 px-3 py-1 rounded-full text-white text-sm font-mono">
+          v{APP_VERSION}
+        </div>
+      </div>
+      
       <div className="bg-black bg-opacity-70 text-white p-4 rounded-lg">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">

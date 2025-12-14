@@ -79,8 +79,8 @@ export function generateSpecialTiles(): Array<{ position: Position; type: Specia
     '13,13', '12,13', '13,12' // Ennemi
   ]);
   
-  const tileTypes: SpecialTileType[] = ['heal', 'damage_boost', 'movement_boost', 'initiative_boost'];
-  const counts = [10, 10, 10, 10];
+  const tileTypes: SpecialTileType[] = ['heal', 'damage_boost', 'movement_boost', 'initiative_boost', 'armor', 'shield', 'regeneration'];
+  const counts = [10, 10, 10, 10, 10, 10, 10];
   
   tileTypes.forEach((type, typeIndex) => {
     for (let i = 0; i < counts[typeIndex]; i++) {
@@ -122,6 +122,9 @@ export function initializeCharacters(): {
       movementBoost: 0,
       attacksRemaining: 2,
       initiative: 10,
+      armor: 0,
+      shield: 0,
+      regeneration: 0,
     },
     {
       id: 'player-mage',
@@ -137,6 +140,9 @@ export function initializeCharacters(): {
       movementBoost: 0,
       attacksRemaining: 1,
       initiative: 11,
+      armor: 0,
+      shield: 0,
+      regeneration: 0,
     },
     {
       id: 'player-thief',
@@ -152,6 +158,9 @@ export function initializeCharacters(): {
       movementBoost: 0,
       attacksRemaining: 1,
       initiative: 8,
+      armor: 0,
+      shield: 0,
+      regeneration: 0,
     },
   ];
   
@@ -170,6 +179,9 @@ export function initializeCharacters(): {
       movementBoost: 0,
       attacksRemaining: 2,
       initiative: 10,
+      armor: 0,
+      shield: 0,
+      regeneration: 0,
     },
     {
       id: 'enemy-mage',
@@ -185,6 +197,9 @@ export function initializeCharacters(): {
       movementBoost: 0,
       attacksRemaining: 1,
       initiative: 11,
+      armor: 0,
+      shield: 0,
+      regeneration: 0,
     },
     {
       id: 'enemy-thief',
@@ -200,6 +215,9 @@ export function initializeCharacters(): {
       movementBoost: 0,
       attacksRemaining: 1,
       initiative: 8,
+      armor: 0,
+      shield: 0,
+      regeneration: 0,
     },
   ];
   

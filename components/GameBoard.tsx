@@ -28,13 +28,13 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
   // Symbole et couleur selon le type de case spéciale
   const getSpecialInfo = () => {
     switch (specialType) {
-      case 'heal': return { symbol: '❤', color: '#22c55e' }; // Coeur vert
+      case 'heal': return { symbol: '❤', color: '#06b6d4' }; // Coeur turquoise
       case 'damage_boost': return { symbol: '✊', color: '#ef4444' }; // Poing rouge
       case 'movement_boost': return { symbol: '👟', color: '#a855f7' }; // Chaussure violette
       case 'initiative_boost': return { symbol: '⚡', color: '#eab308' }; // Éclair jaune
-      case 'armor': return { symbol: '🛡', color: '#f97316' }; // Armure orange
-      case 'shield': return { symbol: '⛨', color: '#ffffff' }; // Bouclier blanc
-      case 'regeneration': return { symbol: '✚', color: '#166534' }; // Croix vert foncé
+      case 'armor': return { symbol: '⛊', color: '#f97316' }; // Plastron orange
+      case 'shield': return { symbol: '🛡', color: '#ffffff' }; // Bouclier blanc
+      case 'regeneration': return { symbol: '✙', color: '#166534' }; // Croix contour vert foncé
       default: return null;
     }
   };

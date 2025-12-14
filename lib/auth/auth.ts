@@ -1,0 +1,59 @@
+// SystÃ¨me d'authentification simple
+
+import bcrypt from 'bcryptjs';
+
+export interface User {
+  id: string;
+  username: string;
+  passwordHash: string;
+  createdAt: Date;
+}
+
+// En production, utiliser une vraie base de donnÃ©es
+// Pour l'instant, on utilise un stockage en mÃ©moire
+const users: Map<string, User> = new Map();
+
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, 10);
+}
+
+export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  return bcrypt.compare(password, hash);
+}
+
+export async function createUser(username: string, password: string): Promise<User> {
+  // VÃ©rifier si l'utilisateur existe dÃ©jÃ 
+  for (const user of users.values()) {
+    if (user.username === username) {
+      throw new Error('Username already exists');
+    }
+  }
+  
+  const passwordHash = await hashPassword(password);
+  const user: User = {
+    id: `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    username,
+    passwordHash,
+    createdAt: new Date(),
+  };
+  
+  users.set(user.id, user);
+  return user;
+}
+
+export async function authenticateUser(username: string, password: string): Promise<User | null> {
+  for (const user of users.values()) {
+    if (user.username === username) {
+      const isValid = await verifyPassword(password, user.passwordHash);
+      if (isValid) {
+        return user;
+      }
+    }
+  }
+  return null;
+}
+
+export function getUserById(userId: string): User | undefined {
+  return users.get(userId);
+}
+

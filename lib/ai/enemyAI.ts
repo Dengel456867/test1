@@ -1,19 +1,7 @@
-// IA adverse utilisant OpenAI
+// IA adverse - stratégie simple sans OpenAI
 
-import OpenAI from 'openai';
-import { GameState, Character, Position, Team } from '../types/game';
-import { moveCharacter, performAttack, endTurn } from '../game/gameLogic';
-import { getDistance, getAttackTargets } from '../game/utils';
+import { GameState, Character, Position } from '../types/game';
 import { ATTACK_RANGES } from '../game/constants';
-
-// OpenAI client (initialisÃ© seulement si la clÃ© API est disponible)
-let openai: OpenAI | null = null;
-
-if (process.env.OPENAI_API_KEY) {
-  openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-}
 
 interface AIMove {
   action: 'move' | 'attack' | 'end_turn';
@@ -23,98 +11,100 @@ interface AIMove {
   isMelee?: boolean;
 }
 
+function getDistance(pos1: Position, pos2: Position): number {
+  return Math.abs(pos1.x - pos2.x) + Math.abs(pos1.y - pos2.y);
+}
+
 export async function getEnemyMove(gameState: GameState): Promise<AIMove> {
-  // Si ce n'est pas le tour de l'ennemi, ne rien faire
+  // Vérifications de base
   if (gameState.currentTurn !== 'enemy' || gameState.gameOver) {
     return { action: 'end_turn' };
   }
   
-  const currentCharacter = gameState.enemyTeam[gameState.currentCharacterIndex];
-  
-  if (!currentCharacter || !currentCharacter.isAlive) {
+  // Trouver le premier personnage ennemi vivant
+  const aliveEnemies = gameState.enemyTeam.filter(c => c.isAlive);
+  if (aliveEnemies.length === 0) {
     return { action: 'end_turn' };
   }
   
-  // StratÃ©gie simple : chercher Ã  attaquer si possible, sinon se rapprocher
-  const playerCharacters = gameState.playerTeam.filter(c => c.isAlive);
+  const currentCharacter = aliveEnemies[0];
   
-  if (playerCharacters.length === 0) {
+  // Trouver les cibles (personnages joueur vivants)
+  const targets = gameState.playerTeam.filter(c => c.isAlive);
+  if (targets.length === 0) {
     return { action: 'end_turn' };
   }
   
-  // VÃ©rifier si on peut attaquer
-  const canAttackMelee = currentCharacter.type === 'warrior' || 
-                         (currentCharacter.type === 'thief' && currentCharacter.movement > 0);
-  const canAttackRanged = currentCharacter.type === 'mage' || 
-                          (currentCharacter.type === 'thief' && currentCharacter.movement === 0);
+  // Trouver la cible la plus proche
+  let closestTarget: Character | null = null;
+  let closestDistance = Infinity;
   
-  // Trouver les cibles Ã  portÃ©e
-  let bestTarget: Character | null = null;
-  let bestDistance = Infinity;
-  
-  for (const target of playerCharacters) {
-    const distance = getDistance(currentCharacter.position, target.position);
-    if (distance < bestDistance) {
-      bestDistance = distance;
-      bestTarget = target;
+  for (const target of targets) {
+    const dist = getDistance(currentCharacter.position, target.position);
+    if (dist < closestDistance) {
+      closestDistance = dist;
+      closestTarget = target;
     }
   }
   
-  if (!bestTarget) {
+  if (!closestTarget) {
     return { action: 'end_turn' };
   }
   
-  // Si on peut attaquer, attaquer
-  if (currentCharacter.type === 'mage') {
-    // Le mage attaque toujours en zone
-    return {
-      action: 'attack',
-      characterId: currentCharacter.id,
-      targetPosition: bestTarget.position,
-      isMelee: false,
-    };
+  // Logique par type de personnage
+  switch (currentCharacter.type) {
+    case 'mage':
+      // Le mage attaque toujours (portée 4)
+      if (closestDistance <= ATTACK_RANGES.MAGE) {
+        return {
+          action: 'attack',
+          characterId: currentCharacter.id,
+          targetPosition: closestTarget.position,
+          isMelee: false,
+        };
+      }
+      break;
+      
+    case 'warrior':
+      // Le guerrier doit être au corps à corps (portée 1)
+      if (closestDistance <= ATTACK_RANGES.WARRIOR) {
+        return {
+          action: 'attack',
+          characterId: currentCharacter.id,
+          targetPosition: closestTarget.position,
+          isMelee: true,
+        };
+      }
+      break;
+      
+    case 'thief':
+      // Le voleur peut attaquer au corps à corps ou à distance
+      if (closestDistance <= ATTACK_RANGES.THIEF_MELEE) {
+        return {
+          action: 'attack',
+          characterId: currentCharacter.id,
+          targetPosition: closestTarget.position,
+          isMelee: true,
+        };
+      } else if (closestDistance <= ATTACK_RANGES.THIEF_RANGED) {
+        return {
+          action: 'attack',
+          characterId: currentCharacter.id,
+          targetPosition: closestTarget.position,
+          isMelee: false,
+        };
+      }
+      break;
   }
   
-  if (currentCharacter.type === 'warrior' && bestDistance <= ATTACK_RANGES.WARRIOR) {
-    return {
-      action: 'attack',
-      characterId: currentCharacter.id,
-      targetPosition: bestTarget.position,
-      isMelee: true,
-    };
-  }
-  
-  if (currentCharacter.type === 'thief') {
-    if (bestDistance <= ATTACK_RANGES.THIEF_MELEE && currentCharacter.movement > 0) {
-      return {
-        action: 'attack',
-        characterId: currentCharacter.id,
-        targetPosition: bestTarget.position,
-        isMelee: true,
-      };
-    } else if (bestDistance <= ATTACK_RANGES.THIEF_RANGED && currentCharacter.movement === 0) {
-      return {
-        action: 'attack',
-        characterId: currentCharacter.id,
-        targetPosition: bestTarget.position,
-        isMelee: false,
-      };
-    }
-  }
-  
-  // Sinon, se rapprocher
+  // Si on ne peut pas attaquer, se déplacer vers la cible
   if (currentCharacter.movement > 0) {
-    const movePosition = findBestMovePosition(
-      currentCharacter,
-      bestTarget.position,
-      gameState
-    );
-    
-    if (movePosition) {
+    const movePos = findBestMove(currentCharacter, closestTarget.position, gameState);
+    if (movePos) {
       return {
         action: 'move',
         characterId: currentCharacter.id,
-        position: movePosition,
+        position: movePos,
       };
     }
   }
@@ -122,94 +112,38 @@ export async function getEnemyMove(gameState: GameState): Promise<AIMove> {
   return { action: 'end_turn' };
 }
 
-function findBestMovePosition(
+function findBestMove(
   character: Character,
-  targetPosition: Position,
+  targetPos: Position,
   gameState: GameState
 ): Position | null {
-  const currentPos = character.position;
-  const availableMovement = character.movement;
+  const { position, movement } = character;
+  let bestPos: Position | null = null;
+  let bestDist = Infinity;
   
-  let bestPosition: Position | null = null;
-  let bestDistance = Infinity;
-  
-  // Chercher la meilleure position dans la portÃ©e de mouvement
-  for (let dx = -availableMovement; dx <= availableMovement; dx++) {
-    for (let dy = -availableMovement; dy <= availableMovement; dy++) {
-      if (Math.abs(dx) + Math.abs(dy) > availableMovement) continue;
+  // Explorer toutes les positions accessibles
+  for (let dx = -movement; dx <= movement; dx++) {
+    for (let dy = -movement; dy <= movement; dy++) {
+      const manhattanDist = Math.abs(dx) + Math.abs(dy);
+      if (manhattanDist === 0 || manhattanDist > movement) continue;
       
-      const newPos: Position = {
-        x: currentPos.x + dx,
-        y: currentPos.y + dy,
-      };
+      const newX = position.x + dx;
+      const newY = position.y + dy;
       
-      // VÃ©rifier si la position est valide et libre
-      if (newPos.x < 0 || newPos.x >= 16 || newPos.y < 0 || newPos.y >= 16) continue;
-      if (gameState.board[newPos.y][newPos.x] !== null) continue;
+      // Vérifier les limites du plateau
+      if (newX < 0 || newX >= 16 || newY < 0 || newY >= 16) continue;
       
-      const distance = getDistance(newPos, targetPosition);
-      if (distance < bestDistance) {
-        bestDistance = distance;
-        bestPosition = newPos;
+      // Vérifier si la case est libre
+      if (gameState.board[newY]?.[newX] !== null) continue;
+      
+      // Calculer la distance à la cible
+      const distToTarget = getDistance({ x: newX, y: newY }, targetPos);
+      if (distToTarget < bestDist) {
+        bestDist = distToTarget;
+        bestPos = { x: newX, y: newY };
       }
     }
   }
   
-  return bestPosition;
+  return bestPos;
 }
-
-// Version avec OpenAI (optionnelle, pour une IA plus intelligente)
-export async function getEnemyMoveWithAI(gameState: GameState): Promise<AIMove> {
-  if (!openai || !process.env.OPENAI_API_KEY) {
-    // Fallback sur la stratÃ©gie simple
-    return getEnemyMove(gameState);
-  }
-  
-  try {
-    const prompt = buildGameStatePrompt(gameState);
-    
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are an AI playing a tactical turn-based game. Make optimal moves to defeat the player.',
-        },
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-      temperature: 0.7,
-      max_tokens: 200,
-    });
-    
-    // Parser la rÃ©ponse (format JSON attendu)
-    const move = JSON.parse(response.choices[0].message.content || '{}');
-    return move as AIMove;
-  } catch (error) {
-    console.error('Erreur OpenAI:', error);
-    // Fallback sur la stratÃ©gie simple
-    return getEnemyMove(gameState);
-  }
-}
-
-function buildGameStatePrompt(gameState: GameState): string {
-  const currentChar = gameState.enemyTeam[gameState.currentCharacterIndex];
-  const playerChars = gameState.playerTeam.filter(c => c.isAlive);
-  const enemyChars = gameState.enemyTeam.filter(c => c.isAlive);
-  
-  return `Game State:
-Current Character: ${currentChar?.type} at (${currentChar?.position.x}, ${currentChar?.position.y})
-Health: ${currentChar?.health}/${currentChar?.maxHealth}
-Movement: ${currentChar?.movement}
-
-Enemy Team:
-${enemyChars.map(c => `- ${c.type} at (${c.position.x}, ${c.position.y}), HP: ${c.health}`).join('\n')}
-
-Player Team:
-${playerChars.map(c => `- ${c.type} at (${c.position.x}, ${c.position.y}), HP: ${c.health}`).join('\n')}
-
-Make a move. Respond with JSON: {"action": "move"|"attack"|"end_turn", "characterId": "...", "position": {"x": 0, "y": 0}, "targetPosition": {"x": 0, "y": 0}, "isMelee": true/false}`;
-}
-

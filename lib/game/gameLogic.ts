@@ -232,7 +232,7 @@ export function performAttack(
   // Le bonus de dégâts est maintenant permanent, on ne le réinitialise plus
   
   const attackResult: AttackResult = {
-    attacker: updatedAttacker,
+    attacker: attacker,
     targets: attackResults,
   };
   

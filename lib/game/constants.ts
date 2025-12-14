@@ -29,6 +29,7 @@ export const SPECIAL_TILES_COUNT = {
   HEAL: 10,
   DAMAGE_BOOST: 10,
   MOVEMENT_BOOST: 10,
+  INITIATIVE_BOOST: 10,
 };
 
 // Effets des cases spéciales
@@ -36,6 +37,7 @@ export const SPECIAL_TILE_EFFECTS = {
   HEAL: 3,
   DAMAGE_BOOST: 2,
   MOVEMENT_BOOST: 2, // 2 points de mouvement supplémentaires
+  INITIATIVE_BOOST: 1, // Réduction d'initiative (permanent)
 };
 
 // Portées d'attaque

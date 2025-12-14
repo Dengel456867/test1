@@ -247,37 +247,26 @@ export function performAttack(
 }
 
 export function endTurn(gameState: GameState): GameState {
-  // Passer au prochain personnage de l'équipe actuelle
-  const currentTeam = gameState.currentTurn === 'player' 
-    ? gameState.playerTeam 
-    : gameState.enemyTeam;
+  // Alterner immédiatement entre joueur et adversaire après chaque tour
+  const nextTurn: Team = gameState.currentTurn === 'player' ? 'enemy' : 'player';
   
-  let nextCharacterIndex = gameState.currentCharacterIndex + 1;
+  // Réinitialiser les points de mouvement du personnage qui vient de jouer
+  const currentTeamKey = gameState.currentTurn === 'player' ? 'playerTeam' : 'enemyTeam';
+  const nextTeamKey = nextTurn === 'player' ? 'playerTeam' : 'enemyTeam';
   
-  // Si on a fini tous les personnages de l'équipe, passer à l'autre équipe
-  if (nextCharacterIndex >= currentTeam.length) {
-    nextCharacterIndex = 0;
-    const nextTurn: Team = gameState.currentTurn === 'player' ? 'enemy' : 'player';
-    
-    // Réinitialiser les points de mouvement pour la nouvelle équipe
-    const nextTeam = nextTurn === 'player' ? 'playerTeam' : 'enemyTeam';
-    const resetTeam = gameState[nextTeam].map(char => ({
-      ...char,
-      movement: char.maxMovement,
-    }));
-    
-    return {
-      ...gameState,
-      currentTurn: nextTurn,
-      currentCharacterIndex: 0,
-      [nextTeam]: resetTeam,
-      turnCount: gameState.turnCount + 1,
-    };
-  }
+  // Réinitialiser le mouvement pour tous les personnages de la prochaine équipe
+  const resetNextTeam = gameState[nextTeamKey].map(char => ({
+    ...char,
+    movement: char.maxMovement,
+    attacksRemaining: char.type === 'warrior' ? 2 : 1,
+  }));
   
   return {
     ...gameState,
-    currentCharacterIndex: nextCharacterIndex,
+    currentTurn: nextTurn,
+    currentCharacterIndex: 0,
+    [nextTeamKey]: resetNextTeam,
+    turnCount: gameState.turnCount + 1,
   };
 }
 

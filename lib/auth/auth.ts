@@ -23,7 +23,8 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 
 export async function createUser(username: string, password: string): Promise<User> {
   // VÃ©rifier si l'utilisateur existe dÃ©jÃ 
-  for (const user of users.values()) {
+  const existingUsers = Array.from(users.values());
+  for (const user of existingUsers) {
     if (user.username === username) {
       throw new Error('Username already exists');
     }
@@ -42,7 +43,8 @@ export async function createUser(username: string, password: string): Promise<Us
 }
 
 export async function authenticateUser(username: string, password: string): Promise<User | null> {
-  for (const user of users.values()) {
+  const allUsers = Array.from(users.values());
+  for (const user of allUsers) {
     if (user.username === username) {
       const isValid = await verifyPassword(password, user.passwordHash);
       if (isValid) {

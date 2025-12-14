@@ -16,7 +16,7 @@ interface GameBoardProps {
   onCharacterClick?: (character: Character) => void;
 }
 
-// Tuile plate avec support bicolore
+// Tuile plate avec symboles pour les cases spéciales
 function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRightClick }: {
   position: Position;
   isSpecial: boolean;
@@ -25,12 +25,13 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
   onClick: () => void;
   onRightClick: () => void;
 }) {
-  const getSpecialColor = () => {
+  // Symbole et couleur selon le type de case spéciale
+  const getSpecialInfo = () => {
     switch (specialType) {
-      case 'heal': return '#22c55e'; // Vert
-      case 'damage_boost': return '#ef4444'; // Rouge
-      case 'movement_boost': return '#a855f7'; // Violet
-      case 'initiative_boost': return '#eab308'; // Jaune
+      case 'heal': return { symbol: '❤', color: '#22c55e' }; // Coeur vert
+      case 'damage_boost': return { symbol: '✊', color: '#ef4444' }; // Poing rouge
+      case 'movement_boost': return { symbol: '👟', color: '#a855f7' }; // Chaussure violette
+      case 'initiative_boost': return { symbol: '⚡', color: '#eab308' }; // Éclair jaune
       default: return null;
     }
   };
@@ -41,11 +42,8 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
   };
   
   const highlightColor = '#3b82f6'; // Bleu
-  const specialColor = getSpecialColor();
+  const specialInfo = getSpecialInfo();
   const baseColor = getBaseColor();
-  
-  // Cas: Case surlignée ET spéciale -> afficher moitié/moitié
-  const isSplitTile = isHighlighted && isSpecial && specialColor;
   
   const handleClick = (e: any) => {
     e.stopPropagation();
@@ -62,48 +60,65 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
   const xPos = position.x - 7.5;
   const yPos = position.y - 7.5;
   
-  if (isSplitTile) {
-    // Afficher deux demi-tuiles côte à côte
+  // Cas: Case surlignée (mouvement) ET spéciale -> fond bleu avec symbole
+  if (isHighlighted && isSpecial && specialInfo) {
     return (
-      <group position={[xPos, 0, yPos]} rotation={[-Math.PI / 2, 0, 0]}>
-        {/* Moitié gauche - Bleu (mouvement) */}
+      <group position={[xPos, 0, yPos]}>
+        {/* Fond bleu (mouvement) */}
         <mesh 
-          position={[-0.2375, 0, 0]}
+          rotation={[-Math.PI / 2, 0, 0]}
           onClick={handleClick}
           onPointerDown={handleRightClick}
         >
-          <planeGeometry args={[0.475, 0.95]} />
+          <planeGeometry args={[0.95, 0.95]} />
           <meshStandardMaterial color={highlightColor} emissive={highlightColor} emissiveIntensity={0.3} />
         </mesh>
-        {/* Moitié droite - Couleur spéciale */}
-        <mesh 
-          position={[0.2375, 0, 0]}
-          onClick={handleClick}
-          onPointerDown={handleRightClick}
+        {/* Symbole de la case spéciale */}
+        <Text
+          position={[0, 0.05, 0]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          fontSize={0.5}
+          color={specialInfo.color}
+          anchorX="center"
+          anchorY="middle"
         >
-          <planeGeometry args={[0.475, 0.95]} />
-          <meshStandardMaterial color={specialColor} emissive={specialColor} emissiveIntensity={0.4} />
-        </mesh>
-        {/* Bordure lumineuse */}
-        <mesh position={[0, -0.01, 0]}>
-          <planeGeometry args={[0.98, 0.98]} />
-          <meshBasicMaterial color="#ffffff" transparent opacity={0.15} />
-        </mesh>
+          {specialInfo.symbol}
+        </Text>
       </group>
     );
   }
   
-  // Cas normal: une seule couleur
-  let tileColor = baseColor;
-  let emissiveIntensity = 0;
-  
-  if (isHighlighted) {
-    tileColor = highlightColor;
-    emissiveIntensity = 0.3;
-  } else if (isSpecial && specialColor) {
-    tileColor = specialColor;
-    emissiveIntensity = 0.4;
+  // Cas: Case spéciale (non surlignée) -> fond normal avec symbole
+  if (isSpecial && specialInfo) {
+    return (
+      <group position={[xPos, 0, yPos]}>
+        {/* Fond normal */}
+        <mesh 
+          rotation={[-Math.PI / 2, 0, 0]}
+          onClick={handleClick}
+          onPointerDown={handleRightClick}
+        >
+          <planeGeometry args={[0.95, 0.95]} />
+          <meshStandardMaterial color={baseColor} />
+        </mesh>
+        {/* Symbole coloré */}
+        <Text
+          position={[0, 0.05, 0]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          fontSize={0.55}
+          color={specialInfo.color}
+          anchorX="center"
+          anchorY="middle"
+        >
+          {specialInfo.symbol}
+        </Text>
+      </group>
+    );
   }
+  
+  // Cas normal: case simple (surlignée ou non)
+  const tileColor = isHighlighted ? highlightColor : baseColor;
+  const emissiveIntensity = isHighlighted ? 0.3 : 0;
   
   return (
     <mesh
@@ -115,7 +130,7 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
       <planeGeometry args={[0.95, 0.95]} />
       <meshStandardMaterial 
         color={tileColor} 
-        emissive={isHighlighted || isSpecial ? tileColor : undefined}
+        emissive={isHighlighted ? tileColor : undefined}
         emissiveIntensity={emissiveIntensity}
       />
     </mesh>

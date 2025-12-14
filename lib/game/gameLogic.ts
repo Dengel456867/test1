@@ -131,31 +131,56 @@ export function performAttack(
     return { gameState, attackResult: null };
   }
   
-  const attackRange = attacker.type === 'warrior' ? ATTACK_RANGES.WARRIOR :
-                      attacker.type === 'mage' ? ATTACK_RANGES.MAGE :
-                      isMelee ? ATTACK_RANGES.THIEF_MELEE : ATTACK_RANGES.THIEF_RANGED;
-  
-  const isAreaAttack = attacker.type === 'mage';
   const allCharacters = [...gameState.playerTeam, ...gameState.enemyTeam].filter(c => c.isAlive);
-  
-  // Pour les attaques ciblées, trouver les cibles autour de la position cliquée
   let targets: Character[] = [];
   
-  if (isAreaAttack) {
-    // Attaque de zone autour de l'attaquant
-    targets = getAttackTargets(attacker, allCharacters, attackRange, true);
-  } else {
-    // Attaque ciblée : trouver les personnages autour de la position cliquée
-    const charactersAtPosition = allCharacters.filter(char => {
-      const distance = getDistance(char.position, targetPosition);
-      return distance <= (isMelee ? 1 : attackRange);
+  // Logique d'attaque selon le type de personnage
+  if (attacker.type === 'warrior') {
+    // GUERRIER: Corps à corps uniquement (1 case de distance)
+    const distanceToTarget = getDistance(attacker.position, targetPosition);
+    if (distanceToTarget > 1) {
+      return { gameState, attackResult: null }; // Trop loin
+    }
+    
+    // Trouver le personnage sur la case ciblée
+    const targetChar = allCharacters.find(
+      c => c.position.x === targetPosition.x && c.position.y === targetPosition.y && c.id !== attacker.id
+    );
+    
+    if (targetChar) {
+      targets = [targetChar];
+    } else {
+      return { gameState, attackResult: null }; // Pas de cible
+    }
+  } else if (attacker.type === 'thief') {
+    // VOLEUR: Peut attaquer jusqu'à 4 cases de distance
+    const distanceToTarget = getDistance(attacker.position, targetPosition);
+    if (distanceToTarget > ATTACK_RANGES.THIEF) {
+      return { gameState, attackResult: null }; // Trop loin
+    }
+    
+    // Trouver le personnage sur la case ciblée
+    const targetChar = allCharacters.find(
+      c => c.position.x === targetPosition.x && c.position.y === targetPosition.y && c.id !== attacker.id
+    );
+    
+    if (targetChar) {
+      targets = [targetChar];
+      // Déterminer si c'est du corps à corps pour le critique
+      isMelee = distanceToTarget <= 1;
+    } else {
+      return { gameState, attackResult: null }; // Pas de cible
+    }
+  } else if (attacker.type === 'mage') {
+    // MAGE: Attaque de zone - touche TOUS les personnages dans un rayon de 3 cases autour du mage
+    targets = allCharacters.filter(char => {
+      if (char.id === attacker.id) return false; // Le mage ne s'attaque pas lui-même
+      const distance = getDistance(attacker.position, char.position);
+      return distance <= ATTACK_RANGES.MAGE; // 3 cases
     });
     
-    if (charactersAtPosition.length > 0) {
-      targets = charactersAtPosition;
-    } else {
-      // Attaque dans le vide - ne consomme pas les bonus de dégâts
-      return { gameState, attackResult: null };
+    if (targets.length === 0) {
+      return { gameState, attackResult: null }; // Personne à portée
     }
   }
   
@@ -168,7 +193,7 @@ export function performAttack(
     let damage = calculateDamage(attacker.type, target.type, attacker.damageBoost);
     let isCritical = false;
     
-    // Critique pour le voleur en corps à corps
+    // Critique pour le voleur en corps à corps uniquement (50% de chance)
     if (attacker.type === 'thief' && isMelee && Math.random() < 0.5) {
       damage *= 2;
       isCritical = true;

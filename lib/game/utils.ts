@@ -76,6 +76,12 @@ export function generateSpecialTiles(): Array<{ position: Position; type: Specia
   const tiles: Array<{ position: Position; type: SpecialTileType }> = [];
   const usedPositions = new Set<string>();
   
+  // Positions de départ des personnages - à exclure
+  const startingPositions = new Set([
+    '2,2', '3,2', '2,3',    // Joueur
+    '13,13', '12,13', '13,12' // Ennemi
+  ]);
+  
   const tileTypes: SpecialTileType[] = ['heal', 'damage_boost', 'movement_boost'];
   const counts = [10, 10, 10];
   
@@ -90,7 +96,7 @@ export function generateSpecialTiles(): Array<{ position: Position; type: Specia
           y: Math.floor(Math.random() * BOARD_SIZE),
         };
         key = `${position.x},${position.y}`;
-      } while (usedPositions.has(key));
+      } while (usedPositions.has(key) || startingPositions.has(key));
       
       usedPositions.add(key);
       tiles.push({ position, type });

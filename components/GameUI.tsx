@@ -12,60 +12,76 @@ export default function GameUI({ gameState, onEndTurn }: GameUIProps) {
   const selectedCharacter = gameState.selectedCharacter;
 
   return (
-    <div className="absolute top-4 left-4 right-4 z-10">
-      {/* Bandeau de version */}
-      <div className="flex justify-between items-center mb-2">
-        <h1 className="text-2xl font-bold text-white drop-shadow-lg">Test 1</h1>
-        <div className="bg-purple-600 px-3 py-1 rounded-full text-white text-sm font-mono">
-          v{APP_VERSION}
-        </div>
+    <div className="absolute bottom-0 left-0 right-0 z-10">
+      {/* Version en haut à droite */}
+      <div className="absolute top-4 right-4 bg-purple-600 px-3 py-1 rounded-full text-white text-sm font-mono shadow-lg">
+        v{APP_VERSION}
       </div>
       
-      <div className="bg-black bg-opacity-70 text-white p-4 rounded-lg">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">
-            Tour: {gameState.currentTurn === 'player' ? 'Joueur' : 'Adversaire'}
-          </h2>
+      {/* Panneau d'info en bas */}
+      <div className="bg-gradient-to-t from-black via-black/90 to-transparent p-4">
+        {/* Barre de tour et actions */}
+        <div className="flex justify-between items-center mb-3">
+          <div className="flex items-center gap-4">
+            <h1 className="text-xl font-bold text-white">Test 1</h1>
+            <span className="text-lg text-yellow-400">
+              Tour: {gameState.currentTurn === 'player' ? '🎮 Joueur' : '🤖 Adversaire'}
+            </span>
+          </div>
           <button
             onClick={onEndTurn}
             disabled={gameState.currentTurn !== 'player' || !selectedCharacter}
-            className="bg-red-600 px-4 py-2 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Finir le tour
           </button>
         </div>
 
+        {/* Personnage sélectionné */}
         {selectedCharacter && (
-          <div className="mb-4 p-2 bg-blue-900 rounded">
-            <h3 className="font-bold">
-              {selectedCharacter.type} ({selectedCharacter.team === 'player' ? 'Joueur' : 'Adversaire'})
-            </h3>
-            <div>PV: {selectedCharacter.health}/{selectedCharacter.maxHealth}</div>
-            <div>Mouvement: {selectedCharacter.movement}/{selectedCharacter.maxMovement}</div>
-            <div>Attaques restantes: {selectedCharacter.attacksRemaining}</div>
-            {selectedCharacter.damageBoost > 0 && (
-              <div className="text-red-400">Bonus dÃ©gÃ¢ts: +{selectedCharacter.damageBoost}</div>
-            )}
-            {selectedCharacter.movementBoost > 0 && (
-              <div className="text-purple-400">Bonus mouvement: +{selectedCharacter.movementBoost}</div>
-            )}
+          <div className="mb-3 p-3 bg-blue-900/80 rounded-lg inline-block">
+            <div className="flex items-center gap-4">
+              <span className="font-bold text-lg">{getCharacterEmoji(selectedCharacter.type)} {selectedCharacter.type}</span>
+              <span className="text-green-400">❤️ {selectedCharacter.health}/{selectedCharacter.maxHealth}</span>
+              <span className="text-blue-400">👟 {selectedCharacter.movement}/{selectedCharacter.maxMovement}</span>
+              <span className="text-orange-400">⚔️ {selectedCharacter.attacksRemaining}</span>
+              {selectedCharacter.damageBoost > 0 && (
+                <span className="text-red-400">💥 +{selectedCharacter.damageBoost}</span>
+              )}
+              {selectedCharacter.movementBoost > 0 && (
+                <span className="text-purple-400">🏃 +{selectedCharacter.movementBoost}</span>
+              )}
+            </div>
           </div>
         )}
 
+        {/* Équipes côte à côte */}
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <h3 className="font-bold mb-2">Ã‰quipe Joueur</h3>
-            {gameState.playerTeam.map((char) => (
-              <CharacterStatus key={char.id} character={char} />
-            ))}
-          </div>
-          <div>
-            <h3 className="font-bold mb-2">Ã‰quipe Adversaire</h3>
-            {gameState.enemyTeam.map((char) => (
-              <CharacterStatus key={char.id} character={char} />
-            ))}
-          </div>
+          <TeamPanel title="🎮 Joueur" characters={gameState.playerTeam} isPlayer={true} />
+          <TeamPanel title="🤖 Adversaire" characters={gameState.enemyTeam} isPlayer={false} />
         </div>
+      </div>
+    </div>
+  );
+}
+
+function getCharacterEmoji(type: string): string {
+  switch (type.toLowerCase()) {
+    case 'warrior': return '⚔️';
+    case 'mage': return '🔮';
+    case 'thief': return '🗡️';
+    default: return '👤';
+  }
+}
+
+function TeamPanel({ title, characters, isPlayer }: { title: string; characters: Character[]; isPlayer: boolean }) {
+  return (
+    <div className={`p-3 rounded-lg ${isPlayer ? 'bg-blue-900/50' : 'bg-red-900/50'}`}>
+      <h3 className="font-bold mb-2 text-sm">{title}</h3>
+      <div className="flex gap-2 flex-wrap">
+        {characters.map((char) => (
+          <CharacterStatus key={char.id} character={char} />
+        ))}
       </div>
     </div>
   );
@@ -76,21 +92,20 @@ function CharacterStatus({ character }: { character: Character }) {
   const isDead = character.health <= 0;
 
   return (
-    <div className={`mb-2 p-2 rounded ${isDead ? 'bg-gray-800' : 'bg-gray-700'}`}>
-      <div className="flex justify-between text-sm mb-1">
-        <span className="font-bold">{character.type}</span>
-        <span>{character.health}/{character.maxHealth} PV</span>
+    <div className={`p-2 rounded ${isDead ? 'bg-gray-800/80 opacity-50' : 'bg-gray-700/80'} min-w-[120px]`}>
+      <div className="flex justify-between text-xs mb-1">
+        <span className="font-bold">{getCharacterEmoji(character.type)} {character.type}</span>
+        <span>{character.health}/{character.maxHealth}</span>
       </div>
-      <div className="w-full bg-gray-600 rounded-full h-2">
+      <div className="w-full bg-gray-600 rounded-full h-1.5">
         <div
-          className={`h-2 rounded-full ${
+          className={`h-1.5 rounded-full transition-all ${
             healthPercent > 50 ? 'bg-green-500' : healthPercent > 25 ? 'bg-yellow-500' : 'bg-red-500'
           }`}
           style={{ width: `${Math.max(0, healthPercent)}%` }}
         />
       </div>
-      {isDead && <span className="text-red-400 text-xs">MORT</span>}
+      {isDead && <span className="text-red-400 text-xs">💀</span>}
     </div>
   );
 }
-

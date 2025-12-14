@@ -406,9 +406,14 @@ export default function GameBoard({
     for (let x = 0; x < 16; x++) {
       for (let y = 0; y < 16; y++) {
         const distance = Math.abs(x - originPos.x) + Math.abs(y - originPos.y);
-        // Exclure la position actuelle du personnage et les cases occupées
+        // Exclure la position actuelle du personnage
         const isCurrentPos = x === selectedCharacter.position.x && y === selectedCharacter.position.y;
-        if (distance > 0 && distance <= range && !gameState.board[y][x] && !isCurrentPos) {
+        // La case d'origine doit toujours être accessible (pour revenir)
+        const isOriginPos = x === originPos.x && y === originPos.y;
+        // La case est valide si: dans la portée ET (vide OU c'est l'origine) ET pas la position actuelle
+        const isTileEmpty = !gameState.board[y][x];
+        
+        if (distance <= range && !isCurrentPos && (isTileEmpty || isOriginPos)) {
           highlighted.add(`${x}-${y}`);
         }
       }

@@ -91,6 +91,11 @@ function Update-Version {
     $packageJson.version = $newVersion
     $packageJson | ConvertTo-Json -Depth 10 | Set-Content $packageJsonPath -NoNewline
     
+    # Mettre a jour lib/version.ts
+    $versionTsPath = Join-Path (Split-Path $PSScriptRoot -Parent) "lib/version.ts"
+    $versionTsContent = "// Version de l'application - synchronisee avec package.json`n// Cette version est mise a jour par le script de deploiement`nexport const APP_VERSION = '$newVersion';`n"
+    Set-Content -Path $versionTsPath -Value $versionTsContent -NoNewline
+    
     return $newVersion
 }
 

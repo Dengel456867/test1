@@ -118,7 +118,112 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
   );
 }
 
-// Personnage - Cylindre avec couleur équipe
+// Tour (Rook) pour le Guerrier
+function RookPiece({ color, emissive, emissiveIntensity, scale }: { color: string; emissive: string; emissiveIntensity: number; scale: number }) {
+  return (
+    <group scale={[scale, scale, scale]}>
+      {/* Base */}
+      <mesh position={[0, 0, 0]}>
+        <cylinderGeometry args={[0.3, 0.35, 0.15, 16]} />
+        <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
+      </mesh>
+      {/* Corps */}
+      <mesh position={[0, 0.25, 0]}>
+        <cylinderGeometry args={[0.22, 0.28, 0.35, 16]} />
+        <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
+      </mesh>
+      {/* Haut évasé */}
+      <mesh position={[0, 0.5, 0]}>
+        <cylinderGeometry args={[0.28, 0.22, 0.15, 16]} />
+        <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
+      </mesh>
+      {/* Créneaux (4) */}
+      {[0, 1, 2, 3].map((i) => (
+        <mesh key={i} position={[Math.cos(i * Math.PI / 2) * 0.18, 0.65, Math.sin(i * Math.PI / 2) * 0.18]}>
+          <boxGeometry args={[0.12, 0.15, 0.12]} />
+          <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+// Fou (Bishop) pour le Mage
+function BishopPiece({ color, emissive, emissiveIntensity, scale }: { color: string; emissive: string; emissiveIntensity: number; scale: number }) {
+  return (
+    <group scale={[scale, scale, scale]}>
+      {/* Base */}
+      <mesh position={[0, 0, 0]}>
+        <cylinderGeometry args={[0.28, 0.32, 0.12, 16]} />
+        <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
+      </mesh>
+      {/* Corps inférieur */}
+      <mesh position={[0, 0.15, 0]}>
+        <cylinderGeometry args={[0.18, 0.26, 0.2, 16]} />
+        <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
+      </mesh>
+      {/* Corps principal (forme de goutte) */}
+      <mesh position={[0, 0.4, 0]}>
+        <sphereGeometry args={[0.2, 16, 16]} />
+        <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
+      </mesh>
+      {/* Fente diagonale (représentée par un anneau) */}
+      <mesh position={[0, 0.45, 0]} rotation={[0, 0, Math.PI / 4]}>
+        <torusGeometry args={[0.12, 0.02, 8, 16]} />
+        <meshStandardMaterial color="#1a1a2a" />
+      </mesh>
+      {/* Pointe */}
+      <mesh position={[0, 0.62, 0]}>
+        <sphereGeometry args={[0.08, 12, 12]} />
+        <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
+      </mesh>
+    </group>
+  );
+}
+
+// Cavalier (Knight) pour le Voleur
+function KnightPiece({ color, emissive, emissiveIntensity, scale }: { color: string; emissive: string; emissiveIntensity: number; scale: number }) {
+  return (
+    <group scale={[scale, scale, scale]}>
+      {/* Base */}
+      <mesh position={[0, 0, 0]}>
+        <cylinderGeometry args={[0.28, 0.32, 0.12, 16]} />
+        <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
+      </mesh>
+      {/* Support */}
+      <mesh position={[0, 0.12, 0]}>
+        <cylinderGeometry args={[0.2, 0.26, 0.12, 16]} />
+        <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
+      </mesh>
+      {/* Corps du cheval (simplifié) */}
+      <mesh position={[0, 0.35, 0.05]} rotation={[0.3, 0, 0]}>
+        <boxGeometry args={[0.2, 0.35, 0.25]} />
+        <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
+      </mesh>
+      {/* Tête du cheval */}
+      <mesh position={[0, 0.55, 0.18]} rotation={[0.8, 0, 0]}>
+        <boxGeometry args={[0.15, 0.25, 0.18]} />
+        <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
+      </mesh>
+      {/* Museau */}
+      <mesh position={[0, 0.5, 0.32]} rotation={[1.2, 0, 0]}>
+        <boxGeometry args={[0.1, 0.18, 0.1]} />
+        <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
+      </mesh>
+      {/* Oreilles */}
+      <mesh position={[-0.06, 0.68, 0.12]} rotation={[0.3, 0, -0.2]}>
+        <coneGeometry args={[0.04, 0.1, 4]} />
+        <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
+      </mesh>
+      <mesh position={[0.06, 0.68, 0.12]} rotation={[0.3, 0, 0.2]}>
+        <coneGeometry args={[0.04, 0.1, 4]} />
+        <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
+      </mesh>
+    </group>
+  );
+}
+
+// Personnage - Pièce d'échecs selon le type
 function CharacterModel({ character, isSelected, onClick }: { 
   character: Character; 
   isSelected: boolean;
@@ -126,20 +231,18 @@ function CharacterModel({ character, isSelected, onClick }: {
 }) {
   const groupRef = useRef<THREE.Group>(null);
   
-  // Animation de flottement pour le personnage sélectionné
   useFrame((state) => {
     if (groupRef.current && isSelected) {
-      groupRef.current.position.y = 0.4 + Math.sin(state.clock.elapsedTime * 3) * 0.1;
+      groupRef.current.position.y = 0.15 + Math.sin(state.clock.elapsedTime * 3) * 0.08;
     } else if (groupRef.current) {
-      groupRef.current.position.y = 0.4;
+      groupRef.current.position.y = 0.15;
     }
   });
   
-  // Couleur basée sur l'équipe uniquement
-  const teamColor = character.team === 'player' ? '#3b82f6' : '#ef4444'; // Bleu vs Rouge
+  const teamColor = character.team === 'player' ? '#3b82f6' : '#ef4444';
   const glowColor = character.team === 'player' ? '#60a5fa' : '#f87171';
-  
-  const scale = isSelected ? 1.3 : 1;
+  const emissiveIntensity = isSelected ? 0.6 : 0.25;
+  const scale = isSelected ? 1.15 : 1;
   
   const handleClick = (e: any) => {
     e.stopPropagation();
@@ -149,53 +252,36 @@ function CharacterModel({ character, isSelected, onClick }: {
   return (
     <group
       ref={groupRef}
-      position={[character.position.x - 7.5, 0.4, character.position.y - 7.5]}
+      position={[character.position.x - 7.5, 0.15, character.position.y - 7.5]}
       onClick={handleClick}
     >
-      {/* Base / socle */}
-      <mesh position={[0, -0.35, 0]} scale={[scale, 0.1, scale]}>
-        <cylinderGeometry args={[0.35, 0.4, 0.1, 16]} />
-        <meshStandardMaterial color={teamColor} emissive={teamColor} emissiveIntensity={0.3} />
-      </mesh>
-      
-      {/* Corps du personnage */}
-      <mesh scale={[scale, scale, scale]}>
-        <cylinderGeometry args={[0.25, 0.3, 0.6, 16]} />
-        <meshStandardMaterial 
-          color={teamColor} 
-          emissive={isSelected ? glowColor : teamColor} 
-          emissiveIntensity={isSelected ? 0.5 : 0.2}
-        />
-      </mesh>
-      
-      {/* Tête */}
-      <mesh position={[0, 0.45 * scale, 0]} scale={[scale, scale, scale]}>
-        <sphereGeometry args={[0.2, 16, 16]} />
-        <meshStandardMaterial 
-          color={teamColor} 
-          emissive={isSelected ? glowColor : teamColor} 
-          emissiveIntensity={isSelected ? 0.5 : 0.2}
-        />
-      </mesh>
+      {/* Pièce selon le type */}
+      {character.type === 'warrior' && (
+        <RookPiece color={teamColor} emissive={isSelected ? glowColor : teamColor} emissiveIntensity={emissiveIntensity} scale={scale} />
+      )}
+      {character.type === 'mage' && (
+        <BishopPiece color={teamColor} emissive={isSelected ? glowColor : teamColor} emissiveIntensity={emissiveIntensity} scale={scale} />
+      )}
+      {character.type === 'thief' && (
+        <KnightPiece color={teamColor} emissive={isSelected ? glowColor : teamColor} emissiveIntensity={emissiveIntensity} scale={scale} />
+      )}
       
       {/* Indicateur de sélection */}
       {isSelected && (
-        <mesh position={[0, 0.9, 0]} rotation={[0, 0, 0]}>
-          <coneGeometry args={[0.15, 0.2, 4]} />
-          <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.8} />
+        <mesh position={[0, 0.85, 0]}>
+          <coneGeometry args={[0.12, 0.18, 4]} />
+          <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.9} />
         </mesh>
       )}
       
       {/* Barre de vie */}
-      <group position={[0, 0.8, 0]} rotation={[0, 0, 0]}>
-        {/* Fond de la barre */}
+      <group position={[0, 0.95, 0]}>
         <mesh position={[0, 0, 0.01]}>
-          <planeGeometry args={[0.6, 0.08]} />
+          <planeGeometry args={[0.5, 0.06]} />
           <meshBasicMaterial color="#1f2937" />
         </mesh>
-        {/* Vie restante */}
-        <mesh position={[(character.health / character.maxHealth - 1) * 0.3, 0, 0.02]}>
-          <planeGeometry args={[0.6 * (character.health / character.maxHealth), 0.06]} />
+        <mesh position={[(character.health / character.maxHealth - 1) * 0.25, 0, 0.02]}>
+          <planeGeometry args={[0.5 * (character.health / character.maxHealth), 0.04]} />
           <meshBasicMaterial color={character.health > 5 ? '#22c55e' : character.health > 2 ? '#eab308' : '#ef4444'} />
         </mesh>
       </group>

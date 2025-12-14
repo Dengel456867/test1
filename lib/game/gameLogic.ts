@@ -77,31 +77,7 @@ export function moveCharacter(
     movementBoost: 0, // Consommé après le mouvement
   };
   
-  // Appliquer les effets des cases spéciales
-  const specialTile = gameState.specialTiles.find(
-    tile => tile.position.x === newPosition.x &&
-            tile.position.y === newPosition.y &&
-            !tile.used
-  );
-  
-  if (specialTile) {
-    switch (specialTile.type) {
-      case 'heal':
-        updatedCharacter.health = Math.min(
-          updatedCharacter.maxHealth,
-          updatedCharacter.health + SPECIAL_TILE_EFFECTS.HEAL
-        );
-        break;
-      case 'damage_boost':
-        updatedCharacter.damageBoost += SPECIAL_TILE_EFFECTS.DAMAGE_BOOST;
-        break;
-      case 'movement_boost':
-        updatedCharacter.movementBoost = SPECIAL_TILE_EFFECTS.MOVEMENT_BOOST;
-        break;
-    }
-    
-    specialTile.used = true;
-  }
+  // NOTE: Les cases spéciales ne s'activent qu'en fin de tour (dans endTurn)
   
   // Mettre à jour l'équipe
   const team = character.team === 'player' ? 'playerTeam' : 'enemyTeam';
@@ -277,26 +253,74 @@ export function performAttack(
   return { gameState: newGameState, attackResult };
 }
 
-export function endTurn(gameState: GameState): GameState {
+export function endTurn(gameState: GameState, usedCharacterId?: string): GameState {
   // Alterner immédiatement entre joueur et adversaire après chaque tour
   const nextTurn: Team = gameState.currentTurn === 'player' ? 'enemy' : 'player';
   
-  // Réinitialiser les points de mouvement du personnage qui vient de jouer
   const currentTeamKey = gameState.currentTurn === 'player' ? 'playerTeam' : 'enemyTeam';
   const nextTeamKey = nextTurn === 'player' ? 'playerTeam' : 'enemyTeam';
+  
+  // Appliquer les effets des cases spéciales au personnage qui vient de jouer
+  let updatedCurrentTeam = [...gameState[currentTeamKey]];
+  let updatedSpecialTiles = [...gameState.specialTiles];
+  let newBoard = gameState.board.map(row => [...row]);
+  
+  if (usedCharacterId) {
+    const charIndex = updatedCurrentTeam.findIndex(c => c.id === usedCharacterId);
+    if (charIndex !== -1) {
+      const character = updatedCurrentTeam[charIndex];
+      
+      // Trouver si le personnage est sur une case spéciale non utilisée
+      const tileIndex = updatedSpecialTiles.findIndex(
+        tile => tile.position.x === character.position.x &&
+                tile.position.y === character.position.y &&
+                !tile.used
+      );
+      
+      if (tileIndex !== -1) {
+        const specialTile = updatedSpecialTiles[tileIndex];
+        let updatedChar = { ...character };
+        
+        switch (specialTile.type) {
+          case 'heal':
+            updatedChar.health = Math.min(
+              updatedChar.maxHealth,
+              updatedChar.health + SPECIAL_TILE_EFFECTS.HEAL
+            );
+            break;
+          case 'damage_boost':
+            updatedChar.damageBoost += SPECIAL_TILE_EFFECTS.DAMAGE_BOOST;
+            break;
+          case 'movement_boost':
+            // Le bonus sera appliqué au prochain tour
+            updatedChar.movementBoost = SPECIAL_TILE_EFFECTS.MOVEMENT_BOOST;
+            break;
+        }
+        
+        // Marquer la case comme utilisée
+        updatedSpecialTiles[tileIndex] = { ...specialTile, used: true };
+        updatedCurrentTeam[charIndex] = updatedChar;
+        newBoard[character.position.y][character.position.x] = updatedChar;
+      }
+    }
+  }
   
   // Réinitialiser le mouvement pour tous les personnages de la prochaine équipe
   const resetNextTeam = gameState[nextTeamKey].map(char => ({
     ...char,
-    movement: char.maxMovement,
+    movement: char.maxMovement + char.movementBoost, // Appliquer le bonus de mouvement
+    movementBoost: 0, // Réinitialiser après utilisation
     attacksRemaining: char.type === 'warrior' ? 2 : 1,
   }));
   
   return {
     ...gameState,
+    board: newBoard,
+    [currentTeamKey]: updatedCurrentTeam,
+    [nextTeamKey]: resetNextTeam,
+    specialTiles: updatedSpecialTiles,
     currentTurn: nextTurn,
     currentCharacterIndex: 0,
-    [nextTeamKey]: resetNextTeam,
     turnCount: gameState.turnCount + 1,
   };
 }

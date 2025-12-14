@@ -1,9 +1,7 @@
 'use client';
 
 import { GameState, Character } from '@/lib/game/types';
-
-// Version du jeu (mise Ã  jour automatiquement par le script de dÃ©ploiement)
-const APP_VERSION = '0.1.6';
+import { APP_VERSION } from '@/lib/version';
 
 interface GameUIProps {
   gameState: GameState;

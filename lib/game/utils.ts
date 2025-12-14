@@ -45,16 +45,16 @@ export function getAttackTargets(
   isAreaAttack: boolean
 ): Character[] {
   if (isAreaAttack) {
-    // Attaque de zone : tous les personnages dans la portÃ©e
+    // Attaque de zone : tous les personnages dans la portée
     return allCharacters.filter(char => {
-      if (char.id === attacker.id) return false; // Le mage ne s'attaque pas lui-mÃªme
+      if (char.id === attacker.id) return false; // Le mage ne s'attaque pas lui-même
       const distance = getDistance(attacker.position, char.position);
       return distance <= attackRange;
     });
   } else {
-    // Attaque ciblÃ©e : le personnage le plus proche dans la portÃ©e
+    // Attaque ciblée : le personnage le plus proche dans la portée
     const targets = allCharacters.filter(char => {
-      if (char.team === attacker.team) return false; // Pas d'attaques alliÃ©es pour les attaques ciblÃ©es
+      if (char.team === attacker.team) return false; // Pas d'attaques alliées pour les attaques ciblées
       const distance = getDistance(attacker.position, char.position);
       return distance <= attackRange;
     });
@@ -117,6 +117,7 @@ export function initializeCharacters(): {
       isAlive: true,
       damageBoost: 0,
       movementBoost: 0,
+      attacksRemaining: 2,
     },
     {
       id: 'player-mage',
@@ -130,6 +131,7 @@ export function initializeCharacters(): {
       isAlive: true,
       damageBoost: 0,
       movementBoost: 0,
+      attacksRemaining: 1,
     },
     {
       id: 'player-thief',
@@ -143,6 +145,7 @@ export function initializeCharacters(): {
       isAlive: true,
       damageBoost: 0,
       movementBoost: 0,
+      attacksRemaining: 1,
     },
   ];
   
@@ -159,6 +162,7 @@ export function initializeCharacters(): {
       isAlive: true,
       damageBoost: 0,
       movementBoost: 0,
+      attacksRemaining: 2,
     },
     {
       id: 'enemy-mage',
@@ -172,6 +176,7 @@ export function initializeCharacters(): {
       isAlive: true,
       damageBoost: 0,
       movementBoost: 0,
+      attacksRemaining: 1,
     },
     {
       id: 'enemy-thief',
@@ -185,6 +190,7 @@ export function initializeCharacters(): {
       isAlive: true,
       damageBoost: 0,
       movementBoost: 0,
+      attacksRemaining: 1,
     },
   ];
   

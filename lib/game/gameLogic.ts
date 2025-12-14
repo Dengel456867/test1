@@ -181,16 +181,35 @@ export function performAttack(
       isCritical = true;
     }
     
-    const newHealth = Math.max(0, target.health - damage);
+    // Appliquer la réduction d'armure (minimum 0 dégâts)
+    const damageAfterArmor = Math.max(0, damage - (target.armor || 0));
+    
+    // Appliquer les dégâts au bouclier d'abord, puis à la vie
+    let newShield = target.shield || 0;
+    let newHealth = target.health;
+    
+    if (damageAfterArmor > 0) {
+      if (newShield > 0) {
+        // Le bouclier absorbe les dégâts en premier
+        const shieldDamage = Math.min(newShield, damageAfterArmor);
+        newShield -= shieldDamage;
+        const remainingDamage = damageAfterArmor - shieldDamage;
+        newHealth = Math.max(0, newHealth - remainingDamage);
+      } else {
+        newHealth = Math.max(0, newHealth - damageAfterArmor);
+      }
+    }
+    
     const updatedTarget = {
       ...target,
       health: newHealth,
+      shield: newShield,
       isAlive: newHealth > 0,
     };
     
     return {
       character: updatedTarget,
-      damage,
+      damage: damageAfterArmor, // Afficher les dégâts après armure
       isCritical,
     };
   });
@@ -280,7 +299,7 @@ export function endTurn(gameState: GameState, usedCharacterId?: string): GameSta
         
         switch (specialTile.type) {
           case 'heal':
-            // +3 PV max (permanent) et soigne 6 PV
+            // +3 PV max (permanent) et soigne 2 PV
             updatedChar.maxHealth += SPECIAL_TILE_EFFECTS.HEAL_MAX_HP;
             updatedChar.health = Math.min(
               updatedChar.maxHealth,
@@ -299,6 +318,18 @@ export function endTurn(gameState: GameState, usedCharacterId?: string): GameSta
           case 'initiative_boost':
             // -1 initiative (permanent, minimum 1)
             updatedChar.initiative = Math.max(1, updatedChar.initiative - SPECIAL_TILE_EFFECTS.INITIATIVE_BOOST);
+            break;
+          case 'armor':
+            // +1 réduction de dégâts (permanent, cumulable)
+            updatedChar.armor += SPECIAL_TILE_EFFECTS.ARMOR;
+            break;
+          case 'shield':
+            // +4 points de bouclier
+            updatedChar.shield += SPECIAL_TILE_EFFECTS.SHIELD;
+            break;
+          case 'regeneration':
+            // +1 PV régénéré par tour (permanent, cumulable)
+            updatedChar.regeneration += SPECIAL_TILE_EFFECTS.REGENERATION;
             break;
         }
         
@@ -354,8 +385,8 @@ export function endTurn(gameState: GameState, usedCharacterId?: string): GameSta
     });
     
     // Faire apparaître une nouvelle case bonus de chaque type
-    const tileTypes: Array<'heal' | 'damage_boost' | 'movement_boost' | 'initiative_boost'> = [
-      'heal', 'damage_boost', 'movement_boost', 'initiative_boost'
+    const tileTypes: Array<'heal' | 'damage_boost' | 'movement_boost' | 'initiative_boost' | 'armor' | 'shield' | 'regeneration'> = [
+      'heal', 'damage_boost', 'movement_boost', 'initiative_boost', 'armor', 'shield', 'regeneration'
     ];
     
     // Positions occupées (personnages + cases bonus existantes)
@@ -393,9 +424,25 @@ export function endTurn(gameState: GameState, usedCharacterId?: string): GameSta
     });
   }
   
-  // Trouver le prochain personnage
+  // Trouver le prochain personnage et appliquer la régénération
   const nextCharId = newTurnOrder[nextIndex];
-  const nextChar = [...updatedPlayerTeam, ...updatedEnemyTeam].find(c => c.id === nextCharId);
+  let nextChar = [...updatedPlayerTeam, ...updatedEnemyTeam].find(c => c.id === nextCharId);
+  
+  // Appliquer la régénération au personnage qui va jouer
+  if (nextChar && nextChar.isAlive && nextChar.regeneration > 0) {
+    const healedChar = {
+      ...nextChar,
+      health: Math.min(nextChar.maxHealth, nextChar.health + nextChar.regeneration),
+    };
+    
+    if (nextChar.team === 'player') {
+      updatedPlayerTeam = updatedPlayerTeam.map(c => c.id === nextCharId ? healedChar : c);
+    } else {
+      updatedEnemyTeam = updatedEnemyTeam.map(c => c.id === nextCharId ? healedChar : c);
+    }
+    newBoard[healedChar.position.y][healedChar.position.x] = healedChar;
+    nextChar = healedChar;
+  }
   
   return {
     ...gameState,

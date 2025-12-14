@@ -115,6 +115,17 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
     setTurnTimer(TURN_TIMER);
   }, []);
   
+  // Réinitialiser originalPosition et originalMovement quand le personnage actif change
+  useEffect(() => {
+    if (!gameState || !currentCharacter) return;
+    
+    // Réinitialiser pour le nouveau personnage actif
+    setOriginalPosition(currentCharacter.position);
+    setOriginalMovement(currentCharacter.movement);
+    setHasAttacked(false);
+    setTurnTimer(TURN_TIMER);
+  }, [gameState?.currentTurnOrderIndex, gameState?.turnCount]);
+  
   // Gérer le tour de l'ennemi (quand c'est le tour d'un personnage ennemi)
   useEffect(() => {
     if (!gameState || gameState.gameOver || isProcessing) return;
@@ -296,10 +307,15 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
       const distanceFromOrigin = Math.abs(position.x - originPos.x) + Math.abs(position.y - originPos.y);
       
       // Vérifier si la case est dans la portée depuis la position d'origine
-      if (distanceFromOrigin > maxRange || distanceFromOrigin === 0) return;
+      if (distanceFromOrigin > maxRange) return;
       
-      // Vérifier si la case est libre
-      if (gameState.board[position.y]?.[position.x] !== null) return;
+      // Vérifier si la case est la position actuelle (ne rien faire)
+      if (position.x === currentCharacter.position.x && position.y === currentCharacter.position.y) return;
+      
+      // Vérifier si la case est libre OU si c'est la position d'origine (on peut y retourner)
+      const isOriginPos = position.x === originPos.x && position.y === originPos.y;
+      const cellContent = gameState.board[position.y]?.[position.x];
+      if (cellContent !== null && !isOriginPos) return;
       
       // Déplacer le personnage de façon hypothétique
       const newBoard = gameState.board.map(row => [...row]);

@@ -215,11 +215,6 @@ function BishopPiece({ color, emissive, emissiveIntensity, scale }: { color: str
         <torusGeometry args={[0.12, 0.025, 8, 16]} />
         <meshStandardMaterial color="#111111" />
       </mesh>
-      {/* Bande noire horizontale sur le corps */}
-      <mesh position={[0, 0.35, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.19, 0.015, 8, 24]} />
-        <meshStandardMaterial color="#111111" />
-      </mesh>
       {/* Pointe */}
       <mesh position={[0, 0.62, 0]}>
         <sphereGeometry args={[0.08, 12, 12]} />

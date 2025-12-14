@@ -32,9 +32,11 @@ function Tile({ position, isSpecial, specialType, onClick, onRightClick }: TileP
       ref={meshRef}
       position={position}
       onClick={onClick}
-      onContextMenu={(e) => {
-        e.preventDefault();
-        onRightClick();
+      onPointerDown={(e) => {
+        if (e.button === 2) {
+          e.stopPropagation();
+          onRightClick();
+        }
       }}
     >
       <boxGeometry args={[0.9, 0.1, 0.9]} />

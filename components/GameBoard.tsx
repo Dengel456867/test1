@@ -10,6 +10,9 @@ interface GameBoardProps {
   gameState: GameState;
   onTileClick: (position: Position, isRightClick: boolean) => void;
   selectedCharacter: Character | null;
+  originalPosition?: Position | null;
+  originalMovement?: number;
+  hasAttacked?: boolean;
   onCharacterClick?: (character: Character) => void;
 }
 
@@ -379,18 +382,33 @@ function BoardCoordinates() {
   );
 }
 
-export default function GameBoard({ gameState, onTileClick, selectedCharacter, onCharacterClick }: GameBoardProps) {
-  // Cases où le personnage sélectionné peut se déplacer
+export default function GameBoard({ 
+  gameState, 
+  onTileClick, 
+  selectedCharacter, 
+  originalPosition,
+  originalMovement,
+  hasAttacked,
+  onCharacterClick 
+}: GameBoardProps) {
+  // Cases où le personnage sélectionné peut se déplacer (basé sur la position d'origine)
   const getHighlightedTiles = (): Set<string> => {
-    if (!selectedCharacter || selectedCharacter.movement <= 0) return new Set();
+    if (!selectedCharacter || hasAttacked) return new Set();
+    
+    // Utiliser la position d'origine et le mouvement d'origine pour le calcul
+    const originPos = originalPosition || selectedCharacter.position;
+    const range = originalMovement ?? selectedCharacter.movement;
+    
+    if (range <= 0) return new Set();
+    
     const highlighted = new Set<string>();
-    const { x: sx, y: sy } = selectedCharacter.position;
-    const range = selectedCharacter.movement;
     
     for (let x = 0; x < 16; x++) {
       for (let y = 0; y < 16; y++) {
-        const distance = Math.abs(x - sx) + Math.abs(y - sy);
-        if (distance > 0 && distance <= range && !gameState.board[y][x]) {
+        const distance = Math.abs(x - originPos.x) + Math.abs(y - originPos.y);
+        // Exclure la position actuelle du personnage et les cases occupées
+        const isCurrentPos = x === selectedCharacter.position.x && y === selectedCharacter.position.y;
+        if (distance > 0 && distance <= range && !gameState.board[y][x] && !isCurrentPos) {
           highlighted.add(`${x}-${y}`);
         }
       }

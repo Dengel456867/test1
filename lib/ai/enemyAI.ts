@@ -54,7 +54,7 @@ export async function getEnemyMove(gameState: GameState): Promise<AIMove> {
   // Logique par type de personnage
   switch (currentCharacter.type) {
     case 'mage':
-      // Le mage attaque toujours (portée 4)
+      // Le mage attaque en zone autour de lui (portée 3)
       if (closestDistance <= ATTACK_RANGES.MAGE) {
         return {
           action: 'attack',
@@ -78,20 +78,15 @@ export async function getEnemyMove(gameState: GameState): Promise<AIMove> {
       break;
       
     case 'thief':
-      // Le voleur peut attaquer au corps à corps ou à distance
-      if (closestDistance <= ATTACK_RANGES.THIEF_MELEE) {
+      // Le voleur peut attaquer jusqu'à 4 cases de distance
+      // Corps à corps si distance <= 1, distance sinon
+      if (closestDistance <= ATTACK_RANGES.THIEF) {
+        const isMelee = closestDistance <= 1;
         return {
           action: 'attack',
           characterId: currentCharacter.id,
           targetPosition: closestTarget.position,
-          isMelee: true,
-        };
-      } else if (closestDistance <= ATTACK_RANGES.THIEF_RANGED) {
-        return {
-          action: 'attack',
-          characterId: currentCharacter.id,
-          targetPosition: closestTarget.position,
-          isMelee: false,
+          isMelee: isMelee,
         };
       }
       break;

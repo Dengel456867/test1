@@ -21,13 +21,13 @@ export async function getEnemyMove(gameState: GameState): Promise<AIMove> {
     return { action: 'end_turn' };
   }
   
-  // Trouver le premier personnage ennemi vivant
-  const aliveEnemies = gameState.enemyTeam.filter(c => c.isAlive);
-  if (aliveEnemies.length === 0) {
+  // Trouver le personnage actuel depuis l'ordre de tour
+  const currentCharId = gameState.turnOrder[gameState.currentTurnOrderIndex];
+  const currentCharacter = gameState.enemyTeam.find(c => c.id === currentCharId && c.isAlive);
+  
+  if (!currentCharacter) {
     return { action: 'end_turn' };
   }
-  
-  const currentCharacter = aliveEnemies[0];
   
   // Trouver les cibles (personnages joueur vivants)
   const targets = gameState.playerTeam.filter(c => c.isAlive);

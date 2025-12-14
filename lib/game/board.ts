@@ -18,13 +18,13 @@ export function generateSpecialTiles(): SpecialTile[] {
   const usedPositions = new Set<string>();
   
   const tileTypes: { type: SpecialTileType; count: number }[] = [
-    { type: 'heal', count: 10 },
-    { type: 'damage_boost', count: 10 },
-    { type: 'movement_boost', count: 10 },
-    { type: 'initiative_boost', count: 10 },
-    { type: 'armor', count: 10 },
-    { type: 'shield', count: 10 },
-    { type: 'regeneration', count: 10 },
+    { type: 'heal', count: 7 },
+    { type: 'damage_boost', count: 7 },
+    { type: 'movement_boost', count: 7 },
+    { type: 'initiative_boost', count: 7 },
+    { type: 'armor', count: 7 },
+    { type: 'shield', count: 7 },
+    { type: 'regeneration', count: 7 },
   ];
   
   tileTypes.forEach(({ type, count }) => {

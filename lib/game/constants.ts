@@ -32,7 +32,7 @@ export const SPECIAL_TILES_COUNT = {
 export const SPECIAL_TILE_EFFECTS = {
   HEAL: 3,
   DAMAGE_BOOST: 2,
-  MOVEMENT_BOOST: 3,
+  MOVEMENT_BOOST: 2, // 2 points de mouvement supplémentaires
 };
 
 // Portées d'attaque

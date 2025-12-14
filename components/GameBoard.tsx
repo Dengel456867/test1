@@ -41,7 +41,7 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
     return isEven ? '#2a2a3a' : '#1a1a2a';
   };
   
-  const highlightColor = '#3b82f6'; // Bleu
+  const highlightColor = '#1e40af'; // Bleu plus sombre/terne
   const specialInfo = getSpecialInfo();
   const baseColor = getBaseColor();
   
@@ -60,20 +60,20 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
   const xPos = position.x - 7.5;
   const yPos = position.y - 7.5;
   
-  // Cas: Case surlignée (mouvement) ET spéciale -> fond bleu avec symbole
+  // Cas: Case surlignée (mouvement) ET spéciale -> fond bleu avec symbole brillant
   if (isHighlighted && isSpecial && specialInfo) {
     return (
       <group position={[xPos, 0, yPos]}>
-        {/* Fond bleu (mouvement) */}
+        {/* Fond bleu (mouvement) - plus terne */}
         <mesh 
           rotation={[-Math.PI / 2, 0, 0]}
           onClick={handleClick}
           onPointerDown={handleRightClick}
         >
           <planeGeometry args={[0.95, 0.95]} />
-          <meshStandardMaterial color={highlightColor} emissive={highlightColor} emissiveIntensity={0.3} />
+          <meshStandardMaterial color={highlightColor} emissive={highlightColor} emissiveIntensity={0.15} transparent opacity={0.85} />
         </mesh>
-        {/* Symbole de la case spéciale */}
+        {/* Symbole de la case spéciale - brillant */}
         <Text
           position={[0, 0.05, 0]}
           rotation={[-Math.PI / 2, 0, 0]}
@@ -81,6 +81,8 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
           color={specialInfo.color}
           anchorX="center"
           anchorY="middle"
+          outlineWidth={0.03}
+          outlineColor={specialInfo.color}
         >
           {specialInfo.symbol}
         </Text>
@@ -88,7 +90,7 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
     );
   }
   
-  // Cas: Case spéciale (non surlignée) -> fond normal avec symbole
+  // Cas: Case spéciale (non surlignée) -> fond normal avec symbole brillant
   if (isSpecial && specialInfo) {
     return (
       <group position={[xPos, 0, yPos]}>
@@ -101,7 +103,7 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
           <planeGeometry args={[0.95, 0.95]} />
           <meshStandardMaterial color={baseColor} />
         </mesh>
-        {/* Symbole coloré */}
+        {/* Symbole coloré - brillant avec contour lumineux */}
         <Text
           position={[0, 0.05, 0]}
           rotation={[-Math.PI / 2, 0, 0]}
@@ -109,16 +111,26 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
           color={specialInfo.color}
           anchorX="center"
           anchorY="middle"
+          outlineWidth={0.04}
+          outlineColor={specialInfo.color}
         >
           {specialInfo.symbol}
         </Text>
+        {/* Halo lumineux sous le symbole */}
+        <mesh 
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[0, 0.02, 0]}
+        >
+          <circleGeometry args={[0.35, 16]} />
+          <meshBasicMaterial color={specialInfo.color} transparent opacity={0.25} />
+        </mesh>
       </group>
     );
   }
   
   // Cas normal: case simple (surlignée ou non)
   const tileColor = isHighlighted ? highlightColor : baseColor;
-  const emissiveIntensity = isHighlighted ? 0.3 : 0;
+  const emissiveIntensity = isHighlighted ? 0.15 : 0; // Moins lumineux
   
   return (
     <mesh
@@ -132,6 +144,8 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
         color={tileColor} 
         emissive={isHighlighted ? tileColor : undefined}
         emissiveIntensity={emissiveIntensity}
+        transparent={isHighlighted}
+        opacity={isHighlighted ? 0.8 : 1}
       />
     </mesh>
   );
@@ -261,7 +275,7 @@ function CharacterModel({ character, isSelected, onClick }: {
   const teamColor = character.team === 'player' ? '#3b82f6' : '#ef4444';
   const glowColor = character.team === 'player' ? '#60a5fa' : '#f87171';
   const emissiveIntensity = isSelected ? 0.6 : 0.25;
-  const scale = isSelected ? 1.15 : 1;
+  const scale = isSelected ? 1.45 : 1.3; // Pions plus grands
   
   const handleClick = (e: any) => {
     e.stopPropagation();

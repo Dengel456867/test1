@@ -61,6 +61,8 @@ function CharacterCard({
   );
 }
 
+const TURN_TIMER = 30; // 30 secondes par tour
+
 export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps) {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
@@ -76,6 +78,8 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
   const [originalPosition, setOriginalPosition] = useState<Position | null>(null);
   // Points de mouvement d'origine
   const [originalMovement, setOriginalMovement] = useState<number>(0);
+  // Timer du tour (en secondes)
+  const [turnTimer, setTurnTimer] = useState<number>(TURN_TIMER);
   
   useEffect(() => {
     const newGame = initializeGame();
@@ -87,6 +91,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
     setHasAttacked(false);
     setOriginalPosition(firstAlive?.position || null);
     setOriginalMovement(firstAlive?.movement || 0);
+    setTurnTimer(TURN_TIMER);
   }, []);
   
   useEffect(() => {
@@ -134,6 +139,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
       // Réinitialiser pour le tour du joueur
       setLockedCharacterId(null);
       setHasAttacked(false);
+      setTurnTimer(TURN_TIMER); // Reset timer
       const alivePlayer = finalState.playerTeam.find(c => c.isAlive);
       if (alivePlayer) {
         setSelectedCharacter(alivePlayer);
@@ -145,6 +151,29 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
     
     executeEnemyTurn();
   }, [gameState?.currentTurn, gameState?.turnCount]);
+  
+  // Timer du tour du joueur
+  useEffect(() => {
+    if (!gameState || gameState.gameOver || isProcessing) return;
+    if (gameState.currentTurn !== 'player') return;
+    
+    const interval = setInterval(() => {
+      setTurnTimer(prev => {
+        if (prev <= 1) {
+          // Temps écoulé - fin automatique du tour
+          clearInterval(interval);
+          const charIdToUse = lockedCharacterId || selectedCharacter?.id;
+          setGameState(endTurn(gameState, charIdToUse));
+          setLockedCharacterId(null);
+          setHasAttacked(false);
+          return TURN_TIMER;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [gameState?.currentTurn, gameState?.turnCount, isProcessing]);
   
   useEffect(() => {
     if (gameState?.gameOver) {
@@ -195,15 +224,33 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
         const newAttacksLeft = attacksLeft - 1;
         setAttacksLeft(newAttacksLeft);
         
-        // Si plus d'attaques restantes, fin du tour
-        if (newAttacksLeft <= 0) {
+        // Mettre à jour le personnage sélectionné avec les nouvelles stats
+        const updated = newState.playerTeam.find(c => c.id === selectedCharacter.id);
+        
+        // Si c'est un guerrier avec des attaques restantes, vérifier s'il y a des cibles au corps à corps
+        let shouldEndTurn = newAttacksLeft <= 0;
+        
+        if (!shouldEndTurn && selectedCharacter.type === 'warrior' && updated) {
+          // Chercher des cibles ennemies adjacentes (distance = 1)
+          const hasAdjacentTarget = newState.enemyTeam.some(enemy => {
+            if (!enemy.isAlive) return false;
+            const distance = Math.abs(enemy.position.x - updated.position.x) + 
+                           Math.abs(enemy.position.y - updated.position.y);
+            return distance <= 1;
+          });
+          
+          if (!hasAdjacentTarget) {
+            shouldEndTurn = true; // Pas de cible au corps à corps, fin du tour
+          }
+        }
+        
+        if (shouldEndTurn) {
           setGameState(endTurn(newState, selectedCharacter.id));
           setLockedCharacterId(null);
           setHasAttacked(false);
+          setTurnTimer(TURN_TIMER);
         } else {
           setGameState(newState);
-          // Mettre à jour le personnage sélectionné avec les nouvelles stats
-          const updated = newState.playerTeam.find(c => c.id === selectedCharacter.id);
           if (updated) setSelectedCharacter(updated);
         }
       }
@@ -267,11 +314,38 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
     }}>
       {/* Header - spans all columns */}
       <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px', borderBottom: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.3)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        {/* Gauche - Logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
           <span style={{ fontFamily: 'Orbitron, sans-serif', fontSize: '18px', fontWeight: 'bold', background: 'linear-gradient(to right, #818cf8, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>TEST 1</span>
           <span style={{ fontSize: '11px', color: '#6b7280', fontFamily: 'monospace' }}>v{APP_VERSION}</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        
+        {/* Centre - Timer */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+          {!isEnemyTurn && !gameState.gameOver && (
+            <div style={{ 
+              padding: '8px 24px', 
+              borderRadius: '12px', 
+              fontSize: '20px', 
+              fontWeight: 'bold', 
+              fontFamily: 'monospace',
+              background: turnTimer <= 10 ? 'rgba(239,68,68,0.3)' : 'rgba(59,130,246,0.2)',
+              color: turnTimer <= 10 ? '#fca5a5' : '#93c5fd',
+              border: `2px solid ${turnTimer <= 10 ? 'rgba(239,68,68,0.6)' : 'rgba(59,130,246,0.4)'}`,
+              animation: turnTimer <= 5 ? 'pulse 0.5s infinite' : 'none'
+            }}>
+              ⏱️ {turnTimer}s
+            </div>
+          )}
+          {isEnemyTurn && (
+            <div style={{ padding: '6px 16px', borderRadius: '20px', fontSize: '13px', fontWeight: 'bold', background: 'rgba(239,68,68,0.3)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.5)' }}>
+              🤖 Tour adversaire...
+            </div>
+          )}
+        </div>
+        
+        {/* Droite - Contrôles */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, justifyContent: 'flex-end' }}>
           <div style={{ padding: '6px 16px', borderRadius: '20px', fontSize: '13px', fontWeight: 'bold', background: isEnemyTurn ? 'rgba(239,68,68,0.3)' : 'rgba(59,130,246,0.3)', color: isEnemyTurn ? '#fca5a5' : '#93c5fd', border: `1px solid ${isEnemyTurn ? 'rgba(239,68,68,0.5)' : 'rgba(59,130,246,0.5)'}` }}>
             {isEnemyTurn ? '🤖 Adversaire' : '🎮 Votre tour'} #{gameState.turnCount}
           </div>
@@ -283,6 +357,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
                 setGameState(endTurn(gameState, charIdToUse));
                 setLockedCharacterId(null);
                 setHasAttacked(false);
+                setTurnTimer(TURN_TIMER);
               }
             }}
             disabled={!canPlayerAct}

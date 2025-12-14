@@ -97,6 +97,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
       await new Promise(r => setTimeout(r, 1000));
       const move = await getEnemyMove(gameState);
       let currentState = gameState;
+      const usedEnemyId = move.characterId || aliveEnemy.id;
       
       if (move.action === 'move' && move.position && move.characterId) {
         currentState = moveCharacter(currentState, move.characterId, move.position);
@@ -116,7 +117,8 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
         }
       }
       
-      const finalState = endTurn(currentState);
+      // Passer l'ID du personnage ennemi utilisé pour activer les cases spéciales
+      const finalState = endTurn(currentState, usedEnemyId);
       setGameState(finalState);
       setIsProcessing(false);
       
@@ -182,7 +184,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
         
         // Si plus d'attaques restantes, fin du tour
         if (newAttacksLeft <= 0) {
-          setGameState(endTurn(newState));
+          setGameState(endTurn(newState, selectedCharacter.id));
           setLockedCharacterId(null);
         } else {
           setGameState(newState);
@@ -229,7 +231,9 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
           <button
             onClick={() => {
               if (canPlayerAct) {
-                setGameState(endTurn(gameState));
+                // Passer l'ID du personnage utilisé (ou sélectionné) pour activer les cases spéciales
+                const charIdToUse = lockedCharacterId || selectedCharacter?.id;
+                setGameState(endTurn(gameState, charIdToUse));
                 setLockedCharacterId(null);
               }
             }}

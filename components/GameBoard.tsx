@@ -32,9 +32,9 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
       case 'damage_boost': return { symbol: '✊', color: '#ef4444' }; // Poing rouge
       case 'movement_boost': return { symbol: '👟', color: '#a855f7' }; // Chaussure violette
       case 'initiative_boost': return { symbol: '⚡', color: '#eab308' }; // Éclair jaune
-      case 'armor': return { symbol: '⛊', color: '#f97316' }; // Plastron orange
+      case 'armor': return { symbol: '🦺', color: '#f97316' }; // Armure/gilet orange
       case 'shield': return { symbol: '🛡', color: '#ffffff' }; // Bouclier blanc
-      case 'regeneration': return { symbol: '✙', color: '#166534' }; // Croix contour vert foncé
+      case 'regeneration': return { symbol: '+', color: '#166534', isOutline: true }; // Croix contour vert foncé
       default: return null;
     }
   };
@@ -65,6 +65,7 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
   
   // Cas: Case surlignée (mouvement) ET spéciale -> fond bleu avec symbole
   if (isHighlighted && isSpecial && specialInfo) {
+    const isOutline = 'isOutline' in specialInfo && specialInfo.isOutline;
     return (
       <group position={[xPos, 0, yPos]}>
         {/* Fond bleu (mouvement) - terne */}
@@ -80,10 +81,13 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
         <Text
           position={[0, 0.05, 0]}
           rotation={[-Math.PI / 2, 0, 0]}
-          fontSize={0.5}
-          color={specialInfo.color}
+          fontSize={isOutline ? 0.6 : 0.5}
+          color={isOutline ? 'transparent' : specialInfo.color}
           anchorX="center"
           anchorY="middle"
+          outlineWidth={isOutline ? 0.03 : 0}
+          outlineColor={specialInfo.color}
+          fontWeight={isOutline ? 'bold' : 'normal'}
         >
           {specialInfo.symbol}
         </Text>
@@ -93,6 +97,7 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
   
   // Cas: Case spéciale (non surlignée) -> fond normal avec symbole simple
   if (isSpecial && specialInfo) {
+    const isOutline = 'isOutline' in specialInfo && specialInfo.isOutline;
     return (
       <group position={[xPos, 0, yPos]}>
         {/* Fond normal */}
@@ -108,10 +113,13 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
         <Text
           position={[0, 0.05, 0]}
           rotation={[-Math.PI / 2, 0, 0]}
-          fontSize={0.55}
-          color={specialInfo.color}
+          fontSize={isOutline ? 0.65 : 0.55}
+          color={isOutline ? 'transparent' : specialInfo.color}
           anchorX="center"
           anchorY="middle"
+          outlineWidth={isOutline ? 0.035 : 0}
+          outlineColor={specialInfo.color}
+          fontWeight={isOutline ? 'bold' : 'normal'}
         >
           {specialInfo.symbol}
         </Text>

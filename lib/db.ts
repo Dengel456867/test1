@@ -1,131 +1,123 @@
-import sqlite3 from 'sqlite3';
-import { promisify } from 'util';
-import path from 'path';
-import fs from 'fs';
+// Base de données en mémoire (compatible Vercel serverless)
+// Note: Les données sont perdues entre les redémarrages du serveur
+// Pour une vraie persistance, utilisez Vercel KV, Postgres, ou un service externe
 
-let db: sqlite3.Database | null = null;
-
-function getDB() {
-  if (!db) {
-    const dbPath = process.env.DATABASE_PATH || path.join(process.cwd(), 'data', 'game.db');
-    
-    // CrÃ©er le dossier data s'il n'existe pas
-    if (!fs.existsSync(path.dirname(dbPath))) {
-      fs.mkdirSync(path.dirname(dbPath), { recursive: true });
-    }
-    
-    db = new sqlite3.Database(dbPath);
-  }
-  return db;
+interface User {
+  id: number;
+  username: string;
+  password_hash: string;
+  created_at: Date;
 }
 
-// Promisify les mÃ©thodes
-function dbRun(sql: string, params?: any[]) {
-  return promisify(getDB().run.bind(getDB()))(sql, params);
+interface Game {
+  id: number;
+  user_id: number;
+  won: boolean;
+  turns: number;
+  movements: number;
+  created_at: Date;
 }
 
-function dbGet(sql: string, params?: any[]) {
-  return promisify(getDB().get.bind(getDB()))(sql, params);
+interface UserStats {
+  user_id: number;
+  victories: number;
+  defeats: number;
+  total_games: number;
+  total_turns: number;
+  total_movements: number;
 }
 
-function dbAll(sql: string, params?: any[]) {
-  return promisify(getDB().all.bind(getDB()))(sql, params);
-}
+// Stockage en mémoire
+const users: Map<number, User> = new Map();
+const games: Map<number, Game> = new Map();
+const userStats: Map<number, UserStats> = new Map();
+let userIdCounter = 1;
+let gameIdCounter = 1;
 
-// Initialiser la base de donnÃ©es
+// Initialiser la base de données (no-op pour in-memory)
 export async function initDB() {
-  // Table des utilisateurs
-  await dbRun(`
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT UNIQUE NOT NULL,
-      password_hash TEXT NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-
-  // Table des parties
-  await dbRun(`
-    CREATE TABLE IF NOT EXISTS games (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER NOT NULL,
-      won BOOLEAN NOT NULL,
-      turns INTEGER NOT NULL,
-      movements INTEGER NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES users(id)
-    )
-  `);
-
-  // Table des statistiques utilisateur
-  await dbRun(`
-    CREATE TABLE IF NOT EXISTS user_stats (
-      user_id INTEGER PRIMARY KEY,
-      victories INTEGER DEFAULT 0,
-      defeats INTEGER DEFAULT 0,
-      total_games INTEGER DEFAULT 0,
-      total_turns INTEGER DEFAULT 0,
-      total_movements INTEGER DEFAULT 0,
-      FOREIGN KEY (user_id) REFERENCES users(id)
-    )
-  `);
+  // Rien à faire pour le stockage en mémoire
 }
 
 // Fonctions utilisateurs
 export async function createUser(username: string, passwordHash: string) {
-  await dbRun(
-    'INSERT INTO users (username, password_hash) VALUES (?, ?)',
-    [username, passwordHash]
-  );
-  const user = await dbGet('SELECT * FROM users WHERE username = ?', [username]) as any;
-  await dbRun(
-    'INSERT INTO user_stats (user_id) VALUES (?)',
-    [user.id]
-  );
+  // Vérifier si l'utilisateur existe
+  const existingUsers = Array.from(users.values());
+  for (const user of existingUsers) {
+    if (user.username === username) {
+      throw new Error('Username already exists');
+    }
+  }
+  
+  const user: User = {
+    id: userIdCounter++,
+    username,
+    password_hash: passwordHash,
+    created_at: new Date(),
+  };
+  
+  users.set(user.id, user);
+  
+  // Créer les stats initiales
+  userStats.set(user.id, {
+    user_id: user.id,
+    victories: 0,
+    defeats: 0,
+    total_games: 0,
+    total_turns: 0,
+    total_movements: 0,
+  });
+  
   return user;
 }
 
 export async function getUserByUsername(username: string) {
-  return await dbGet('SELECT * FROM users WHERE username = ?', [username]) as any;
+  const allUsers = Array.from(users.values());
+  return allUsers.find(u => u.username === username) || null;
 }
 
 export async function getUserById(id: number) {
-  return await dbGet('SELECT * FROM users WHERE id = ?', [id]) as any;
+  return users.get(id) || null;
 }
 
 // Fonctions parties
 export async function createGame(userId: number, won: boolean, turns: number, movements: number) {
-  await dbRun(
-    'INSERT INTO games (user_id, won, turns, movements) VALUES (?, ?, ?, ?)',
-    [userId, won ? 1 : 0, turns, movements]
-  );
+  const game: Game = {
+    id: gameIdCounter++,
+    user_id: userId,
+    won,
+    turns,
+    movements,
+    created_at: new Date(),
+  };
   
-  // Mettre Ã  jour les statistiques
-  const stats = await dbGet('SELECT * FROM user_stats WHERE user_id = ?', [userId]) as any;
+  games.set(game.id, game);
+  
+  // Mettre à jour les statistiques
+  const stats = userStats.get(userId);
   if (stats) {
-    await dbRun(
-      `UPDATE user_stats 
-       SET victories = victories + ?, 
-           defeats = defeats + ?,
-           total_games = total_games + 1,
-           total_turns = total_turns + ?,
-           total_movements = total_movements + ?
-       WHERE user_id = ?`,
-      [won ? 1 : 0, won ? 0 : 1, turns, movements, userId]
-    );
+    stats.victories += won ? 1 : 0;
+    stats.defeats += won ? 0 : 1;
+    stats.total_games += 1;
+    stats.total_turns += turns;
+    stats.total_movements += movements;
   }
 }
 
 export async function getLastGames(userId: number, limit: number = 10) {
-  return await dbAll(
-    'SELECT * FROM games WHERE user_id = ? ORDER BY created_at DESC LIMIT ?',
-    [userId, limit]
-  ) as any[];
+  const userGames = Array.from(games.values())
+    .filter(g => g.user_id === userId)
+    .sort((a, b) => b.created_at.getTime() - a.created_at.getTime())
+    .slice(0, limit);
+  
+  return userGames;
 }
 
 export async function getUserStats(userId: number) {
-  return await dbGet('SELECT * FROM user_stats WHERE user_id = ?', [userId]) as any;
+  return userStats.get(userId) || null;
 }
 
-export { getDB };
-
+// Export pour compatibilité
+export function getDB() {
+  return null; // Plus de SQLite
+}

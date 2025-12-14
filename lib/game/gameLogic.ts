@@ -197,7 +197,12 @@ export function performAttack(
     const result = attackResults.find(r => r.character.id === char.id);
     if (result) {
       const updated = result.character;
-      newBoard[updated.position.y][updated.position.x] = updated;
+      // Si le personnage est mort, libérer la case
+      if (!updated.isAlive) {
+        newBoard[updated.position.y][updated.position.x] = null;
+      } else {
+        newBoard[updated.position.y][updated.position.x] = updated;
+      }
       return updated;
     }
     return char;
@@ -207,7 +212,12 @@ export function performAttack(
     const result = attackResults.find(r => r.character.id === char.id);
     if (result) {
       const updated = result.character;
-      newBoard[updated.position.y][updated.position.x] = updated;
+      // Si le personnage est mort, libérer la case
+      if (!updated.isAlive) {
+        newBoard[updated.position.y][updated.position.x] = null;
+      } else {
+        newBoard[updated.position.y][updated.position.x] = updated;
+      }
       return updated;
     }
     return char;

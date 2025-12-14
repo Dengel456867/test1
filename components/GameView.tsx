@@ -311,10 +311,10 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
         </div>
       )}
       
-      {/* Main content - 3 columns */}
-      <div className="flex-1 flex min-h-0">
-        {/* Left panel - Player team (15%) */}
-        <div className="w-[15%] min-w-[180px] p-2 overflow-y-auto">
+      {/* Main content - 3 columns side by side */}
+      <div className="flex-1 flex flex-row flex-nowrap overflow-hidden" style={{ minHeight: 0 }}>
+        {/* Left panel - Player team */}
+        <div className="w-48 flex-shrink-0 p-2 overflow-y-auto border-r border-white/10 bg-black/20">
           <TeamPanel
             team={gameState.playerTeam}
             title="🎮 JOUEUR"
@@ -325,8 +325,8 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
           />
         </div>
         
-        {/* Center - Game board (70%) */}
-        <div className="flex-1 relative flex items-center justify-center">
+        {/* Center - Game board */}
+        <div className="flex-1 relative" style={{ minWidth: 0 }}>
           <GameBoard
             gameState={gameState}
             onTileClick={handleTileClick}
@@ -359,8 +359,8 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
           )}
         </div>
         
-        {/* Right panel - Enemy team (15%) */}
-        <div className="w-[15%] min-w-[180px] p-2 overflow-y-auto">
+        {/* Right panel - Enemy team */}
+        <div className="w-48 flex-shrink-0 p-2 overflow-y-auto border-l border-white/10 bg-black/20">
           <TeamPanel
             team={gameState.enemyTeam}
             title="🤖 ENNEMI"

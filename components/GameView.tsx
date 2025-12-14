@@ -313,11 +313,11 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
       
       {/* Main content - 3 columns */}
       <div className="flex-1 flex min-h-0">
-        {/* Left panel - Player team (20%) */}
-        <div className="w-[20%] p-4 overflow-y-auto">
+        {/* Left panel - Player team (15%) */}
+        <div className="w-[15%] min-w-[180px] p-2 overflow-y-auto">
           <TeamPanel
             team={gameState.playerTeam}
-            title="🎮 VOTRE ÉQUIPE"
+            title="🎮 JOUEUR"
             isPlayer={true}
             selectedCharacter={selectedCharacter}
             onSelectCharacter={setSelectedCharacter}
@@ -325,8 +325,8 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
           />
         </div>
         
-        {/* Center - Game board (60%) */}
-        <div className="w-[60%] relative">
+        {/* Center - Game board (70%) */}
+        <div className="flex-1 relative flex items-center justify-center">
           <GameBoard
             gameState={gameState}
             onTileClick={handleTileClick}
@@ -359,11 +359,11 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
           )}
         </div>
         
-        {/* Right panel - Enemy team (20%) */}
-        <div className="w-[20%] p-4 overflow-y-auto">
+        {/* Right panel - Enemy team (15%) */}
+        <div className="w-[15%] min-w-[180px] p-2 overflow-y-auto">
           <TeamPanel
             team={gameState.enemyTeam}
-            title="🤖 ADVERSAIRE"
+            title="🤖 ENNEMI"
             isPlayer={false}
             selectedCharacter={null}
             canSelect={false}

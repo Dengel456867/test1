@@ -26,13 +26,13 @@ export const CHARACTER_STATS = {
 
 // Nombre de cases spéciales
 export const SPECIAL_TILES_COUNT = {
-  HEAL: 10,
-  DAMAGE_BOOST: 10,
-  MOVEMENT_BOOST: 10,
-  INITIATIVE_BOOST: 10,
-  ARMOR: 10,
-  SHIELD: 10,
-  REGENERATION: 10,
+  HEAL: 7,
+  DAMAGE_BOOST: 7,
+  MOVEMENT_BOOST: 7,
+  INITIATIVE_BOOST: 7,
+  ARMOR: 7,
+  SHIELD: 7,
+  REGENERATION: 7,
 };
 
 // Effets des cases spéciales (tous permanents jusqu'à fin de partie)

@@ -70,6 +70,8 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
   const [lockedCharacterId, setLockedCharacterId] = useState<string | null>(null);
   // Compteur d'attaques restantes pour ce tour
   const [attacksLeft, setAttacksLeft] = useState<number>(0);
+  // Indique si le joueur a déjà attaqué ce tour (bloque le mouvement)
+  const [hasAttacked, setHasAttacked] = useState<boolean>(false);
   
   useEffect(() => {
     const newGame = initializeGame();
@@ -78,6 +80,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
     setSelectedCharacter(firstAlive || null);
     setLockedCharacterId(null);
     setAttacksLeft(firstAlive?.attacksRemaining || 1);
+    setHasAttacked(false);
   }, []);
   
   useEffect(() => {
@@ -124,6 +127,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
       
       // Réinitialiser pour le tour du joueur
       setLockedCharacterId(null);
+      setHasAttacked(false);
       const alivePlayer = finalState.playerTeam.find(c => c.isAlive);
       if (alivePlayer) {
         setSelectedCharacter(alivePlayer);
@@ -176,8 +180,9 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
         setAttackResult(result);
         setTimeout(() => setAttackResult(null), 1500);
         
-        // Verrouiller ce personnage pour le tour
+        // Verrouiller ce personnage et marquer qu'il a attaqué
         setLockedCharacterId(selectedCharacter.id);
+        setHasAttacked(true); // Bloque le mouvement après attaque
         
         const newAttacksLeft = attacksLeft - 1;
         setAttacksLeft(newAttacksLeft);
@@ -186,6 +191,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
         if (newAttacksLeft <= 0) {
           setGameState(endTurn(newState, selectedCharacter.id));
           setLockedCharacterId(null);
+          setHasAttacked(false);
         } else {
           setGameState(newState);
           // Mettre à jour le personnage sélectionné avec les nouvelles stats
@@ -194,7 +200,9 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
         }
       }
     } else {
-      // MOUVEMENT
+      // MOUVEMENT - bloqué si on a déjà attaqué
+      if (hasAttacked) return;
+      
       const newState = moveCharacter(gameState, selectedCharacter.id, position);
       
       // Vérifier si le mouvement a eu lieu (position différente)
@@ -235,6 +243,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
                 const charIdToUse = lockedCharacterId || selectedCharacter?.id;
                 setGameState(endTurn(gameState, charIdToUse));
                 setLockedCharacterId(null);
+                setHasAttacked(false);
               }
             }}
             disabled={!canPlayerAct}

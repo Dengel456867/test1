@@ -32,12 +32,13 @@ export const SPECIAL_TILES_COUNT = {
   INITIATIVE_BOOST: 10,
 };
 
-// Effets des cases spéciales
+// Effets des cases spéciales (tous permanents jusqu'à fin de partie)
 export const SPECIAL_TILE_EFFECTS = {
-  HEAL: 3,
-  DAMAGE_BOOST: 2,
-  MOVEMENT_BOOST: 2, // 2 points de mouvement supplémentaires
-  INITIATIVE_BOOST: 1, // Réduction d'initiative (permanent)
+  HEAL_MAX_HP: 3,        // +3 PV max (permanent)
+  HEAL_AMOUNT: 6,        // Soigne 6 PV
+  DAMAGE_BOOST: 1,       // +1 dégâts (permanent)
+  MOVEMENT_BOOST: 1,     // +1 mouvement (permanent)
+  INITIATIVE_BOOST: 1,   // -1 initiative (permanent)
 };
 
 // Portées d'attaque

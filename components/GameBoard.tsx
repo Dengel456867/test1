@@ -32,6 +32,9 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
       case 'damage_boost': return { symbol: '✊', color: '#ef4444' }; // Poing rouge
       case 'movement_boost': return { symbol: '👟', color: '#a855f7' }; // Chaussure violette
       case 'initiative_boost': return { symbol: '⚡', color: '#eab308' }; // Éclair jaune
+      case 'armor': return { symbol: '🛡', color: '#f97316' }; // Armure orange
+      case 'shield': return { symbol: '⛨', color: '#ffffff' }; // Bouclier blanc
+      case 'regeneration': return { symbol: '✚', color: '#166534' }; // Croix vert foncé
       default: return null;
     }
   };

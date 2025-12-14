@@ -231,11 +231,13 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
         let shouldEndTurn = newAttacksLeft <= 0;
         
         if (!shouldEndTurn && selectedCharacter.type === 'warrior' && updated) {
-          // Chercher des cibles ennemies adjacentes (distance = 1)
-          const hasAdjacentTarget = newState.enemyTeam.some(enemy => {
-            if (!enemy.isAlive) return false;
-            const distance = Math.abs(enemy.position.x - updated.position.x) + 
-                           Math.abs(enemy.position.y - updated.position.y);
+          // Chercher des cibles adjacentes (ennemis OU alliés, distance = 1)
+          const allCharacters = [...newState.playerTeam, ...newState.enemyTeam];
+          const hasAdjacentTarget = allCharacters.some(char => {
+            // Exclure le guerrier lui-même et les morts
+            if (char.id === updated.id || !char.isAlive) return false;
+            const distance = Math.abs(char.position.x - updated.position.x) + 
+                           Math.abs(char.position.y - updated.position.y);
             return distance <= 1;
           });
           

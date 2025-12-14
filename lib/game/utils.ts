@@ -79,8 +79,8 @@ export function generateSpecialTiles(): Array<{ position: Position; type: Specia
     '13,13', '12,13', '13,12' // Ennemi
   ]);
   
-  const tileTypes: SpecialTileType[] = ['heal', 'damage_boost', 'movement_boost'];
-  const counts = [10, 10, 10];
+  const tileTypes: SpecialTileType[] = ['heal', 'damage_boost', 'movement_boost', 'initiative_boost'];
+  const counts = [10, 10, 10, 10];
   
   tileTypes.forEach((type, typeIndex) => {
     for (let i = 0; i < counts[typeIndex]; i++) {

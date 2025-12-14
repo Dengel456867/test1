@@ -72,6 +72,10 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
   const [attacksLeft, setAttacksLeft] = useState<number>(0);
   // Indique si le joueur a déjà attaqué ce tour (bloque le mouvement)
   const [hasAttacked, setHasAttacked] = useState<boolean>(false);
+  // Position d'origine du personnage au début du tour (pour mouvement hypothétique)
+  const [originalPosition, setOriginalPosition] = useState<Position | null>(null);
+  // Points de mouvement d'origine
+  const [originalMovement, setOriginalMovement] = useState<number>(0);
   
   useEffect(() => {
     const newGame = initializeGame();
@@ -81,6 +85,8 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
     setLockedCharacterId(null);
     setAttacksLeft(firstAlive?.attacksRemaining || 1);
     setHasAttacked(false);
+    setOriginalPosition(firstAlive?.position || null);
+    setOriginalMovement(firstAlive?.movement || 0);
   }, []);
   
   useEffect(() => {
@@ -132,6 +138,8 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
       if (alivePlayer) {
         setSelectedCharacter(alivePlayer);
         setAttacksLeft(alivePlayer.attacksRemaining);
+        setOriginalPosition(alivePlayer.position);
+        setOriginalMovement(alivePlayer.movement);
       }
     };
     
@@ -200,19 +208,50 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
         }
       }
     } else {
-      // MOUVEMENT - bloqué si on a déjà attaqué
+      // MOUVEMENT HYPOTHÉTIQUE - bloqué si on a déjà attaqué
       if (hasAttacked) return;
       
-      const newState = moveCharacter(gameState, selectedCharacter.id, position);
+      // Utiliser la position d'origine pour calculer la distance
+      const originPos = originalPosition || selectedCharacter.position;
+      const maxRange = originalMovement || selectedCharacter.maxMovement;
+      const distanceFromOrigin = Math.abs(position.x - originPos.x) + Math.abs(position.y - originPos.y);
       
-      // Vérifier si le mouvement a eu lieu (position différente)
-      const updated = newState.playerTeam.find(c => c.id === selectedCharacter.id);
-      if (updated && (updated.position.x !== selectedCharacter.position.x || updated.position.y !== selectedCharacter.position.y)) {
-        // Verrouiller ce personnage pour le tour
-        setLockedCharacterId(selectedCharacter.id);
-        setGameState(newState);
-        setSelectedCharacter(updated);
+      // Vérifier si la case est dans la portée depuis la position d'origine
+      if (distanceFromOrigin > maxRange || distanceFromOrigin === 0) return;
+      
+      // Vérifier si la case est libre
+      if (gameState.board[position.y]?.[position.x] !== null) return;
+      
+      // Déplacer le personnage de façon hypothétique
+      const newBoard = gameState.board.map(row => [...row]);
+      newBoard[selectedCharacter.position.y][selectedCharacter.position.x] = null;
+      
+      const updatedCharacter = {
+        ...selectedCharacter,
+        position: position,
+        movement: maxRange - distanceFromOrigin, // Mouvement restant basé sur la distance depuis l'origine
+      };
+      
+      newBoard[position.y][position.x] = updatedCharacter;
+      
+      const updatedPlayerTeam = gameState.playerTeam.map(c =>
+        c.id === selectedCharacter.id ? updatedCharacter : c
+      );
+      
+      // Verrouiller ce personnage pour le tour (mais le mouvement reste hypothétique)
+      setLockedCharacterId(selectedCharacter.id);
+      
+      // Sauvegarder la position d'origine si c'est le premier mouvement
+      if (!originalPosition || originalPosition.x !== originPos.x || originalPosition.y !== originPos.y) {
+        // Déjà sauvegardé
       }
+      
+      setGameState({
+        ...gameState,
+        board: newBoard,
+        playerTeam: updatedPlayerTeam,
+      });
+      setSelectedCharacter(updatedCharacter);
     }
   };
 
@@ -273,6 +312,11 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
               if (!lockedCharacterId || lockedCharacterId === char.id) {
                 setSelectedCharacter(char);
                 setAttacksLeft(char.attacksRemaining);
+                // Sauvegarder la position d'origine pour le mouvement hypothétique
+                if (!lockedCharacterId) {
+                  setOriginalPosition(char.position);
+                  setOriginalMovement(char.movement);
+                }
               }
             }}
             canSelect={canPlayerAct && (!lockedCharacterId || lockedCharacterId === char.id)}
@@ -286,11 +330,19 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
           gameState={gameState}
           onTileClick={handleTileClick}
           selectedCharacter={selectedCharacter}
+          originalPosition={originalPosition}
+          originalMovement={originalMovement}
+          hasAttacked={hasAttacked}
           onCharacterClick={(char) => {
             // Ne peut sélectionner que les personnages du joueur, et pas changer si verrouillé
             if (canPlayerAct && char.team === 'player' && (!lockedCharacterId || lockedCharacterId === char.id)) {
               setSelectedCharacter(char);
               setAttacksLeft(char.attacksRemaining);
+              // Sauvegarder la position d'origine pour le mouvement hypothétique
+              if (!lockedCharacterId) {
+                setOriginalPosition(char.position);
+                setOriginalMovement(char.movement);
+              }
             }
           }}
         />

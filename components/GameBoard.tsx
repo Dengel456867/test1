@@ -10,6 +10,7 @@ interface GameBoardProps {
   gameState: GameState;
   onTileClick: (position: Position, isRightClick: boolean) => void;
   selectedCharacter: Character | null;
+  onCharacterClick?: (character: Character) => void;
 }
 
 // Tuile plate avec support bicolore
@@ -118,7 +119,11 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
 }
 
 // Personnage - Cylindre avec couleur équipe
-function CharacterModel({ character, isSelected }: { character: Character; isSelected: boolean }) {
+function CharacterModel({ character, isSelected, onClick }: { 
+  character: Character; 
+  isSelected: boolean;
+  onClick?: () => void;
+}) {
   const groupRef = useRef<THREE.Group>(null);
   
   // Animation de flottement pour le personnage sélectionné
@@ -134,22 +139,18 @@ function CharacterModel({ character, isSelected }: { character: Character; isSel
   const teamColor = character.team === 'player' ? '#3b82f6' : '#ef4444'; // Bleu vs Rouge
   const glowColor = character.team === 'player' ? '#60a5fa' : '#f87171';
   
-  // Emoji du type
-  const getEmoji = () => {
-    switch (character.type) {
-      case 'warrior': return '⚔️';
-      case 'mage': return '🔮';
-      case 'thief': return '🗡️';
-      default: return '👤';
-    }
-  };
-  
   const scale = isSelected ? 1.3 : 1;
+  
+  const handleClick = (e: any) => {
+    e.stopPropagation();
+    if (onClick) onClick();
+  };
   
   return (
     <group
       ref={groupRef}
       position={[character.position.x - 7.5, 0.4, character.position.y - 7.5]}
+      onClick={handleClick}
     >
       {/* Base / socle */}
       <mesh position={[0, -0.35, 0]} scale={[scale, 0.1, scale]}>
@@ -222,7 +223,7 @@ function BoardBorder() {
   );
 }
 
-export default function GameBoard({ gameState, onTileClick, selectedCharacter }: GameBoardProps) {
+export default function GameBoard({ gameState, onTileClick, selectedCharacter, onCharacterClick }: GameBoardProps) {
   // Cases où le personnage sélectionné peut se déplacer
   const getHighlightedTiles = (): Set<string> => {
     if (!selectedCharacter || selectedCharacter.movement <= 0) return new Set();
@@ -308,6 +309,7 @@ export default function GameBoard({ gameState, onTileClick, selectedCharacter }:
               key={character.id}
               character={character}
               isSelected={selectedCharacter?.id === character.id}
+              onClick={character.team === 'player' && onCharacterClick ? () => onCharacterClick(character) : undefined}
             />
           ))}
       </Canvas>

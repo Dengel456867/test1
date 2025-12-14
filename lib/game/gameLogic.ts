@@ -352,6 +352,45 @@ export function endTurn(gameState: GameState, usedCharacterId?: string): GameSta
         newBoard[char.position.y][char.position.x] = char;
       }
     });
+    
+    // Faire apparaître une nouvelle case bonus de chaque type
+    const tileTypes: Array<'heal' | 'damage_boost' | 'movement_boost' | 'initiative_boost'> = [
+      'heal', 'damage_boost', 'movement_boost', 'initiative_boost'
+    ];
+    
+    // Positions occupées (personnages + cases bonus existantes)
+    const occupiedPositions = new Set<string>();
+    [...updatedPlayerTeam, ...updatedEnemyTeam].forEach(char => {
+      if (char.isAlive) {
+        occupiedPositions.add(`${char.position.x},${char.position.y}`);
+      }
+    });
+    updatedSpecialTiles.forEach(tile => {
+      if (!tile.used) {
+        occupiedPositions.add(`${tile.position.x},${tile.position.y}`);
+      }
+    });
+    
+    // Générer une case de chaque type
+    tileTypes.forEach(type => {
+      let attempts = 0;
+      while (attempts < 100) {
+        const x = Math.floor(Math.random() * BOARD_SIZE);
+        const y = Math.floor(Math.random() * BOARD_SIZE);
+        const key = `${x},${y}`;
+        
+        if (!occupiedPositions.has(key)) {
+          updatedSpecialTiles.push({
+            position: { x, y },
+            type,
+            used: false,
+          });
+          occupiedPositions.add(key);
+          break;
+        }
+        attempts++;
+      }
+    });
   }
   
   // Trouver le prochain personnage

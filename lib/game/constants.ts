@@ -8,16 +8,19 @@ export const CHARACTER_STATS = {
     health: 15,
     movement: 4,
     attacksPerTurn: 2,
+    initiative: 10,
   },
   MAGE: {
     health: 10,
     movement: 4,
     attacksPerTurn: 1,
+    initiative: 11,
   },
   THIEF: {
     health: 12,
     movement: 5,
     attacksPerTurn: 1,
+    initiative: 8,
   },
 };
 

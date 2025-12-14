@@ -2,7 +2,7 @@
 
 export type CharacterType = 'warrior' | 'mage' | 'thief';
 export type Team = 'player' | 'enemy';
-export type SpecialTileType = 'heal' | 'damage_boost' | 'movement_boost' | 'normal';
+export type SpecialTileType = 'heal' | 'damage_boost' | 'movement_boost' | 'initiative_boost' | 'normal';
 
 export interface Position {
   x: number;

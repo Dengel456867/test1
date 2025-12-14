@@ -163,11 +163,6 @@ function RookPiece({ color, emissive, emissiveIntensity, scale }: { color: strin
         <cylinderGeometry args={[0.28, 0.22, 0.15, 16]} />
         <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
       </mesh>
-      {/* Anneau noir horizontal sous les créneaux */}
-      <mesh position={[0, 0.56, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.27, 0.02, 8, 24]} />
-        <meshStandardMaterial color="#111111" />
-      </mesh>
       {/* Créneaux (4) */}
       {[0, 1, 2, 3].map((i) => (
         <mesh key={i} position={[Math.cos(i * Math.PI / 2) * 0.18, 0.65, Math.sin(i * Math.PI / 2) * 0.18]}>
@@ -223,11 +218,6 @@ function BishopPiece({ color, emissive, emissiveIntensity, scale }: { color: str
       {/* Bande noire horizontale sur le corps */}
       <mesh position={[0, 0.35, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[0.19, 0.015, 8, 24]} />
-        <meshStandardMaterial color="#111111" />
-      </mesh>
-      {/* Anneau noir horizontal à la base de la pointe */}
-      <mesh position={[0, 0.54, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.08, 0.015, 8, 16]} />
         <meshStandardMaterial color="#111111" />
       </mesh>
       {/* Pointe */}

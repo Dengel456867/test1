@@ -30,6 +30,7 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
       case 'heal': return '#22c55e'; // Vert
       case 'damage_boost': return '#ef4444'; // Rouge
       case 'movement_boost': return '#a855f7'; // Violet
+      case 'initiative_boost': return '#eab308'; // Jaune
       default: return null;
     }
   };

@@ -220,6 +220,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
           gameState={gameState}
           onTileClick={handleTileClick}
           selectedCharacter={selectedCharacter}
+          onCharacterClick={(char) => canPlayerAct && setSelectedCharacter(char)}
         />
         
         {isEnemyTurn && (

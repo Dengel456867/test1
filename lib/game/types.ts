@@ -16,7 +16,8 @@ export interface Character {
   maxHealth: number;
   movement: number;
   maxMovement: number;
-  damageBoost: number; // Bonus de dÃ©gÃ¢ts cumulÃ©s
+  isAlive: boolean;
+  damageBoost: number; // Bonus de dégâts cumulés
   movementBoost: number; // Bonus de mouvement pour le prochain tour
   attacksRemaining: number; // Pour le guerrier qui peut attaquer 2 fois
 }
@@ -33,10 +34,12 @@ export interface GameState {
   enemyTeam: Character[];
   specialTiles: SpecialTile[];
   currentTurn: Team;
+  currentCharacterIndex: number;
   selectedCharacter: Character | null;
   gameOver: boolean;
   winner: Team | null;
   turnCount: number;
+  moveCount: number;
   movementCount: number;
 }
 
@@ -48,4 +51,3 @@ export interface AttackResult {
     isCritical: boolean;
   }>;
 }
-

@@ -16,6 +16,7 @@ export default function GameView({ userId, onGameEnd }: GameViewProps) {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [attackResult, setAttackResult] = useState<any>(null);
+  const [isEnemyThinking, setIsEnemyThinking] = useState(false);
   
   useEffect(() => {
     const newGame = initializeGame();
@@ -25,51 +26,51 @@ export default function GameView({ userId, onGameEnd }: GameViewProps) {
   
   useEffect(() => {
     // Gérer le tour de l'IA
-    if (gameState && gameState.currentTurn === 'enemy' && !gameState.gameOver) {
+    if (gameState && gameState.currentTurn === 'enemy' && !gameState.gameOver && !isEnemyThinking) {
+      setIsEnemyThinking(true);
+      
       const handleEnemyTurn = async () => {
-        const currentChar = gameState.enemyTeam[gameState.currentCharacterIndex];
-        if (!currentChar || !currentChar.isAlive) {
-          const newState = endTurn(gameState);
-          setGameState(newState);
+        // Trouver le premier personnage vivant de l'ennemi
+        const aliveEnemies = gameState.enemyTeam.filter(c => c.isAlive);
+        if (aliveEnemies.length === 0) {
+          setGameState(endTurn(gameState));
+          setIsEnemyThinking(false);
           return;
         }
         
+        const currentEnemy = aliveEnemies[0];
         const move = await getEnemyMove(gameState);
         
         let newState = gameState;
         
+        // Mouvement
         if (move.action === 'move' && move.position && move.characterId) {
           newState = moveCharacter(gameState, move.characterId, move.position);
-          setGameState(newState);
-          
-          // Attendre un peu avant la prochaine action
-          setTimeout(() => {
-            if (move.action === 'attack' && move.targetPosition && move.characterId) {
-              const { gameState: updatedState } = performAttack(
-                newState,
-                move.characterId,
-                move.targetPosition,
-                move.isMelee || false
-              );
-              setGameState(endTurn(updatedState));
-            } else {
-              setGameState(endTurn(newState));
-            }
-          }, 500);
-        } else if (move.action === 'attack' && move.targetPosition && move.characterId) {
-          const { gameState: updatedState } = performAttack(
-            gameState,
+        }
+        
+        // Attaque
+        if (move.targetPosition && move.characterId) {
+          const { gameState: updatedState, attackResult: result } = performAttack(
+            newState,
             move.characterId,
             move.targetPosition,
             move.isMelee || false
           );
-          setGameState(endTurn(updatedState));
-        } else {
-          setGameState(endTurn(gameState));
+          newState = updatedState;
+          
+          if (result) {
+            setAttackResult(result);
+            setTimeout(() => setAttackResult(null), 1500);
+          }
         }
+        
+        // Fin du tour ennemi → tour du joueur
+        const finalState = endTurn(newState);
+        setGameState(finalState);
+        setIsEnemyThinking(false);
       };
       
-      const timer = setTimeout(handleEnemyTurn, 1000);
+      const timer = setTimeout(handleEnemyTurn, 800);
       return () => clearTimeout(timer);
     }
     
@@ -82,27 +83,23 @@ export default function GameView({ userId, onGameEnd }: GameViewProps) {
         won,
         turns: gameState.turnCount,
         moves: gameState.moveCount,
-        duration: 0, // À calculer
+        duration: 0,
         timestamp: new Date(),
       };
       onGameEnd(won, stats);
     }
-  }, [gameState, userId, onGameEnd]);
+  }, [gameState, userId, onGameEnd, isEnemyThinking]);
   
   if (!gameState) {
     return <div className="text-white flex items-center justify-center h-screen">Chargement...</div>;
   }
-  
-  const currentCharacter = gameState.currentTurn === 'player'
-    ? gameState.playerTeam[gameState.currentCharacterIndex]
-    : gameState.enemyTeam[gameState.currentCharacterIndex];
   
   const handleTileClick = (position: Position, isRightClick: boolean) => {
     if (gameState.currentTurn !== 'player' || gameState.gameOver) return;
     if (!selectedCharacter || !selectedCharacter.isAlive) return;
     
     if (isRightClick) {
-      // Attaque
+      // Attaque → fin du tour
       const { gameState: newState, attackResult: result } = performAttack(
         gameState,
         selectedCharacter.id,
@@ -113,16 +110,16 @@ export default function GameView({ userId, onGameEnd }: GameViewProps) {
       
       if (result) {
         setAttackResult(result);
-        setTimeout(() => setAttackResult(null), 2000);
+        setTimeout(() => setAttackResult(null), 1500);
       }
       
+      // Après l'attaque, c'est au tour de l'adversaire
       setGameState(endTurn(newState));
     } else {
-      // Mouvement
+      // Mouvement (sans fin de tour)
       const newState = moveCharacter(gameState, selectedCharacter.id, position);
       setGameState(newState);
       
-      // Mettre à jour le personnage sélectionné
       const updated = newState.playerTeam.find(c => c.id === selectedCharacter.id);
       if (updated) setSelectedCharacter(updated);
     }
@@ -134,7 +131,7 @@ export default function GameView({ userId, onGameEnd }: GameViewProps) {
     }
   };
 
-  const getCharacterEmoji = (type: string): string => {
+  const getEmoji = (type: string): string => {
     switch (type.toLowerCase()) {
       case 'warrior': return '⚔️';
       case 'mage': return '🔮';
@@ -144,147 +141,103 @@ export default function GameView({ userId, onGameEnd }: GameViewProps) {
   };
   
   return (
-    <div className="h-screen flex flex-col bg-gray-900 overflow-hidden">
-      {/* Version badge - coin supérieur droit */}
-      <div className="absolute top-2 right-2 z-20 bg-purple-600/90 px-3 py-1 rounded-full text-white text-sm font-mono shadow-lg">
+    <div className="h-screen flex flex-col bg-black overflow-hidden">
+      {/* Version - coin supérieur droit */}
+      <div className="absolute top-1 right-1 z-20 bg-purple-600/80 px-2 py-0.5 rounded text-white text-xs font-mono">
         v{APP_VERSION}
       </div>
       
-      {/* Zone de jeu 3D - prend tout l'espace disponible en haut */}
-      <div className="flex-1 relative">
+      {/* Zone 3D - maximisée */}
+      <div className="flex-1 relative min-h-0">
         <GameBoard
           gameState={gameState}
           onTileClick={handleTileClick}
           selectedCharacter={selectedCharacter}
         />
         
+        {/* Indicateur tour adversaire */}
+        {gameState.currentTurn === 'enemy' && (
+          <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-red-600 px-4 py-1 rounded-full text-white text-sm font-bold animate-pulse z-20">
+            🤖 L'adversaire joue...
+          </div>
+        )}
+        
         {/* Notification d'attaque */}
         {attackResult && (
-          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 p-4 bg-yellow-900/90 rounded-lg text-white shadow-lg z-20">
-            <div className="font-bold text-lg">⚔️ Attaque !</div>
-            {attackResult.targets.map((target: any, i: number) => (
+          <div className="absolute top-12 left-1/2 -translate-x-1/2 p-3 bg-yellow-900/95 rounded-lg text-white shadow-lg z-20">
+            <div className="font-bold">⚔️ Attaque !</div>
+            {attackResult.targets.map((t: any, i: number) => (
               <div key={i} className="text-sm">
-                {target.character.type} : -{target.damage} PV
-                {target.isCritical && <span className="text-yellow-400 ml-2">💥 CRITIQUE!</span>}
+                {t.character.type}: -{t.damage} PV {t.isCritical && '💥 CRIT!'}
               </div>
             ))}
           </div>
         )}
       </div>
       
-      {/* Panneau inférieur - UI compacte */}
-      <div className="bg-gradient-to-t from-gray-900 via-gray-900/95 to-gray-900/80 border-t border-gray-700">
-        {/* Barre d'actions */}
-        <div className="flex justify-between items-center px-4 py-2 border-b border-gray-700/50">
-          <div className="flex items-center gap-4">
-            <h1 className="text-lg font-bold text-white">Test 1</h1>
-            <span className={`px-3 py-1 rounded-full text-sm font-bold ${
-              gameState.currentTurn === 'player' ? 'bg-blue-600' : 'bg-red-600'
-            }`}>
-              {gameState.currentTurn === 'player' ? '🎮 Votre tour' : '🤖 Adversaire'}
-            </span>
-            <span className="text-gray-400 text-sm">Tour #{gameState.turnCount}</span>
-          </div>
-          
-          <div className="flex items-center gap-2">
+      {/* UI compacte en bas - hauteur fixe réduite */}
+      <div className="h-20 bg-gray-900/95 border-t border-gray-700 flex items-center px-3 gap-3">
+        {/* Tour actuel */}
+        <div className={`px-3 py-1 rounded text-sm font-bold ${
+          gameState.currentTurn === 'player' ? 'bg-blue-600' : 'bg-red-600'
+        }`}>
+          {gameState.currentTurn === 'player' ? '🎮' : '🤖'} Tour #{gameState.turnCount}
+        </div>
+        
+        {/* Sélection personnage */}
+        <div className="flex gap-1">
+          {gameState.playerTeam.filter(c => c.isAlive).map(char => (
             <button
-              onClick={handleEndTurn}
-              disabled={gameState.currentTurn !== 'player'}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              key={char.id}
+              onClick={() => setSelectedCharacter(char)}
+              className={`px-2 py-1 rounded text-xs font-bold ${
+                selectedCharacter?.id === char.id
+                  ? 'bg-blue-600 ring-1 ring-blue-400'
+                  : 'bg-gray-700 hover:bg-gray-600'
+              }`}
             >
-              Finir le tour
+              {getEmoji(char.type)}
             </button>
+          ))}
+        </div>
+        
+        {/* Stats personnage sélectionné */}
+        {selectedCharacter && (
+          <div className="flex items-center gap-2 text-xs bg-gray-800 px-2 py-1 rounded">
+            <span className="font-bold">{getEmoji(selectedCharacter.type)}</span>
+            <span className="text-green-400">❤️{selectedCharacter.health}</span>
+            <span className="text-blue-400">👟{selectedCharacter.movement}</span>
+            <span className="text-orange-400">⚔️{selectedCharacter.attacksRemaining}</span>
+          </div>
+        )}
+        
+        {/* Équipes mini */}
+        <div className="flex-1 flex gap-2 justify-center">
+          <div className="flex gap-0.5">
+            {gameState.playerTeam.map(c => (
+              <span key={c.id} className={`text-xs ${c.isAlive ? 'text-blue-400' : 'text-gray-600'}`}>
+                {c.isAlive ? getEmoji(c.type) : '💀'}
+              </span>
+            ))}
+          </div>
+          <span className="text-gray-500">vs</span>
+          <div className="flex gap-0.5">
+            {gameState.enemyTeam.map(c => (
+              <span key={c.id} className={`text-xs ${c.isAlive ? 'text-red-400' : 'text-gray-600'}`}>
+                {c.isAlive ? getEmoji(c.type) : '💀'}
+              </span>
+            ))}
           </div>
         </div>
         
-        {/* Contenu principal du panneau */}
-        <div className="px-4 py-3">
-          <div className="flex gap-4">
-            {/* Sélection personnage */}
-            <div className="flex-shrink-0">
-              <h3 className="text-xs text-gray-400 mb-1">Personnage actif</h3>
-              <div className="flex gap-1">
-                {gameState.playerTeam
-                  .filter(c => c.isAlive)
-                  .map(char => (
-                    <button
-                      key={char.id}
-                      onClick={() => setSelectedCharacter(char)}
-                      className={`px-3 py-2 rounded text-sm font-bold transition-all ${
-                        selectedCharacter?.id === char.id
-                          ? 'bg-blue-600 text-white ring-2 ring-blue-400'
-                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                      }`}
-                    >
-                      {getCharacterEmoji(char.type)} {char.type}
-                    </button>
-                  ))}
-              </div>
-            </div>
-            
-            {/* Stats du personnage sélectionné */}
-            {selectedCharacter && (
-              <div className="flex-shrink-0 bg-blue-900/50 px-4 py-2 rounded-lg">
-                <div className="flex items-center gap-3 text-sm">
-                  <span className="text-green-400">❤️ {selectedCharacter.health}/{selectedCharacter.maxHealth}</span>
-                  <span className="text-blue-400">👟 {selectedCharacter.movement}/{selectedCharacter.maxMovement}</span>
-                  <span className="text-orange-400">⚔️ {selectedCharacter.attacksRemaining} attaque(s)</span>
-                  {selectedCharacter.damageBoost > 0 && (
-                    <span className="text-red-400">💥 +{selectedCharacter.damageBoost}</span>
-                  )}
-                  {selectedCharacter.movementBoost > 0 && (
-                    <span className="text-purple-400">🏃 +{selectedCharacter.movementBoost}</span>
-                  )}
-                </div>
-              </div>
-            )}
-            
-            {/* Équipes */}
-            <div className="flex-1 grid grid-cols-2 gap-2">
-              {/* Joueur */}
-              <div className="bg-blue-900/30 p-2 rounded-lg">
-                <h4 className="text-xs text-blue-300 mb-1">🎮 Joueur</h4>
-                <div className="flex gap-1 flex-wrap">
-                  {gameState.playerTeam.map(char => (
-                    <CharacterMini key={char.id} character={char} getEmoji={getCharacterEmoji} />
-                  ))}
-                </div>
-              </div>
-              
-              {/* Adversaire */}
-              <div className="bg-red-900/30 p-2 rounded-lg">
-                <h4 className="text-xs text-red-300 mb-1">🤖 Adversaire</h4>
-                <div className="flex gap-1 flex-wrap">
-                  {gameState.enemyTeam.map(char => (
-                    <CharacterMini key={char.id} character={char} getEmoji={getCharacterEmoji} />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function CharacterMini({ character, getEmoji }: { character: Character; getEmoji: (type: string) => string }) {
-  const healthPercent = (character.health / character.maxHealth) * 100;
-  const isDead = !character.isAlive;
-  
-  return (
-    <div className={`px-2 py-1 rounded text-xs ${isDead ? 'bg-gray-800 opacity-50' : 'bg-gray-700'}`}>
-      <div className="flex items-center gap-1">
-        <span>{getEmoji(character.type)}</span>
-        <div className="w-12 bg-gray-600 rounded-full h-1">
-          <div
-            className={`h-1 rounded-full ${
-              healthPercent > 50 ? 'bg-green-500' : healthPercent > 25 ? 'bg-yellow-500' : 'bg-red-500'
-            }`}
-            style={{ width: `${Math.max(0, healthPercent)}%` }}
-          />
-        </div>
-        {isDead && <span>💀</span>}
+        {/* Bouton fin de tour */}
+        <button
+          onClick={handleEndTurn}
+          disabled={gameState.currentTurn !== 'player'}
+          className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          Fin tour
+        </button>
       </div>
     </div>
   );

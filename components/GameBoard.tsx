@@ -2,7 +2,7 @@
 
 import { useRef, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, Text } from '@react-three/drei';
+import { OrbitControls, PerspectiveCamera, Text, Billboard } from '@react-three/drei';
 import * as THREE from 'three';
 import { GameState, Character, Position } from '@/lib/types/game';
 
@@ -277,8 +277,8 @@ function CharacterModel({ character, isSelected, onClick }: {
         </mesh>
       )}
       
-      {/* Barre de vie */}
-      <group position={[0, 0.95, 0]}>
+      {/* Barre de vie - Billboard pour toujours faire face à la caméra */}
+      <Billboard position={[0, 0.95, 0]} follow={true} lockX={false} lockY={false} lockZ={false}>
         <mesh position={[0, 0, 0.01]}>
           <planeGeometry args={[0.5, 0.06]} />
           <meshBasicMaterial color="#1f2937" />
@@ -287,7 +287,7 @@ function CharacterModel({ character, isSelected, onClick }: {
           <planeGeometry args={[0.5 * (character.health / character.maxHealth), 0.04]} />
           <meshBasicMaterial color={character.health > 5 ? '#22c55e' : character.health > 2 ? '#eab308' : '#ef4444'} />
         </mesh>
-      </group>
+      </Billboard>
     </group>
   );
 }

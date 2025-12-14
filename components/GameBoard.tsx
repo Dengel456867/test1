@@ -60,11 +60,11 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
   const xPos = position.x - 7.5;
   const yPos = position.y - 7.5;
   
-  // Cas: Case surlignée (mouvement) ET spéciale -> fond bleu avec symbole brillant
+  // Cas: Case surlignée (mouvement) ET spéciale -> fond bleu avec symbole
   if (isHighlighted && isSpecial && specialInfo) {
     return (
       <group position={[xPos, 0, yPos]}>
-        {/* Fond bleu (mouvement) - plus terne */}
+        {/* Fond bleu (mouvement) - terne */}
         <mesh 
           rotation={[-Math.PI / 2, 0, 0]}
           onClick={handleClick}
@@ -73,7 +73,7 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
           <planeGeometry args={[0.95, 0.95]} />
           <meshStandardMaterial color={highlightColor} emissive={highlightColor} emissiveIntensity={0.15} transparent opacity={0.85} />
         </mesh>
-        {/* Symbole de la case spéciale - brillant */}
+        {/* Symbole de la case spéciale */}
         <Text
           position={[0, 0.05, 0]}
           rotation={[-Math.PI / 2, 0, 0]}
@@ -81,8 +81,6 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
           color={specialInfo.color}
           anchorX="center"
           anchorY="middle"
-          outlineWidth={0.03}
-          outlineColor={specialInfo.color}
         >
           {specialInfo.symbol}
         </Text>
@@ -90,7 +88,7 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
     );
   }
   
-  // Cas: Case spéciale (non surlignée) -> fond normal avec symbole brillant
+  // Cas: Case spéciale (non surlignée) -> fond normal avec symbole simple
   if (isSpecial && specialInfo) {
     return (
       <group position={[xPos, 0, yPos]}>
@@ -103,7 +101,7 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
           <planeGeometry args={[0.95, 0.95]} />
           <meshStandardMaterial color={baseColor} />
         </mesh>
-        {/* Symbole coloré - brillant avec contour lumineux */}
+        {/* Symbole coloré simple */}
         <Text
           position={[0, 0.05, 0]}
           rotation={[-Math.PI / 2, 0, 0]}
@@ -111,19 +109,9 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
           color={specialInfo.color}
           anchorX="center"
           anchorY="middle"
-          outlineWidth={0.04}
-          outlineColor={specialInfo.color}
         >
           {specialInfo.symbol}
         </Text>
-        {/* Halo lumineux sous le symbole */}
-        <mesh 
-          rotation={[-Math.PI / 2, 0, 0]}
-          position={[0, 0.02, 0]}
-        >
-          <circleGeometry args={[0.35, 16]} />
-          <meshBasicMaterial color={specialInfo.color} transparent opacity={0.25} />
-        </mesh>
       </group>
     );
   }
@@ -275,7 +263,7 @@ function CharacterModel({ character, isSelected, onClick }: {
   const teamColor = character.team === 'player' ? '#3b82f6' : '#ef4444';
   const glowColor = character.team === 'player' ? '#60a5fa' : '#f87171';
   const emissiveIntensity = isSelected ? 0.6 : 0.25;
-  const scale = isSelected ? 1.45 : 1.3; // Pions plus grands
+  const scale = isSelected ? 1.7 : 1.5; // Pions encore plus grands
   
   const handleClick = (e: any) => {
     e.stopPropagation();

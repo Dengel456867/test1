@@ -277,39 +277,27 @@ function Push-AllFilesToGitHub {
     return $uploadedCount -gt 0
 }
 
-# Fonction pour deployer sur Vercel
+# Fonction pour deployer sur Vercel via Deploy Hook
 function Invoke-VercelDeploy {
-    Write-Step "Deploiement sur Vercel..." "info"
+    Write-Step "Deploiement sur Vercel via Deploy Hook..." "info"
+    
+    $deployHook = $config.vercel.deployHook
+    
+    if (-not $deployHook) {
+        Write-Step "Aucun Deploy Hook configure dans config.json" "error"
+        return $false
+    }
     
     try {
-        $headers = @{
-            "Authorization" = "Bearer $env:VERCEL_TOKEN"
-            "Content-Type" = "application/json"
-        }
+        # Declencher le deploy hook
+        $response = Invoke-RestMethod -Uri $deployHook -Method Post -ErrorAction Stop
         
-        # Lier le projet GitHub a Vercel
-        $linkBody = @{
-            name = $env:VERCEL_PROJECT_NAME
-            framework = "nextjs"
-            gitRepository = @{
-                type = "github"
-                repo = "$script:GitHubUser/$($config.github.repoName)"
-            }
-        } | ConvertTo-Json -Depth 5
-        
-        try {
-            $projectResponse = Invoke-RestMethod -Uri "https://api.vercel.com/v9/projects" -Method Post -Headers $headers -Body $linkBody -ErrorAction Stop
-            Write-Step "Projet Vercel cree/lie" "success"
-        } catch {
-            Write-Step "Projet Vercel existe deja ou lie" "info"
-        }
-        
-        Write-Step "Deploiement initie sur Vercel (via GitHub)" "success"
-        Write-Step "Le deploiement se fera automatiquement depuis GitHub" "info"
+        Write-Step "Deploiement declenche avec succes!" "success"
+        Write-Step "Job ID: $($response.job.id)" "info"
+        Write-Step "Suivez le deploiement sur: https://vercel.com" "info"
         return $true
     } catch {
-        Write-Step "Erreur deploiement Vercel: $($_.Exception.Message)" "warning"
-        Write-Step "Configurez manuellement le projet sur vercel.com" "info"
+        Write-Step "Erreur deploiement Vercel: $($_.Exception.Message)" "error"
         return $false
     }
 }

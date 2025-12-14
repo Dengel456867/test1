@@ -13,6 +13,139 @@ interface GameViewProps {
   onLogout: () => void;
 }
 
+// Panneau d'équipe
+function TeamPanel({ 
+  team, 
+  title, 
+  isPlayer, 
+  selectedCharacter, 
+  onSelectCharacter,
+  canSelect 
+}: {
+  team: Character[];
+  title: string;
+  isPlayer: boolean;
+  selectedCharacter: Character | null;
+  onSelectCharacter?: (char: Character) => void;
+  canSelect: boolean;
+}) {
+  const getEmoji = (type: string) => {
+    const emojis: Record<string, string> = { warrior: '⚔️', mage: '🔮', thief: '🗡️' };
+    return emojis[type.toLowerCase()] || '👤';
+  };
+
+  const getTypeName = (type: string) => {
+    const names: Record<string, string> = { warrior: 'Guerrier', mage: 'Mage', thief: 'Voleur' };
+    return names[type.toLowerCase()] || type;
+  };
+
+  const teamColor = isPlayer ? 'blue' : 'red';
+  const gradientFrom = isPlayer ? 'from-blue-600' : 'from-red-600';
+  const gradientTo = isPlayer ? 'to-cyan-600' : 'to-orange-600';
+  const borderColor = isPlayer ? 'border-blue-500/30' : 'border-red-500/30';
+  const bgColor = isPlayer ? 'bg-blue-500/10' : 'bg-red-500/10';
+
+  return (
+    <div className={`h-full flex flex-col ${isPlayer ? 'items-end' : 'items-start'}`}>
+      {/* Header */}
+      <div className={`glass px-4 py-2 mb-4 ${isPlayer ? 'rounded-l-xl' : 'rounded-r-xl'}`}>
+        <h2 className={`font-title text-lg bg-gradient-to-r ${gradientFrom} ${gradientTo} bg-clip-text text-transparent font-bold`}>
+          {title}
+        </h2>
+      </div>
+      
+      {/* Characters */}
+      <div className="flex-1 flex flex-col gap-3 w-full px-2">
+        {team.map((char) => {
+          const isSelected = selectedCharacter?.id === char.id;
+          const healthPercent = (char.health / char.maxHealth) * 100;
+          const isDead = !char.isAlive;
+          
+          return (
+            <div
+              key={char.id}
+              onClick={() => canSelect && char.isAlive && onSelectCharacter?.(char)}
+              className={`
+                glass p-3 rounded-xl transition-all cursor-pointer
+                ${borderColor} border
+                ${isDead ? 'opacity-40 grayscale' : ''}
+                ${isSelected ? `ring-2 ${isPlayer ? 'ring-blue-400' : 'ring-red-400'} ${bgColor}` : ''}
+                ${canSelect && char.isAlive ? 'hover:scale-105' : ''}
+              `}
+            >
+              {/* Character header */}
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-2xl">{isDead ? '💀' : getEmoji(char.type)}</span>
+                <div className="flex-1">
+                  <div className="font-title text-sm font-bold">{getTypeName(char.type)}</div>
+                  <div className={`text-xs ${isPlayer ? 'text-blue-400' : 'text-red-400'}`}>
+                    {isPlayer ? 'Joueur' : 'Adversaire'}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Health bar */}
+              <div className="mb-2">
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="text-gray-400">PV</span>
+                  <span className={healthPercent > 50 ? 'text-green-400' : healthPercent > 25 ? 'text-yellow-400' : 'text-red-400'}>
+                    {char.health}/{char.maxHealth}
+                  </span>
+                </div>
+                <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full transition-all duration-500 rounded-full ${
+                      healthPercent > 50 ? 'bg-gradient-to-r from-green-500 to-emerald-400' : 
+                      healthPercent > 25 ? 'bg-gradient-to-r from-yellow-500 to-orange-400' : 
+                      'bg-gradient-to-r from-red-500 to-rose-400'
+                    }`}
+                    style={{ width: `${healthPercent}%` }}
+                  />
+                </div>
+              </div>
+              
+              {/* Stats */}
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="flex items-center gap-1 bg-black/20 rounded px-2 py-1">
+                  <span>👟</span>
+                  <span className="text-blue-300">{char.movement}/{char.maxMovement}</span>
+                </div>
+                <div className="flex items-center gap-1 bg-black/20 rounded px-2 py-1">
+                  <span>⚔️</span>
+                  <span className="text-orange-300">{char.attacksRemaining}</span>
+                </div>
+              </div>
+              
+              {/* Bonus indicators */}
+              {(char.damageBoost > 0 || char.movementBoost > 0) && (
+                <div className="flex gap-2 mt-2">
+                  {char.damageBoost > 0 && (
+                    <span className="text-xs bg-red-500/20 text-red-300 px-2 py-0.5 rounded">
+                      💥 +{char.damageBoost} DMG
+                    </span>
+                  )}
+                  {char.movementBoost > 0 && (
+                    <span className="text-xs bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded">
+                      🏃 +{char.movementBoost} MOV
+                    </span>
+                  )}
+                </div>
+              )}
+              
+              {/* Selected indicator */}
+              {isSelected && (
+                <div className={`mt-2 text-xs text-center py-1 rounded ${isPlayer ? 'bg-blue-500/30 text-blue-300' : 'bg-red-500/30 text-red-300'}`}>
+                  ✨ Sélectionné
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps) {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
@@ -119,22 +252,18 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
     }
   };
 
-  const getEmoji = (type: string) => {
-    const emojis: Record<string, string> = { warrior: '⚔️', mage: '🔮', thief: '🗡️' };
-    return emojis[type.toLowerCase()] || '👤';
-  };
-
-  const getTypeName = (type: string) => {
-    const names: Record<string, string> = { warrior: 'Guerrier', mage: 'Mage', thief: 'Voleur' };
-    return names[type.toLowerCase()] || type;
+  const handleEndTurn = () => {
+    if (canPlayerAct) {
+      setGameState(endTurn(gameState));
+    }
   };
   
   return (
-    <div className="h-screen w-screen flex flex-col overflow-hidden relative">
-      {/* Header bar */}
-      <div className="h-12 glass flex items-center justify-between px-4 border-b border-white/10 z-20">
+    <div className="h-screen w-screen flex flex-col overflow-hidden">
+      {/* Header */}
+      <div className="h-14 glass flex items-center justify-between px-4 border-b border-white/10 z-20 flex-shrink-0">
         <div className="flex items-center gap-3">
-          <span className="font-title text-lg bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent font-bold">
+          <span className="font-title text-xl bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent font-bold">
             TEST 1
           </span>
           <span className="text-xs text-gray-500 font-mono">v{APP_VERSION}</span>
@@ -142,19 +271,28 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
         
         <div className="flex items-center gap-4">
           {/* Turn indicator */}
-          <div className={`px-3 py-1 rounded-full text-sm font-bold flex items-center gap-2 ${
+          <div className={`px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 ${
             isEnemyTurn 
               ? 'bg-red-500/30 text-red-300 border border-red-500/50' 
               : 'bg-blue-500/30 text-blue-300 border border-blue-500/50'
           }`}>
-            {isEnemyTurn ? '🤖 Adversaire' : '🎮 Votre tour'}
+            {isEnemyTurn ? '🤖 Tour Adversaire' : '🎮 Votre Tour'}
             <span className="text-xs opacity-70">#{gameState.turnCount}</span>
           </div>
+          
+          {/* End turn button */}
+          <button
+            onClick={handleEndTurn}
+            disabled={!canPlayerAct}
+            className="btn btn-primary px-4 py-2 text-sm disabled:opacity-30"
+          >
+            Fin du tour
+          </button>
           
           {/* Menu button */}
           <button
             onClick={() => setShowMenu(!showMenu)}
-            className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
+            className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
           >
             ⚙️
           </button>
@@ -163,7 +301,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
       
       {/* Menu dropdown */}
       {showMenu && (
-        <div className="absolute top-14 right-4 z-30 glass-strong p-4 w-48 animate-slide-up">
+        <div className="absolute top-16 right-4 z-30 glass-strong p-4 w-48 animate-slide-up">
           <button
             onClick={onLogout}
             className="w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 text-red-400 transition-colors"
@@ -173,156 +311,99 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
         </div>
       )}
       
-      {/* AI thinking overlay */}
-      {isEnemyTurn && (
-        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-20">
-          <div className="glass px-6 py-3 animate-pulse flex items-center gap-3">
-            <div className="w-3 h-3 bg-red-500 rounded-full animate-ping" />
-            <span className="text-red-300 font-medium">L'adversaire réfléchit...</span>
-          </div>
+      {/* Main content - 3 columns */}
+      <div className="flex-1 flex min-h-0">
+        {/* Left panel - Player team (20%) */}
+        <div className="w-[20%] p-4 overflow-y-auto">
+          <TeamPanel
+            team={gameState.playerTeam}
+            title="🎮 VOTRE ÉQUIPE"
+            isPlayer={true}
+            selectedCharacter={selectedCharacter}
+            onSelectCharacter={setSelectedCharacter}
+            canSelect={canPlayerAct}
+          />
         </div>
-      )}
-      
-      {/* Attack notification */}
-      {attackResult && (
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30 animate-slide-up">
-          <div className="glass-strong px-6 py-4 border border-orange-500/50">
-            <div className="font-title text-orange-400 text-lg mb-2">⚔️ ATTAQUE !</div>
-            {attackResult.targets?.map((t: any, i: number) => (
-              <div key={i} className="text-sm flex items-center gap-2">
-                <span>{getEmoji(t.character?.type)}</span>
-                <span className="text-red-400 font-bold">-{t.damage} PV</span>
-                {t.isCritical && <span className="text-yellow-400 animate-pulse">💥 CRITIQUE!</span>}
+        
+        {/* Center - Game board (60%) */}
+        <div className="w-[60%] relative">
+          <GameBoard
+            gameState={gameState}
+            onTileClick={handleTileClick}
+            selectedCharacter={selectedCharacter}
+          />
+          
+          {/* AI thinking overlay */}
+          {isEnemyTurn && (
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20">
+              <div className="glass px-6 py-3 animate-pulse flex items-center gap-3 rounded-full">
+                <div className="w-3 h-3 bg-red-500 rounded-full animate-ping" />
+                <span className="text-red-300 font-medium">L'adversaire réfléchit...</span>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
-      
-      {/* Game board - main area */}
-      <div className="flex-1 relative">
-        <GameBoard
-          gameState={gameState}
-          onTileClick={handleTileClick}
-          selectedCharacter={selectedCharacter}
-        />
-      </div>
-      
-      {/* Bottom control bar */}
-      <div className="h-24 glass border-t border-white/10 flex items-center px-4 gap-4 z-20">
-        {/* Character selection */}
-        <div className="flex flex-col gap-1">
-          <span className="text-[10px] text-gray-500 uppercase tracking-wider">Personnage</span>
-          <div className="flex gap-2">
-            {gameState.playerTeam.map(c => (
-              <button
-                key={c.id}
-                onClick={() => c.isAlive && setSelectedCharacter(c)}
-                disabled={!c.isAlive || !canPlayerAct}
-                className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center transition-all ${
-                  !c.isAlive 
-                    ? 'bg-gray-800/50 opacity-40' 
-                    : selectedCharacter?.id === c.id
-                      ? 'bg-gradient-to-br from-indigo-600 to-purple-600 glow-primary'
-                      : 'bg-white/5 hover:bg-white/10 border border-white/10'
-                } disabled:cursor-not-allowed`}
-              >
-                <span className="text-xl">{c.isAlive ? getEmoji(c.type) : '💀'}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-        
-        {/* Selected character stats */}
-        {selectedCharacter && (
-          <div className="glass px-4 py-2 flex flex-col gap-1">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">{getEmoji(selectedCharacter.type)}</span>
-              <span className="font-title text-sm">{getTypeName(selectedCharacter.type)}</span>
             </div>
-            <div className="flex gap-3 text-xs">
-              <span className="flex items-center gap-1">
-                <span className="text-green-400">❤️</span>
-                <span className="font-mono">{selectedCharacter.health}/{selectedCharacter.maxHealth}</span>
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="text-blue-400">👟</span>
-                <span className="font-mono">{selectedCharacter.movement}</span>
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="text-orange-400">⚔️</span>
-                <span className="font-mono">{selectedCharacter.attacksRemaining}</span>
-              </span>
-            </div>
-          </div>
-        )}
-        
-        {/* Teams status */}
-        <div className="flex-1 flex items-center justify-center gap-6">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-blue-400 uppercase tracking-wider">Vous</span>
-            <div className="flex gap-1">
-              {gameState.playerTeam.map(c => (
-                <div key={c.id} className={`w-8 h-2 rounded-full ${
-                  c.isAlive 
-                    ? `bg-gradient-to-r from-blue-500 to-cyan-500`
-                    : 'bg-gray-700'
-                }`} style={{ width: `${Math.max(8, (c.health / c.maxHealth) * 32)}px` }} />
-              ))}
-            </div>
-          </div>
+          )}
           
-          <span className="text-gray-600 font-title">VS</span>
-          
-          <div className="flex items-center gap-2">
-            <div className="flex gap-1">
-              {gameState.enemyTeam.map(c => (
-                <div key={c.id} className={`w-8 h-2 rounded-full ${
-                  c.isAlive 
-                    ? `bg-gradient-to-r from-red-500 to-orange-500`
-                    : 'bg-gray-700'
-                }`} style={{ width: `${Math.max(8, (c.health / c.maxHealth) * 32)}px` }} />
-              ))}
+          {/* Attack notification */}
+          {attackResult && (
+            <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 animate-slide-up">
+              <div className="glass-strong px-6 py-4 border border-orange-500/50 rounded-xl">
+                <div className="font-title text-orange-400 text-lg mb-2">⚔️ ATTAQUE !</div>
+                {attackResult.targets?.map((t: any, i: number) => (
+                  <div key={i} className="text-sm flex items-center gap-2">
+                    <span className="text-red-400 font-bold">-{t.damage} PV</span>
+                    {t.isCritical && <span className="text-yellow-400 animate-pulse">💥 CRITIQUE!</span>}
+                  </div>
+                ))}
+              </div>
             </div>
-            <span className="text-xs text-red-400 uppercase tracking-wider">IA</span>
-          </div>
+          )}
         </div>
         
-        {/* End turn button */}
-        <button
-          onClick={() => canPlayerAct && setGameState(endTurn(gameState))}
-          disabled={!canPlayerAct}
-          className="btn btn-primary px-6 py-3 disabled:opacity-30"
-        >
-          Fin du tour
-        </button>
+        {/* Right panel - Enemy team (20%) */}
+        <div className="w-[20%] p-4 overflow-y-auto">
+          <TeamPanel
+            team={gameState.enemyTeam}
+            title="🤖 ADVERSAIRE"
+            isPlayer={false}
+            selectedCharacter={null}
+            canSelect={false}
+          />
+        </div>
       </div>
       
       {/* Game over overlay */}
       {gameState.gameOver && (
         <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-50">
-          <div className="glass-strong p-8 text-center animate-slide-up max-w-md">
-            <div className="text-6xl mb-4">
+          <div className="glass-strong p-8 text-center animate-slide-up max-w-md rounded-2xl">
+            <div className="text-7xl mb-4">
               {gameState.winner === 'player' ? '🏆' : '💀'}
             </div>
-            <h2 className="font-title text-3xl mb-2">
+            <h2 className="font-title text-4xl mb-2 bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
               {gameState.winner === 'player' ? 'VICTOIRE !' : 'DÉFAITE'}
             </h2>
-            <p className="text-gray-400 mb-6">
+            <p className="text-gray-400 mb-6 text-lg">
               {gameState.winner === 'player' 
                 ? 'Vous avez vaincu l\'adversaire !' 
                 : 'L\'adversaire vous a terrassé...'}
             </p>
-            <button
-              onClick={() => {
-                const newGame = initializeGame();
-                setGameState(newGame);
-                setSelectedCharacter(newGame.playerTeam[0]);
-              }}
-              className="btn btn-primary"
-            >
-              🔄 Rejouer
-            </button>
+            <div className="flex gap-4 justify-center">
+              <button
+                onClick={() => {
+                  const newGame = initializeGame();
+                  setGameState(newGame);
+                  setSelectedCharacter(newGame.playerTeam[0]);
+                }}
+                className="btn btn-primary"
+              >
+                🔄 Rejouer
+              </button>
+              <button
+                onClick={onLogout}
+                className="btn bg-gray-700 hover:bg-gray-600 text-white"
+              >
+                🚪 Quitter
+              </button>
+            </div>
           </div>
         </div>
       )}

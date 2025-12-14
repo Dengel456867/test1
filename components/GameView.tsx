@@ -17,15 +17,15 @@ interface GameViewProps {
 function CharacterCard({ 
   char, 
   isPlayer, 
-  isSelected, 
-  onClick,
-  canSelect 
+  isSelected,
+  isCurrentTurn,
+  turnPosition
 }: {
   char: Character;
   isPlayer: boolean;
   isSelected: boolean;
-  onClick?: () => void;
-  canSelect: boolean;
+  isCurrentTurn?: boolean;
+  turnPosition?: number;
 }) {
   const getEmoji = (type: string) => ({ warrior: '⚔️', mage: '🔮', thief: '🗡️' }[type] || '👤');
   const getName = (type: string) => ({ warrior: 'Guerrier', mage: 'Mage', thief: 'Voleur' }[type] || type);
@@ -34,17 +34,35 @@ function CharacterCard({
 
   return (
     <div
-      onClick={() => canSelect && char.isAlive && onClick?.()}
       className={`
-        p-2 rounded-lg mb-2 transition-all
+        p-2 rounded-lg mb-2 transition-all relative
         ${!char.isAlive ? 'opacity-30 grayscale' : ''}
-        ${isSelected ? `ring-2 ring-${color}-400 bg-${color}-900/40` : 'bg-white/5'}
-        ${canSelect && char.isAlive ? 'cursor-pointer hover:bg-white/10' : ''}
+        ${isCurrentTurn ? `ring-2 ring-yellow-400 bg-yellow-900/30` : isSelected ? `ring-2 ring-${color}-400 bg-${color}-900/40` : 'bg-white/5'}
       `}
     >
+      {turnPosition !== undefined && char.isAlive && (
+        <div style={{ 
+          position: 'absolute', 
+          top: '-8px', 
+          right: '-8px', 
+          background: isCurrentTurn ? '#fbbf24' : '#6b7280',
+          color: isCurrentTurn ? '#000' : '#fff',
+          borderRadius: '50%',
+          width: '20px',
+          height: '20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '11px',
+          fontWeight: 'bold'
+        }}>
+          {turnPosition + 1}
+        </div>
+      )}
       <div className="flex items-center gap-2 mb-1">
         <span className="text-lg">{char.isAlive ? getEmoji(char.type) : '💀'}</span>
         <span className="font-bold text-sm">{getName(char.type)}</span>
+        <span className="text-xs text-gray-500">⚡{char.initiative}</span>
       </div>
       <div className="h-1.5 bg-gray-700 rounded-full mb-1">
         <div 
@@ -63,15 +81,17 @@ function CharacterCard({
 
 const TURN_TIMER = 30; // 30 secondes par tour
 
+// Fonction pour obtenir le personnage actuel depuis l'ordre de tour
+function getCurrentCharacter(gameState: GameState): Character | null {
+  if (!gameState.turnOrder || gameState.turnOrder.length === 0) return null;
+  const currentId = gameState.turnOrder[gameState.currentTurnOrderIndex];
+  return [...gameState.playerTeam, ...gameState.enemyTeam].find(c => c.id === currentId) || null;
+}
+
 export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps) {
   const [gameState, setGameState] = useState<GameState | null>(null);
-  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [attackResult, setAttackResult] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  // L'unité qui a été utilisée ce tour (ne peut plus être changée après action)
-  const [lockedCharacterId, setLockedCharacterId] = useState<string | null>(null);
-  // Compteur d'attaques restantes pour ce tour
-  const [attacksLeft, setAttacksLeft] = useState<number>(0);
   // Indique si le joueur a déjà attaqué ce tour (bloque le mouvement)
   const [hasAttacked, setHasAttacked] = useState<boolean>(false);
   // Position d'origine du personnage au début du tour (pour mouvement hypothétique)
@@ -81,37 +101,35 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
   // Timer du tour (en secondes)
   const [turnTimer, setTurnTimer] = useState<number>(TURN_TIMER);
   
+  // Le personnage actuel est déterminé par l'ordre d'initiative
+  const currentCharacter = gameState ? getCurrentCharacter(gameState) : null;
+  const isPlayerTurn = currentCharacter?.team === 'player';
+  
   useEffect(() => {
     const newGame = initializeGame();
     setGameState(newGame);
-    const firstAlive = newGame.playerTeam.find(c => c.isAlive);
-    setSelectedCharacter(firstAlive || null);
-    setLockedCharacterId(null);
-    setAttacksLeft(firstAlive?.attacksRemaining || 1);
+    const firstChar = getCurrentCharacter(newGame);
     setHasAttacked(false);
-    setOriginalPosition(firstAlive?.position || null);
-    setOriginalMovement(firstAlive?.movement || 0);
+    setOriginalPosition(firstChar?.position || null);
+    setOriginalMovement(firstChar?.movement || 0);
     setTurnTimer(TURN_TIMER);
   }, []);
   
+  // Gérer le tour de l'ennemi (quand c'est le tour d'un personnage ennemi)
   useEffect(() => {
     if (!gameState || gameState.gameOver || isProcessing) return;
-    if (gameState.currentTurn !== 'enemy') return;
+    
+    const current = getCurrentCharacter(gameState);
+    if (!current || current.team !== 'enemy') return;
     
     setIsProcessing(true);
     
     const executeEnemyTurn = async () => {
-      const aliveEnemy = gameState.enemyTeam.find(c => c.isAlive);
-      if (!aliveEnemy) {
-        setGameState(prev => prev ? endTurn(prev) : prev);
-        setIsProcessing(false);
-        return;
-      }
-      
       await new Promise(r => setTimeout(r, 1000));
+      
+      // L'IA joue avec le personnage actuel (déterminé par l'ordre d'initiative)
       const move = await getEnemyMove(gameState);
       let currentState = gameState;
-      const usedEnemyId = move.characterId || aliveEnemy.id;
       
       if (move.action === 'move' && move.position && move.characterId) {
         currentState = moveCharacter(currentState, move.characterId, move.position);
@@ -131,40 +149,36 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
         }
       }
       
-      // Passer l'ID du personnage ennemi utilisé pour activer les cases spéciales
-      const finalState = endTurn(currentState, usedEnemyId);
+      // Passer au personnage suivant dans l'ordre
+      const finalState = endTurn(currentState, current.id);
       setGameState(finalState);
       setIsProcessing(false);
       
-      // Réinitialiser pour le tour du joueur
-      setLockedCharacterId(null);
+      // Réinitialiser pour le prochain personnage
       setHasAttacked(false);
-      setTurnTimer(TURN_TIMER); // Reset timer
-      const alivePlayer = finalState.playerTeam.find(c => c.isAlive);
-      if (alivePlayer) {
-        setSelectedCharacter(alivePlayer);
-        setAttacksLeft(alivePlayer.attacksRemaining);
-        setOriginalPosition(alivePlayer.position);
-        setOriginalMovement(alivePlayer.movement);
+      setTurnTimer(TURN_TIMER);
+      
+      const nextChar = getCurrentCharacter(finalState);
+      if (nextChar) {
+        setOriginalPosition(nextChar.position);
+        setOriginalMovement(nextChar.movement);
       }
     };
     
     executeEnemyTurn();
-  }, [gameState?.currentTurn, gameState?.turnCount]);
+  }, [gameState?.currentTurnOrderIndex, gameState?.turnCount]);
   
   // Timer du tour du joueur
   useEffect(() => {
     if (!gameState || gameState.gameOver || isProcessing) return;
-    if (gameState.currentTurn !== 'player') return;
+    if (!isPlayerTurn) return;
     
     const interval = setInterval(() => {
       setTurnTimer(prev => {
         if (prev <= 1) {
           // Temps écoulé - fin automatique du tour
           clearInterval(interval);
-          const charIdToUse = lockedCharacterId || selectedCharacter?.id;
-          setGameState(endTurn(gameState, charIdToUse));
-          setLockedCharacterId(null);
+          setGameState(endTurn(gameState, currentCharacter?.id));
           setHasAttacked(false);
           return TURN_TIMER;
         }
@@ -173,7 +187,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
     }, 1000);
     
     return () => clearInterval(interval);
-  }, [gameState?.currentTurn, gameState?.turnCount, isProcessing]);
+  }, [gameState?.currentTurnOrderIndex, gameState?.turnCount, isProcessing, isPlayerTurn]);
   
   useEffect(() => {
     if (gameState?.gameOver) {
@@ -195,44 +209,62 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
     );
   }
   
-  const canPlayerAct = gameState.currentTurn === 'player' && !isProcessing && !gameState.gameOver;
+  const canPlayerAct = isPlayerTurn && !isProcessing && !gameState.gameOver;
+  const selectedCharacter = currentCharacter; // Le personnage actuel est celui de l'ordre d'initiative
   const isEnemyTurn = gameState.currentTurn === 'enemy';
   
   const handleTileClick = (position: Position, isRightClick: boolean) => {
-    if (!canPlayerAct || !selectedCharacter?.isAlive) return;
-    
-    // Si un personnage est verrouillé, on ne peut agir qu'avec lui
-    if (lockedCharacterId && lockedCharacterId !== selectedCharacter.id) return;
+    if (!canPlayerAct || !currentCharacter?.isAlive) return;
     
     if (isRightClick) {
       // ATTAQUE
-      if (attacksLeft <= 0) return; // Plus d'attaques disponibles
+      const attacksRemaining = currentCharacter.attacksRemaining;
+      if (attacksRemaining <= 0) return; // Plus d'attaques disponibles
       
       const { gameState: newState, attackResult: result } = performAttack(
-        gameState, selectedCharacter.id, position,
-        selectedCharacter.type === 'warrior' || selectedCharacter.type === 'thief'
+        gameState, currentCharacter.id, position,
+        currentCharacter.type === 'warrior' || currentCharacter.type === 'thief'
       );
       
       if (result) {
         setAttackResult(result);
         setTimeout(() => setAttackResult(null), 1500);
         
-        // Verrouiller ce personnage et marquer qu'il a attaqué
-        setLockedCharacterId(selectedCharacter.id);
         setHasAttacked(true); // Bloque le mouvement après attaque
         
-        const newAttacksLeft = attacksLeft - 1;
-        setAttacksLeft(newAttacksLeft);
+        // Trouver le personnage mis à jour
+        const updated = [...newState.playerTeam, ...newState.enemyTeam].find(c => c.id === currentCharacter.id);
+        const newAttacksLeft = (updated?.attacksRemaining ?? attacksRemaining) - 1;
         
-        // Mettre à jour le personnage sélectionné avec les nouvelles stats
-        const updated = newState.playerTeam.find(c => c.id === selectedCharacter.id);
+        // Mettre à jour les attaques restantes du personnage
+        let finalState = newState;
+        if (updated) {
+          const updatedChar = { ...updated, attacksRemaining: newAttacksLeft };
+          if (currentCharacter.team === 'player') {
+            finalState = {
+              ...newState,
+              playerTeam: newState.playerTeam.map(c => c.id === currentCharacter.id ? updatedChar : c),
+              board: newState.board.map((row, y) => row.map((cell, x) => 
+                cell?.id === currentCharacter.id ? updatedChar : cell
+              ))
+            };
+          } else {
+            finalState = {
+              ...newState,
+              enemyTeam: newState.enemyTeam.map(c => c.id === currentCharacter.id ? updatedChar : c),
+              board: newState.board.map((row, y) => row.map((cell, x) => 
+                cell?.id === currentCharacter.id ? updatedChar : cell
+              ))
+            };
+          }
+        }
         
         // Si c'est un guerrier avec des attaques restantes, vérifier s'il y a des cibles au corps à corps
         let shouldEndTurn = newAttacksLeft <= 0;
         
-        if (!shouldEndTurn && selectedCharacter.type === 'warrior' && updated) {
+        if (!shouldEndTurn && currentCharacter.type === 'warrior' && updated) {
           // Chercher des cibles adjacentes (ennemis OU alliés, distance = 1)
-          const allCharacters = [...newState.playerTeam, ...newState.enemyTeam];
+          const allCharacters = [...finalState.playerTeam, ...finalState.enemyTeam];
           const hasAdjacentTarget = allCharacters.some(char => {
             // Exclure le guerrier lui-même et les morts
             if (char.id === updated.id || !char.isAlive) return false;
@@ -247,13 +279,11 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
         }
         
         if (shouldEndTurn) {
-          setGameState(endTurn(newState, selectedCharacter.id));
-          setLockedCharacterId(null);
+          setGameState(endTurn(finalState, currentCharacter.id));
           setHasAttacked(false);
           setTurnTimer(TURN_TIMER);
         } else {
-          setGameState(newState);
-          if (updated) setSelectedCharacter(updated);
+          setGameState(finalState);
         }
       }
     } else {
@@ -261,8 +291,8 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
       if (hasAttacked) return;
       
       // Utiliser la position d'origine pour calculer la distance
-      const originPos = originalPosition || selectedCharacter.position;
-      const maxRange = originalMovement || selectedCharacter.maxMovement;
+      const originPos = originalPosition || currentCharacter.position;
+      const maxRange = originalMovement || currentCharacter.maxMovement;
       const distanceFromOrigin = Math.abs(position.x - originPos.x) + Math.abs(position.y - originPos.y);
       
       // Vérifier si la case est dans la portée depuis la position d'origine
@@ -273,34 +303,27 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
       
       // Déplacer le personnage de façon hypothétique
       const newBoard = gameState.board.map(row => [...row]);
-      newBoard[selectedCharacter.position.y][selectedCharacter.position.x] = null;
+      newBoard[currentCharacter.position.y][currentCharacter.position.x] = null;
       
       const updatedCharacter = {
-        ...selectedCharacter,
+        ...currentCharacter,
         position: position,
-        movement: maxRange - distanceFromOrigin, // Mouvement restant basé sur la distance depuis l'origine
+        movement: maxRange - distanceFromOrigin,
       };
       
       newBoard[position.y][position.x] = updatedCharacter;
       
-      const updatedPlayerTeam = gameState.playerTeam.map(c =>
-        c.id === selectedCharacter.id ? updatedCharacter : c
+      // Mettre à jour dans la bonne équipe
+      const teamKey = currentCharacter.team === 'player' ? 'playerTeam' : 'enemyTeam';
+      const updatedTeam = gameState[teamKey].map(c =>
+        c.id === currentCharacter.id ? updatedCharacter : c
       );
-      
-      // Verrouiller ce personnage pour le tour (mais le mouvement reste hypothétique)
-      setLockedCharacterId(selectedCharacter.id);
-      
-      // Sauvegarder la position d'origine si c'est le premier mouvement
-      if (!originalPosition || originalPosition.x !== originPos.x || originalPosition.y !== originPos.y) {
-        // Déjà sauvegardé
-      }
       
       setGameState({
         ...gameState,
         board: newBoard,
-        playerTeam: updatedPlayerTeam,
+        [teamKey]: updatedTeam,
       });
-      setSelectedCharacter(updatedCharacter);
     }
   };
 
@@ -316,15 +339,18 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
     }}>
       {/* Header - spans all columns */}
       <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px', borderBottom: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.3)' }}>
-        {/* Gauche - Logo */}
+        {/* Gauche - Logo + Tour global */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
           <span style={{ fontFamily: 'Orbitron, sans-serif', fontSize: '18px', fontWeight: 'bold', background: 'linear-gradient(to right, #818cf8, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>TEST 1</span>
           <span style={{ fontSize: '11px', color: '#6b7280', fontFamily: 'monospace' }}>v{APP_VERSION}</span>
+          <span style={{ padding: '4px 12px', borderRadius: '12px', fontSize: '12px', background: 'rgba(168,85,247,0.2)', color: '#c4b5fd' }}>
+            Tour global #{gameState.turnCount}
+          </span>
         </div>
         
-        {/* Centre - Timer */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-          {!isEnemyTurn && !gameState.gameOver && (
+        {/* Centre - Timer + Personnage actuel */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', flex: 1 }}>
+          {isPlayerTurn && !gameState.gameOver && (
             <div style={{ 
               padding: '8px 24px', 
               borderRadius: '12px', 
@@ -339,25 +365,28 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
               ⏱️ {turnTimer}s
             </div>
           )}
-          {isEnemyTurn && (
-            <div style={{ padding: '6px 16px', borderRadius: '20px', fontSize: '13px', fontWeight: 'bold', background: 'rgba(239,68,68,0.3)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.5)' }}>
-              🤖 Tour adversaire...
+          {currentCharacter && (
+            <div style={{ 
+              padding: '6px 16px', 
+              borderRadius: '20px', 
+              fontSize: '13px', 
+              fontWeight: 'bold', 
+              background: isPlayerTurn ? 'rgba(59,130,246,0.3)' : 'rgba(239,68,68,0.3)', 
+              color: isPlayerTurn ? '#93c5fd' : '#fca5a5', 
+              border: `1px solid ${isPlayerTurn ? 'rgba(59,130,246,0.5)' : 'rgba(239,68,68,0.5)'}` 
+            }}>
+              {isPlayerTurn ? '🎮' : '🤖'} {currentCharacter.type === 'warrior' ? 'Guerrier' : currentCharacter.type === 'mage' ? 'Mage' : 'Voleur'}
+              {' '}({gameState.currentTurnOrderIndex + 1}/{gameState.turnOrder.length})
             </div>
           )}
         </div>
         
         {/* Droite - Contrôles */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, justifyContent: 'flex-end' }}>
-          <div style={{ padding: '6px 16px', borderRadius: '20px', fontSize: '13px', fontWeight: 'bold', background: isEnemyTurn ? 'rgba(239,68,68,0.3)' : 'rgba(59,130,246,0.3)', color: isEnemyTurn ? '#fca5a5' : '#93c5fd', border: `1px solid ${isEnemyTurn ? 'rgba(239,68,68,0.5)' : 'rgba(59,130,246,0.5)'}` }}>
-            {isEnemyTurn ? '🤖 Adversaire' : '🎮 Votre tour'} #{gameState.turnCount}
-          </div>
           <button
             onClick={() => {
               if (canPlayerAct) {
-                // Passer l'ID du personnage utilisé (ou sélectionné) pour activer les cases spéciales
-                const charIdToUse = lockedCharacterId || selectedCharacter?.id;
-                setGameState(endTurn(gameState, charIdToUse));
-                setLockedCharacterId(null);
+                setGameState(endTurn(gameState, currentCharacter?.id));
                 setHasAttacked(false);
                 setTurnTimer(TURN_TIMER);
               }
@@ -365,7 +394,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
             disabled={!canPlayerAct}
             style={{ padding: '6px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', background: canPlayerAct ? 'linear-gradient(135deg, #6366f1, #ec4899)' : '#374151', color: 'white', border: 'none', cursor: canPlayerAct ? 'pointer' : 'not-allowed', opacity: canPlayerAct ? 1 : 0.5 }}
           >
-            Fin tour {attacksLeft > 0 && selectedCharacter?.type === 'warrior' && lockedCharacterId ? `(${attacksLeft}⚔️)` : ''}
+            Fin tour {currentCharacter?.type === 'warrior' && currentCharacter.attacksRemaining > 0 ? `(${currentCharacter.attacksRemaining}⚔️)` : ''}
           </button>
           <button onClick={onLogout} style={{ padding: '6px 12px', borderRadius: '8px', background: 'rgba(255,255,255,0.1)', color: '#f87171', border: 'none', cursor: 'pointer' }}>
             🚪
@@ -378,27 +407,19 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
         <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#60a5fa', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>
           🎮 Votre équipe
         </div>
-        {gameState.playerTeam.map(char => (
-          <CharacterCard
-            key={char.id}
-            char={char}
-            isPlayer={true}
-            isSelected={selectedCharacter?.id === char.id}
-            onClick={() => {
-              // Ne peut pas changer de personnage si un autre est verrouillé
-              if (!lockedCharacterId || lockedCharacterId === char.id) {
-                setSelectedCharacter(char);
-                setAttacksLeft(char.attacksRemaining);
-                // Sauvegarder la position d'origine pour le mouvement hypothétique
-                if (!lockedCharacterId) {
-                  setOriginalPosition(char.position);
-                  setOriginalMovement(char.movement);
-                }
-              }
-            }}
-            canSelect={canPlayerAct && (!lockedCharacterId || lockedCharacterId === char.id)}
-          />
-        ))}
+        {gameState.playerTeam.map(char => {
+          const turnPos = gameState.turnOrder.indexOf(char.id);
+          return (
+            <CharacterCard
+              key={char.id}
+              char={char}
+              isPlayer={true}
+              isSelected={selectedCharacter?.id === char.id}
+              isCurrentTurn={currentCharacter?.id === char.id}
+              turnPosition={turnPos >= gameState.currentTurnOrderIndex ? turnPos - gameState.currentTurnOrderIndex : undefined}
+            />
+          );
+        })}
       </div>
       
       {/* Center - Game Board */}
@@ -410,21 +431,9 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
           originalPosition={originalPosition}
           originalMovement={originalMovement}
           hasAttacked={hasAttacked}
-          onCharacterClick={(char) => {
-            // Ne peut sélectionner que les personnages du joueur, et pas changer si verrouillé
-            if (canPlayerAct && char.team === 'player' && (!lockedCharacterId || lockedCharacterId === char.id)) {
-              setSelectedCharacter(char);
-              setAttacksLeft(char.attacksRemaining);
-              // Sauvegarder la position d'origine pour le mouvement hypothétique
-              if (!lockedCharacterId) {
-                setOriginalPosition(char.position);
-                setOriginalMovement(char.movement);
-              }
-            }
-          }}
         />
         
-        {isEnemyTurn && (
+        {!isPlayerTurn && !gameState.gameOver && (
           <div style={{ position: 'absolute', top: '16px', left: '50%', transform: 'translateX(-50%)', zIndex: 20 }}>
             <div style={{ padding: '8px 24px', borderRadius: '20px', background: 'rgba(239,68,68,0.9)', color: 'white', fontWeight: 'bold', animation: 'pulse 1s infinite' }}>
               🤖 L'adversaire joue...
@@ -447,15 +456,19 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
         <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#f87171', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>
           🤖 Adversaire
         </div>
-        {gameState.enemyTeam.map(char => (
-          <CharacterCard
-            key={char.id}
-            char={char}
-            isPlayer={false}
-            isSelected={false}
-            canSelect={false}
-          />
-        ))}
+        {gameState.enemyTeam.map(char => {
+          const turnPos = gameState.turnOrder.indexOf(char.id);
+          return (
+            <CharacterCard
+              key={char.id}
+              char={char}
+              isPlayer={false}
+              isSelected={false}
+              isCurrentTurn={currentCharacter?.id === char.id}
+              turnPosition={turnPos >= gameState.currentTurnOrderIndex ? turnPos - gameState.currentTurnOrderIndex : undefined}
+            />
+          );
+        })}
       </div>
       
       {/* Game Over Overlay */}
@@ -473,7 +486,11 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
               onClick={() => {
                 const newGame = initializeGame();
                 setGameState(newGame);
-                setSelectedCharacter(newGame.playerTeam[0]);
+                const firstChar = getCurrentCharacter(newGame);
+                setOriginalPosition(firstChar?.position || null);
+                setOriginalMovement(firstChar?.movement || 0);
+                setHasAttacked(false);
+                setTurnTimer(TURN_TIMER);
               }}
               style={{ padding: '12px 32px', borderRadius: '12px', background: 'linear-gradient(135deg, #6366f1, #ec4899)', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '16px' }}
             >

@@ -343,13 +343,38 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
     }
   };
 
+  // Fonction pour obtenir l'icône de classe
+  const getClassIcon = (type: string) => {
+    switch (type) {
+      case 'warrior': return '♜'; // Tour (rook)
+      case 'mage': return '♝'; // Fou (bishop)
+      case 'thief': return '♞'; // Cavalier (knight)
+      default: return '?';
+    }
+  };
+
+  // Fonction pour obtenir le nom de classe en français
+  const getClassName = (type: string) => {
+    switch (type) {
+      case 'warrior': return 'Guerrier';
+      case 'mage': return 'Mage';
+      case 'thief': return 'Voleur';
+      default: return type;
+    }
+  };
+
+  // Obtenir tous les personnages dans l'ordre de tour
+  const turnOrderCharacters = gameState.turnOrder.map(id => 
+    [...gameState.playerTeam, ...gameState.enemyTeam].find(c => c.id === id)
+  ).filter(Boolean) as Character[];
+
   return (
     <div style={{
       width: '100vw',
       height: '100vh',
       display: 'grid',
       gridTemplateColumns: '200px 1fr 200px',
-      gridTemplateRows: '50px 1fr',
+      gridTemplateRows: '50px 1fr 60px',
       background: 'linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 50%, #0a1a2e 100%)',
       overflow: 'hidden'
     }}>
@@ -483,6 +508,63 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
               isCurrentTurn={currentCharacter?.id === char.id}
               turnPosition={turnPos >= gameState.currentTurnOrderIndex ? turnPos - gameState.currentTurnOrderIndex : undefined}
             />
+          );
+        })}
+      </div>
+      
+      {/* Bottom Bar - Turn Order - spans all columns */}
+      <div style={{ 
+        gridColumn: '1 / -1', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        gap: '8px',
+        padding: '8px 16px', 
+        borderTop: '1px solid rgba(255,255,255,0.1)', 
+        background: 'rgba(0,0,0,0.4)'
+      }}>
+        <span style={{ fontSize: '11px', color: '#9ca3af', marginRight: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+          Ordre de tour:
+        </span>
+        {turnOrderCharacters.map((char, index) => {
+          const isCurrent = index === gameState.currentTurnOrderIndex;
+          const hasPlayed = index < gameState.currentTurnOrderIndex;
+          const isPlayer = char.team === 'player';
+          
+          return (
+            <div
+              key={char.id}
+              title={`${getClassName(char.type)} ${isPlayer ? '(Vous)' : '(Ennemi)'} - ${char.health}/${char.maxHealth} PV`}
+              style={{
+                width: '42px',
+                height: '42px',
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '22px',
+                fontWeight: 'bold',
+                cursor: 'default',
+                transition: 'all 0.2s ease',
+                background: hasPlayed 
+                  ? 'rgba(100,100,100,0.3)' 
+                  : isCurrent 
+                    ? (isPlayer ? 'rgba(59,130,246,0.5)' : 'rgba(239,68,68,0.5)')
+                    : 'rgba(30,30,50,0.6)',
+                border: isCurrent 
+                  ? `3px solid ${isPlayer ? '#3b82f6' : '#ef4444'}` 
+                  : '2px solid rgba(255,255,255,0.2)',
+                color: hasPlayed 
+                  ? '#6b7280' 
+                  : (isPlayer ? '#60a5fa' : '#f87171'),
+                opacity: hasPlayed ? 0.5 : (char.isAlive ? 1 : 0.3),
+                boxShadow: isCurrent ? `0 0 12px ${isPlayer ? 'rgba(59,130,246,0.6)' : 'rgba(239,68,68,0.6)'}` : 'none',
+                transform: isCurrent ? 'scale(1.15)' : 'scale(1)',
+                textDecoration: !char.isAlive ? 'line-through' : 'none'
+              }}
+            >
+              {getClassIcon(char.type)}
+            </div>
           );
         })}
       </div>

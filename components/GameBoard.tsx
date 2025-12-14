@@ -148,8 +148,8 @@ function RookPiece({ color, emissive, emissiveIntensity, scale }: { color: strin
         <cylinderGeometry args={[0.3, 0.35, 0.15, 16]} />
         <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
       </mesh>
-      {/* Anneau noir sur la base */}
-      <mesh position={[0, 0.08, 0]}>
+      {/* Anneau noir horizontal sur la base */}
+      <mesh position={[0, 0.08, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[0.28, 0.025, 8, 24]} />
         <meshStandardMaterial color="#111111" />
       </mesh>
@@ -158,8 +158,8 @@ function RookPiece({ color, emissive, emissiveIntensity, scale }: { color: strin
         <cylinderGeometry args={[0.22, 0.28, 0.35, 16]} />
         <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
       </mesh>
-      {/* Bande noire au milieu du corps */}
-      <mesh position={[0, 0.25, 0]}>
+      {/* Bande noire horizontale au milieu du corps */}
+      <mesh position={[0, 0.25, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[0.23, 0.02, 8, 24]} />
         <meshStandardMaterial color="#111111" />
       </mesh>
@@ -168,8 +168,8 @@ function RookPiece({ color, emissive, emissiveIntensity, scale }: { color: strin
         <cylinderGeometry args={[0.28, 0.22, 0.15, 16]} />
         <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
       </mesh>
-      {/* Anneau noir sous les créneaux */}
-      <mesh position={[0, 0.56, 0]}>
+      {/* Anneau noir horizontal sous les créneaux */}
+      <mesh position={[0, 0.56, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[0.27, 0.02, 8, 24]} />
         <meshStandardMaterial color="#111111" />
       </mesh>
@@ -200,8 +200,8 @@ function BishopPiece({ color, emissive, emissiveIntensity, scale }: { color: str
         <cylinderGeometry args={[0.28, 0.32, 0.12, 16]} />
         <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
       </mesh>
-      {/* Anneau noir sur la base */}
-      <mesh position={[0, 0.06, 0]}>
+      {/* Anneau noir horizontal sur la base */}
+      <mesh position={[0, 0.06, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[0.27, 0.02, 8, 24]} />
         <meshStandardMaterial color="#111111" />
       </mesh>
@@ -210,8 +210,8 @@ function BishopPiece({ color, emissive, emissiveIntensity, scale }: { color: str
         <cylinderGeometry args={[0.18, 0.26, 0.2, 16]} />
         <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
       </mesh>
-      {/* Bande noire transition */}
-      <mesh position={[0, 0.24, 0]}>
+      {/* Bande noire horizontale transition */}
+      <mesh position={[0, 0.24, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[0.185, 0.015, 8, 24]} />
         <meshStandardMaterial color="#111111" />
       </mesh>
@@ -221,12 +221,12 @@ function BishopPiece({ color, emissive, emissiveIntensity, scale }: { color: str
         <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
       </mesh>
       {/* Fente diagonale (représentée par un anneau) - noir */}
-      <mesh position={[0, 0.45, 0]} rotation={[0, 0, Math.PI / 4]}>
+      <mesh position={[0, 0.45, 0]} rotation={[Math.PI / 2, 0, Math.PI / 4]}>
         <torusGeometry args={[0.12, 0.025, 8, 16]} />
         <meshStandardMaterial color="#111111" />
       </mesh>
       {/* Bande noire horizontale sur le corps */}
-      <mesh position={[0, 0.35, 0]}>
+      <mesh position={[0, 0.35, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[0.19, 0.015, 8, 24]} />
         <meshStandardMaterial color="#111111" />
       </mesh>
@@ -235,8 +235,8 @@ function BishopPiece({ color, emissive, emissiveIntensity, scale }: { color: str
         <sphereGeometry args={[0.08, 12, 12]} />
         <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
       </mesh>
-      {/* Anneau noir sous la pointe */}
-      <mesh position={[0, 0.58, 0]}>
+      {/* Anneau noir horizontal sous la pointe */}
+      <mesh position={[0, 0.58, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[0.06, 0.015, 8, 16]} />
         <meshStandardMaterial color="#111111" />
       </mesh>
@@ -253,8 +253,8 @@ function KnightPiece({ color, emissive, emissiveIntensity, scale }: { color: str
         <cylinderGeometry args={[0.28, 0.32, 0.12, 16]} />
         <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
       </mesh>
-      {/* Anneau noir sur la base */}
-      <mesh position={[0, 0.06, 0]}>
+      {/* Anneau noir horizontal sur la base */}
+      <mesh position={[0, 0.06, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[0.27, 0.02, 8, 24]} />
         <meshStandardMaterial color="#111111" />
       </mesh>
@@ -373,14 +373,14 @@ function CharacterModel({ character, isSelected, onClick }: {
       
       {/* Indicateur de sélection */}
       {isSelected && (
-        <mesh position={[0, 0.85, 0]}>
+        <mesh position={[0, 1.35, 0]}>
           <coneGeometry args={[0.12, 0.18, 4]} />
           <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.9} />
         </mesh>
       )}
       
       {/* Barre de vie - Billboard pour toujours faire face à la caméra */}
-      <Billboard position={[0, 0.95, 0]} follow={true} lockX={false} lockY={false} lockZ={false}>
+      <Billboard position={[0, 1.45, 0]} follow={true} lockX={false} lockY={false} lockZ={false}>
         <mesh position={[0, 0, 0.01]}>
           <planeGeometry args={[0.5, 0.06]} />
           <meshBasicMaterial color="#1f2937" />

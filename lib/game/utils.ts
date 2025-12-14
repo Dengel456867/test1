@@ -1,7 +1,7 @@
 // Utilitaires pour le jeu
 
 import { Position, Character, CharacterType, SpecialTileType } from '../types/game';
-import { BOARD_SIZE, DAMAGE_DICE, THIEF_CRIT_CHANCE } from './constants';
+import { BOARD_SIZE, DAMAGE_RANGES } from './constants';
 
 export function getDistance(pos1: Position, pos2: Position): number {
   return Math.abs(pos1.x - pos2.x) + Math.abs(pos1.y - pos2.y);
@@ -11,12 +11,9 @@ export function isValidPosition(pos: Position): boolean {
   return pos.x >= 0 && pos.x < BOARD_SIZE && pos.y >= 0 && pos.y < BOARD_SIZE;
 }
 
-export function rollDice(dice: number, sides: number): number {
-  let total = 0;
-  for (let i = 0; i < dice; i++) {
-    total += Math.floor(Math.random() * sides) + 1;
-  }
-  return total;
+// Génère un nombre aléatoire entre min et max inclus
+export function randomRange(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 export function calculateDamage(
@@ -24,11 +21,11 @@ export function calculateDamage(
   defenderType: CharacterType,
   damageBoost: number = 0
 ): number {
-  const damageConfig = DAMAGE_DICE[attackerType.toUpperCase() as keyof typeof DAMAGE_DICE];
+  const damageConfig = DAMAGE_RANGES[attackerType.toUpperCase() as keyof typeof DAMAGE_RANGES];
   const defenderKey = `vs_${defenderType}` as keyof typeof damageConfig;
-  const diceConfig = damageConfig[defenderKey];
+  const range = damageConfig[defenderKey];
   
-  const baseDamage = rollDice(diceConfig.dice, diceConfig.sides);
+  const baseDamage = randomRange(range.min, range.max);
   return baseDamage + damageBoost;
 }
 
@@ -116,10 +113,10 @@ export function initializeCharacters(): {
       type: 'warrior',
       team: 'player',
       position: { x: 2, y: 2 },
-      health: 10,
-      maxHealth: 10,
-      movement: 5,
-      maxMovement: 5,
+      health: 15,
+      maxHealth: 15,
+      movement: 4,
+      maxMovement: 4,
       isAlive: true,
       damageBoost: 0,
       movementBoost: 0,
@@ -132,8 +129,8 @@ export function initializeCharacters(): {
       position: { x: 3, y: 2 },
       health: 10,
       maxHealth: 10,
-      movement: 5,
-      maxMovement: 5,
+      movement: 4,
+      maxMovement: 4,
       isAlive: true,
       damageBoost: 0,
       movementBoost: 0,
@@ -144,8 +141,8 @@ export function initializeCharacters(): {
       type: 'thief',
       team: 'player',
       position: { x: 2, y: 3 },
-      health: 10,
-      maxHealth: 10,
+      health: 12,
+      maxHealth: 12,
       movement: 5,
       maxMovement: 5,
       isAlive: true,
@@ -161,10 +158,10 @@ export function initializeCharacters(): {
       type: 'warrior',
       team: 'enemy',
       position: { x: 13, y: 13 },
-      health: 10,
-      maxHealth: 10,
-      movement: 5,
-      maxMovement: 5,
+      health: 15,
+      maxHealth: 15,
+      movement: 4,
+      maxMovement: 4,
       isAlive: true,
       damageBoost: 0,
       movementBoost: 0,
@@ -177,8 +174,8 @@ export function initializeCharacters(): {
       position: { x: 12, y: 13 },
       health: 10,
       maxHealth: 10,
-      movement: 5,
-      maxMovement: 5,
+      movement: 4,
+      maxMovement: 4,
       isAlive: true,
       damageBoost: 0,
       movementBoost: 0,
@@ -189,8 +186,8 @@ export function initializeCharacters(): {
       type: 'thief',
       team: 'enemy',
       position: { x: 13, y: 12 },
-      health: 10,
-      maxHealth: 10,
+      health: 12,
+      maxHealth: 12,
       movement: 5,
       maxMovement: 5,
       isAlive: true,

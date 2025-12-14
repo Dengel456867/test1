@@ -15,6 +15,7 @@ export function createCharacter(
     maxHealth: 10,
     movement: 5,
     maxMovement: 5,
+    isAlive: true,
     damageBoost: 0,
     movementBoost: 0,
     attacksRemaining: type === 'warrior' ? 2 : 1,

@@ -37,9 +37,11 @@ function Tile({ position, isSpecial, specialType, onClick, onRightClick }: {
       position={[position.x - 7.5, 0, position.y - 7.5]}
       rotation={[-Math.PI / 2, 0, 0]}
       onClick={onClick}
-      onContextMenu={(e) => {
-        e.preventDefault();
-        onRightClick();
+      onPointerDown={(e) => {
+        if (e.button === 2) {
+          e.stopPropagation();
+          onRightClick();
+        }
       }}
     >
       <boxGeometry args={[0.9, 0.1, 0.9]} />

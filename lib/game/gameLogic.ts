@@ -306,6 +306,10 @@ export function endTurn(gameState: GameState, usedCharacterId?: string): GameSta
           case 'movement_boost':
             updatedChar.movementBoost = SPECIAL_TILE_EFFECTS.MOVEMENT_BOOST;
             break;
+          case 'initiative_boost':
+            // Réduire l'initiative de façon permanente (minimum 1)
+            updatedChar.initiative = Math.max(1, updatedChar.initiative - SPECIAL_TILE_EFFECTS.INITIATIVE_BOOST);
+            break;
         }
         
         // Marquer la case comme utilisée

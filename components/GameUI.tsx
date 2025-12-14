@@ -3,7 +3,7 @@
 import { GameState, Character } from '@/lib/game/types';
 
 // Version du jeu (mise Ã  jour automatiquement par le script de dÃ©ploiement)
-const APP_VERSION = '0.1.5';
+const APP_VERSION = '0.1.6';
 
 interface GameUIProps {
   gameState: GameState;

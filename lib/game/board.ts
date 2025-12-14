@@ -1,5 +1,6 @@
 import { GameState, SpecialTile, SpecialTileType, Position, Character, Team } from './types';
 import { createCharacter } from './characters';
+import { generateTurnOrder } from './utils';
 
 export function createBoard(): (Character | null)[][] {
   const board: (Character | null)[][] = [];
@@ -88,19 +89,26 @@ export function initializeGame(): GameState {
   
   const specialTiles = generateSpecialTiles();
   
+  // Générer l'ordre de jeu basé sur l'initiative
+  const turnOrder = generateTurnOrder(playerTeam, enemyTeam);
+  const firstCharId = turnOrder[0];
+  const firstChar = [...playerTeam, ...enemyTeam].find(c => c.id === firstCharId);
+  
   return {
     board,
     playerTeam,
     enemyTeam,
     specialTiles,
-    currentTurn: 'player',
+    currentTurn: firstChar?.team || 'player',
     currentCharacterIndex: 0,
     selectedCharacter: null,
     gameOver: false,
     winner: null,
-    turnCount: 0,
+    turnCount: 1,
     moveCount: 0,
     movementCount: 0,
+    turnOrder,
+    currentTurnOrderIndex: 0,
   };
 }
 

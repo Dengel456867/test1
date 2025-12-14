@@ -80,7 +80,7 @@ export function generateSpecialTiles(): Array<{ position: Position; type: Specia
   ]);
   
   const tileTypes: SpecialTileType[] = ['heal', 'damage_boost', 'movement_boost', 'initiative_boost', 'armor', 'shield', 'regeneration'];
-  const counts = [10, 10, 10, 10, 10, 10, 10];
+  const counts = [7, 7, 7, 7, 7, 7, 7];
   
   tileTypes.forEach((type, typeIndex) => {
     for (let i = 0; i < counts[typeIndex]; i++) {

@@ -54,22 +54,66 @@ export const ATTACK_RANGES = {
   THIEF: 4,          // Jusqu'à 4 cases
 };
 
-// Dégâts par type d'attaquant vs type de cible (min-max)
+// Dégâts de base par classe
+export const BASE_DAMAGE = {
+  WARRIOR: 5,
+  MAGE: 5,
+  THIEF: 6,
+};
+
+// Multiplicateurs de dégâts
+export const DAMAGE_MULTIPLIERS = {
+  ADVANTAGE: 1.5,      // x1.5 arrondi au supérieur
+  NEUTRAL: 1.0,        // x1
+  DISADVANTAGE: 0.7,   // x0.7 arrondi au supérieur
+};
+
+// Triangle d'avantages :
+// Guerrier > Voleur > Mage > Guerrier
+// (Pierre-Feuille-Ciseaux)
+export const getMultiplier = (attackerType: string, defenderType: string): number => {
+  const attacker = attackerType.toLowerCase();
+  const defender = defenderType.toLowerCase();
+  
+  if (attacker === defender) return DAMAGE_MULTIPLIERS.NEUTRAL;
+  
+  // Guerrier a l'avantage sur Voleur, désavantage sur Mage
+  if (attacker === 'warrior') {
+    if (defender === 'thief') return DAMAGE_MULTIPLIERS.ADVANTAGE;
+    if (defender === 'mage') return DAMAGE_MULTIPLIERS.DISADVANTAGE;
+  }
+  
+  // Voleur a l'avantage sur Mage, désavantage sur Guerrier
+  if (attacker === 'thief') {
+    if (defender === 'mage') return DAMAGE_MULTIPLIERS.ADVANTAGE;
+    if (defender === 'warrior') return DAMAGE_MULTIPLIERS.DISADVANTAGE;
+  }
+  
+  // Mage a l'avantage sur Guerrier, désavantage sur Voleur
+  if (attacker === 'mage') {
+    if (defender === 'warrior') return DAMAGE_MULTIPLIERS.ADVANTAGE;
+    if (defender === 'thief') return DAMAGE_MULTIPLIERS.DISADVANTAGE;
+  }
+  
+  return DAMAGE_MULTIPLIERS.NEUTRAL;
+};
+
+// Ancien format pour compatibilité (sera supprimé)
 export const DAMAGE_RANGES = {
   WARRIOR: {
-    vs_warrior: { min: 4, max: 6 },
-    vs_mage: { min: 2, max: 4 },
-    vs_thief: { min: 6, max: 10 },
+    vs_warrior: { min: 5, max: 5 },
+    vs_mage: { min: 4, max: 4 },
+    vs_thief: { min: 8, max: 8 },
   },
   MAGE: {
-    vs_warrior: { min: 6, max: 10 },
-    vs_mage: { min: 4, max: 6 },
-    vs_thief: { min: 2, max: 4 },
+    vs_warrior: { min: 8, max: 8 },
+    vs_mage: { min: 5, max: 5 },
+    vs_thief: { min: 4, max: 4 },
   },
   THIEF: {
-    vs_warrior: { min: 2, max: 4 },
-    vs_mage: { min: 6, max: 10 },
-    vs_thief: { min: 4, max: 6 },
+    vs_warrior: { min: 5, max: 5 },
+    vs_mage: { min: 9, max: 9 },
+    vs_thief: { min: 6, max: 6 },
   },
 };
 

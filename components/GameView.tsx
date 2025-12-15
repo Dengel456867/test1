@@ -375,6 +375,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
       case 'warrior': return '♜'; // Tour (rook)
       case 'mage': return '♝'; // Fou (bishop)
       case 'thief': return '♞'; // Cavalier (knight)
+      case 'royal': return '♛'; // Reine (queen)
       default: return '?';
     }
   };
@@ -385,6 +386,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
       case 'warrior': return 'Guerrier';
       case 'mage': return 'Mage';
       case 'thief': return 'Voleur';
+      case 'royal': return 'Royal';
       default: return type;
     }
   };
@@ -442,7 +444,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
               color: isPlayerTurn ? '#93c5fd' : '#fca5a5', 
               border: `1px solid ${isPlayerTurn ? 'rgba(59,130,246,0.5)' : 'rgba(239,68,68,0.5)'}` 
             }}>
-              {isPlayerTurn ? '🎮' : '🤖'} {currentCharacter.type === 'warrior' ? 'Guerrier' : currentCharacter.type === 'mage' ? 'Mage' : 'Voleur'}
+              {isPlayerTurn ? '🎮' : '🤖'} {currentCharacter.type === 'warrior' ? 'Guerrier' : currentCharacter.type === 'mage' ? 'Mage' : currentCharacter.type === 'thief' ? 'Voleur' : 'Royal'}
               {' '}({gameState.currentTurnOrderIndex + 1}/{gameState.turnOrder.length})
             </div>
           )}

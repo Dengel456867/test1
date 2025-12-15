@@ -88,14 +88,14 @@ function CharacterCard({
         <div title="Régénération : PV récupérés au début de chaque tour" style={{ cursor: 'help', opacity: char.regeneration > 0 ? 1 : 0.4 }}>
           <span style={{ color: '#166534' }}>+</span> <span style={{ color: '#fff' }}>{char.regeneration}/t</span>
         </div>
-        <div title="Points de mouvement restants pour ce tour" style={{ cursor: 'help' }}>
-          <span style={{ color: '#a855f7' }}>👟</span> <span style={{ color: '#fff' }}>{char.movement}</span>
+        <div title="Points de mouvement maximum" style={{ cursor: 'help' }}>
+          <span style={{ color: '#a855f7' }}>👟</span> <span style={{ color: '#fff' }}>{char.maxMovement}</span>
         </div>
         <div title="Initiative : plus elle est basse, plus le personnage joue tôt dans le tour" style={{ cursor: 'help' }}>
           <span style={{ color: '#eab308' }}>⚡</span> <span style={{ color: '#fff' }}>{char.initiative}</span>
         </div>
-        <div title="Nombre d'attaques restantes ce tour" style={{ cursor: 'help' }}>
-          <span style={{ color: '#9ca3af' }}>🗡</span> <span style={{ color: '#fff' }}>{char.attacksRemaining}</span>
+        <div title="Nombre d'attaques par tour" style={{ cursor: 'help' }}>
+          <span style={{ color: '#9ca3af' }}>🗡</span> <span style={{ color: '#fff' }}>{char.type === 'warrior' ? 2 : 1}</span>
         </div>
         <div title="Dégâts de base (avant multiplicateur d'avantage/désavantage)" style={{ cursor: 'help' }}>
           <span style={{ color: '#ef4444' }}>✊</span> <span style={{ color: '#fff' }}>{BASE_DAMAGE[char.type.toUpperCase() as keyof typeof BASE_DAMAGE] + char.damageBoost}</span>

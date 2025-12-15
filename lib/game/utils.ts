@@ -79,8 +79,8 @@ export function generateSpecialTiles(): Array<{ position: Position; type: Specia
   
   // Positions de départ des personnages - à exclure
   const startingPositions = new Set([
-    '2,2', '3,2', '2,3',    // Joueur
-    '13,13', '12,13', '13,12' // Ennemi
+    '2,2', '3,2', '2,3', '3,3',      // Joueur (warrior, mage, thief, royal)
+    '13,13', '12,13', '13,12', '12,12' // Ennemi (warrior, mage, thief, royal)
   ]);
   
   const tileTypes: SpecialTileType[] = ['heal', 'damage_boost', 'movement_boost', 'initiative_boost', 'armor', 'shield', 'regeneration'];
@@ -166,6 +166,24 @@ export function initializeCharacters(): {
       shield: 0,
       regeneration: 0,
     },
+    {
+      id: 'player-royal',
+      type: 'royal',
+      team: 'player',
+      position: { x: 3, y: 3 },
+      health: 13,
+      maxHealth: 13,
+      movement: 4,
+      maxMovement: 4,
+      isAlive: true,
+      damageBoost: 0,
+      movementBoost: 0,
+      attacksRemaining: 1,
+      initiative: 9,
+      armor: 0,
+      shield: 0,
+      regeneration: 0,
+    },
   ];
   
   const enemyTeam: Character[] = [
@@ -219,6 +237,24 @@ export function initializeCharacters(): {
       movementBoost: 0,
       attacksRemaining: 1,
       initiative: 8,
+      armor: 0,
+      shield: 0,
+      regeneration: 0,
+    },
+    {
+      id: 'enemy-royal',
+      type: 'royal',
+      team: 'enemy',
+      position: { x: 12, y: 12 },
+      health: 13,
+      maxHealth: 13,
+      movement: 4,
+      maxMovement: 4,
+      isAlive: true,
+      damageBoost: 0,
+      movementBoost: 0,
+      attacksRemaining: 1,
+      initiative: 9,
       armor: 0,
       shield: 0,
       regeneration: 0,

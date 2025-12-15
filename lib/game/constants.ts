@@ -22,6 +22,12 @@ export const CHARACTER_STATS = {
     attacksPerTurn: 1,
     initiative: 8,
   },
+  ROYAL: {
+    health: 13,
+    movement: 4,
+    attacksPerTurn: 1,
+    initiative: 9,
+  },
 };
 
 // Nombre de cases spéciales
@@ -52,6 +58,7 @@ export const ATTACK_RANGES = {
   WARRIOR: 1,        // Corps à corps uniquement
   MAGE: 3,           // Zone autour du mage (AOE)
   THIEF: 4,          // Jusqu'à 4 cases
+  ROYAL: 1,          // Corps à corps uniquement
 };
 
 // Dégâts de base par classe
@@ -59,6 +66,7 @@ export const BASE_DAMAGE = {
   WARRIOR: 5,
   MAGE: 5,
   THIEF: 6,
+  ROYAL: 7,
 };
 
 // Multiplicateurs de dégâts
@@ -71,9 +79,21 @@ export const DAMAGE_MULTIPLIERS = {
 // Triangle d'avantages :
 // Guerrier > Voleur > Mage > Guerrier
 // (Pierre-Feuille-Ciseaux)
+// Royal : avantage vs Royal, neutre sinon
 export const getMultiplier = (attackerType: string, defenderType: string): number => {
   const attacker = attackerType.toLowerCase();
   const defender = defenderType.toLowerCase();
+  
+  // Royal a l'avantage uniquement contre un autre Royal
+  if (attacker === 'royal') {
+    if (defender === 'royal') return DAMAGE_MULTIPLIERS.ADVANTAGE;
+    return DAMAGE_MULTIPLIERS.NEUTRAL; // Neutre contre tous les autres
+  }
+  
+  // Les autres classes sont neutres contre Royal
+  if (defender === 'royal') {
+    return DAMAGE_MULTIPLIERS.NEUTRAL;
+  }
   
   if (attacker === defender) return DAMAGE_MULTIPLIERS.NEUTRAL;
   
@@ -122,6 +142,7 @@ export const ATTACKS_PER_TURN = {
   WARRIOR: 2,
   MAGE: 1,
   THIEF: 1,
+  ROYAL: 1,
 };
 
 // Ancien format pour compatibilité (sera supprimé)

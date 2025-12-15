@@ -78,15 +78,6 @@ function CharacterCard({
         <div title="Points de vie actuels / maximum" style={{ cursor: 'help' }}>
           <span style={{ color: '#06b6d4' }}>❤</span> <span style={{ color: '#fff' }}>{char.health}/{char.maxHealth}</span>
         </div>
-        <div title="Initiative : plus elle est basse, plus le personnage joue tôt dans le tour" style={{ cursor: 'help' }}>
-          <span style={{ color: '#eab308' }}>⚡</span> <span style={{ color: '#fff' }}>{char.initiative}</span>
-        </div>
-        <div title="Points de mouvement restants pour ce tour" style={{ cursor: 'help' }}>
-          <span style={{ color: '#a855f7' }}>👟</span> <span style={{ color: '#fff' }}>{char.movement}</span>
-        </div>
-        <div title="Nombre d'attaques restantes ce tour" style={{ cursor: 'help' }}>
-          <span style={{ color: '#9ca3af' }}>🗡</span> <span style={{ color: '#fff' }}>{char.attacksRemaining}</span>
-        </div>
         <div title="Bouclier : absorbe les dégâts avant les points de vie" style={{ cursor: 'help', opacity: char.shield > 0 ? 1 : 0.4 }}>
           <span style={{ color: '#ffffff' }}>🛡</span> <span style={{ color: '#fff' }}>{char.shield}</span>
         </div>
@@ -95,6 +86,15 @@ function CharacterCard({
         </div>
         <div title="Régénération : PV récupérés au début de chaque tour" style={{ cursor: 'help', opacity: char.regeneration > 0 ? 1 : 0.4 }}>
           <span style={{ color: '#166534' }}>+</span> <span style={{ color: '#fff' }}>{char.regeneration}/t</span>
+        </div>
+        <div title="Points de mouvement restants pour ce tour" style={{ cursor: 'help' }}>
+          <span style={{ color: '#a855f7' }}>👟</span> <span style={{ color: '#fff' }}>{char.movement}</span>
+        </div>
+        <div title="Initiative : plus elle est basse, plus le personnage joue tôt dans le tour" style={{ cursor: 'help' }}>
+          <span style={{ color: '#eab308' }}>⚡</span> <span style={{ color: '#fff' }}>{char.initiative}</span>
+        </div>
+        <div title="Nombre d'attaques restantes ce tour" style={{ cursor: 'help' }}>
+          <span style={{ color: '#9ca3af' }}>🗡</span> <span style={{ color: '#fff' }}>{char.attacksRemaining}</span>
         </div>
         <div title="Bonus de dégâts : ajouté à chaque attaque (permanent)" style={{ cursor: 'help', opacity: char.damageBoost > 0 ? 1 : 0.4 }}>
           <span style={{ color: '#ef4444' }}>✊</span> <span style={{ color: '#fff' }}>+{char.damageBoost}</span>

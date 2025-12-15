@@ -44,6 +44,9 @@ export function canAttack(attacker: Character, targetPos: Position, board: (Char
   } else if (attacker.type === 'thief') {
     // Voleur: corps à corps ou distance (4 max)
     return distance >= 1 && distance <= 4;
+  } else if (attacker.type === 'royal') {
+    // Royal: corps à corps uniquement (1 case)
+    return distance === 1;
   }
   
   return false;

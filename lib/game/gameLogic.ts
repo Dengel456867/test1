@@ -495,7 +495,7 @@ export function endTurn(gameState: GameState, usedCharacterId?: string): GameSta
         }
         attempts++;
       }
-    });
+    }
   }
   
   // Trouver le prochain personnage et appliquer la régénération

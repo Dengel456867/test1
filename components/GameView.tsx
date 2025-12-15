@@ -28,8 +28,8 @@ function CharacterCard({
   isCurrentTurn?: boolean;
   turnPosition?: number;
 }) {
-  const getEmoji = (type: string) => ({ warrior: '⚔️', mage: '🔮', thief: '🗡️' }[type] || '👤');
-  const getName = (type: string) => ({ warrior: 'Guerrier', mage: 'Mage', thief: 'Voleur' }[type] || type);
+  const getEmoji = (type: string) => ({ warrior: '⚔️', mage: '🔮', thief: '🗡️', royal: '👑' }[type] || '👤');
+  const getName = (type: string) => ({ warrior: 'Guerrier', mage: 'Mage', thief: 'Voleur', royal: 'Royal' }[type] || type);
   const healthPercent = (char.health / char.maxHealth) * 100;
   const color = isPlayer ? 'blue' : 'red';
 
@@ -260,7 +260,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
       
       const { gameState: newState, attackResult: result } = performAttack(
         gameState, currentCharacter.id, position,
-        currentCharacter.type === 'warrior' || currentCharacter.type === 'thief'
+        currentCharacter.type === 'warrior' || currentCharacter.type === 'thief' || currentCharacter.type === 'royal'
       );
       
       if (result) {

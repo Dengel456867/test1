@@ -126,7 +126,7 @@ export function initializeCharacters(): {
       movementBoost: 0,
       attacksRemaining: 2,
       initiative: 10,
-      armor: 0,
+      armor: 1,      // Guerrier commence avec 1 armure
       shield: 0,
       regeneration: 0,
     },
@@ -146,7 +146,7 @@ export function initializeCharacters(): {
       initiative: 11,
       armor: 0,
       shield: 0,
-      regeneration: 0,
+      regeneration: 1, // Mage commence avec 1 régénération
     },
     {
       id: 'player-thief',
@@ -183,7 +183,7 @@ export function initializeCharacters(): {
       movementBoost: 0,
       attacksRemaining: 2,
       initiative: 10,
-      armor: 0,
+      armor: 1,      // Guerrier commence avec 1 armure
       shield: 0,
       regeneration: 0,
     },
@@ -203,7 +203,7 @@ export function initializeCharacters(): {
       initiative: 11,
       armor: 0,
       shield: 0,
-      regeneration: 0,
+      regeneration: 1, // Mage commence avec 1 régénération
     },
     {
       id: 'enemy-thief',

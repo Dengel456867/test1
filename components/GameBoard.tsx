@@ -35,6 +35,7 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
       case 'armor': return { symbol: '🦺', color: '#f97316' }; // Armure/gilet orange
       case 'shield': return { symbol: '🛡', color: '#ffffff' }; // Bouclier blanc
       case 'regeneration': return { symbol: '+', color: '#166534', isOutline: true }; // Croix contour vert foncé
+      case 'star': return { symbol: '⭐', color: '#fbbf24' }; // Étoile jaune
       default: return null;
     }
   };

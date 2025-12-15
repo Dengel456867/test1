@@ -164,6 +164,23 @@ export function performAttack(
     if (targets.length === 0) {
       return { gameState, attackResult: null }; // Personne à portée
     }
+  } else if (attacker.type === 'royal') {
+    // ROYAL: Corps à corps uniquement (1 case de distance)
+    const distanceToTarget = getDistance(attacker.position, targetPosition);
+    if (distanceToTarget > 1) {
+      return { gameState, attackResult: null }; // Trop loin
+    }
+    
+    // Trouver le personnage sur la case ciblée
+    const targetChar = allCharacters.find(
+      c => c.position.x === targetPosition.x && c.position.y === targetPosition.y && c.id !== attacker.id
+    );
+    
+    if (targetChar) {
+      targets = [targetChar];
+    } else {
+      return { gameState, attackResult: null }; // Pas de cible
+    }
   }
   
   if (targets.length === 0) {

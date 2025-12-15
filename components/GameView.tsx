@@ -126,10 +126,13 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
   const [originalMovement, setOriginalMovement] = useState<number>(0);
   // Timer du tour (en secondes)
   const [turnTimer, setTurnTimer] = useState<number>(TURN_TIMER);
+  // Mode de jeu : 'vsAI' (contre IA) ou 'pvp' (joueur contre joueur)
+  const [gameMode, setGameMode] = useState<'vsAI' | 'pvp'>('vsAI');
   
   // Le personnage actuel est déterminé par l'ordre d'initiative
   const currentCharacter = gameState ? getCurrentCharacter(gameState) : null;
-  const isPlayerTurn = currentCharacter?.team === 'player';
+  // En mode PvP, les deux équipes sont contrôlables
+  const isPlayerTurn = gameMode === 'pvp' ? true : currentCharacter?.team === 'player';
   
   useEffect(() => {
     const newGame = initializeGame();
@@ -152,9 +155,10 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
     setTurnTimer(TURN_TIMER);
   }, [gameState?.currentTurnOrderIndex, gameState?.turnCount]);
   
-  // Gérer le tour de l'ennemi (quand c'est le tour d'un personnage ennemi)
+  // Gérer le tour de l'ennemi (quand c'est le tour d'un personnage ennemi) - seulement en mode vs IA
   useEffect(() => {
     if (!gameState || gameState.gameOver || isProcessing) return;
+    if (gameMode === 'pvp') return; // En mode PvP, pas d'IA
     
     const current = getCurrentCharacter(gameState);
     if (!current || current.team !== 'enemy') return;
@@ -234,6 +238,22 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
       });
     }
   }, [gameState?.gameOver]);
+  
+  // Fonction pour changer de mode de jeu
+  const switchGameMode = (newMode: 'vsAI' | 'pvp') => {
+    if (newMode === gameMode) return;
+    setGameMode(newMode);
+    // Réinitialiser la partie
+    const newGame = initializeGame();
+    setGameState(newGame);
+    const firstChar = getCurrentCharacter(newGame);
+    setHasAttacked(false);
+    setOriginalPosition(firstChar?.position || null);
+    setOriginalMovement(firstChar?.movement || 0);
+    setTurnTimer(TURN_TIMER);
+    setIsProcessing(false);
+    setAttackResult(null);
+  };
   
   if (!gameState) {
     return (
@@ -474,7 +494,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
       {/* Left Panel - Player Team */}
       <div style={{ padding: '12px', overflowY: 'auto', borderRight: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)' }}>
         <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#60a5fa', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-          🎮 Votre équipe
+          {gameMode === 'pvp' ? '🔵 Équipe Bleue' : '🎮 Votre équipe'}
         </div>
         {gameState.playerTeam.map(char => {
           const turnPos = gameState.turnOrder.indexOf(char.id);
@@ -523,7 +543,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
       {/* Right Panel - Enemy Team */}
       <div style={{ padding: '12px', overflowY: 'auto', borderLeft: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)' }}>
         <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#f87171', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-          🤖 Adversaire
+          {gameMode === 'pvp' ? '🔴 Équipe Rouge' : '🤖 Adversaire'}
         </div>
         {gameState.enemyTeam.map(char => {
           const turnPos = gameState.turnOrder.indexOf(char.id);
@@ -597,6 +617,60 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
         })}
       </div>
       
+      {/* Mode Switch Buttons - Bottom Right */}
+      <div style={{
+        position: 'fixed',
+        bottom: '80px',
+        right: '20px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+        zIndex: 50
+      }}>
+        <button
+          onClick={() => switchGameMode('pvp')}
+          style={{
+            padding: '10px 16px',
+            borderRadius: '8px',
+            fontSize: '13px',
+            fontWeight: 'bold',
+            background: gameMode === 'pvp' 
+              ? 'linear-gradient(135deg, #10b981, #059669)' 
+              : 'rgba(30,30,50,0.8)',
+            color: gameMode === 'pvp' ? 'white' : '#9ca3af',
+            border: gameMode === 'pvp' 
+              ? '2px solid #10b981' 
+              : '2px solid rgba(255,255,255,0.2)',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            boxShadow: gameMode === 'pvp' ? '0 0 12px rgba(16,185,129,0.5)' : 'none'
+          }}
+        >
+          👥 JcJ
+        </button>
+        <button
+          onClick={() => switchGameMode('vsAI')}
+          style={{
+            padding: '10px 16px',
+            borderRadius: '8px',
+            fontSize: '13px',
+            fontWeight: 'bold',
+            background: gameMode === 'vsAI' 
+              ? 'linear-gradient(135deg, #f59e0b, #d97706)' 
+              : 'rgba(30,30,50,0.8)',
+            color: gameMode === 'vsAI' ? 'white' : '#9ca3af',
+            border: gameMode === 'vsAI' 
+              ? '2px solid #f59e0b' 
+              : '2px solid rgba(255,255,255,0.2)',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            boxShadow: gameMode === 'vsAI' ? '0 0 12px rgba(245,158,11,0.5)' : 'none'
+          }}
+        >
+          🤖 vs IA
+        </button>
+      </div>
+      
       {/* Game Over Overlay */}
       {gameState.gameOver && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
@@ -606,7 +680,9 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
               {gameState.winner === 'player' ? 'VICTOIRE !' : 'DÉFAITE'}
             </h2>
             <p style={{ color: '#9ca3af', marginBottom: '24px' }}>
-              {gameState.winner === 'player' ? 'Vous avez gagné !' : 'Vous avez perdu...'}
+              {gameMode === 'pvp' 
+                ? (gameState.winner === 'player' ? 'Bleu gagne !' : 'Rouge gagne !')
+                : (gameState.winner === 'player' ? 'Vous avez gagné !' : 'Vous avez perdu...')}
             </p>
             <button
               onClick={() => {

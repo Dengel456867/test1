@@ -1,4 +1,4 @@
-export type CharacterType = 'warrior' | 'mage' | 'thief';
+export type CharacterType = 'warrior' | 'mage' | 'thief' | 'royal';
 export type Team = 'player' | 'enemy';
 export type SpecialTileType = 'heal' | 'damage_boost' | 'movement_boost' | 'initiative_boost' | 'armor' | 'shield' | 'regeneration' | 'normal';
 

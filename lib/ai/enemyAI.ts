@@ -90,6 +90,18 @@ export async function getEnemyMove(gameState: GameState): Promise<AIMove> {
         };
       }
       break;
+      
+    case 'royal':
+      // Le royal doit être au corps à corps (portée 1)
+      if (closestDistance <= ATTACK_RANGES.ROYAL) {
+        return {
+          action: 'attack',
+          characterId: currentCharacter.id,
+          targetPosition: closestTarget.position,
+          isMelee: true,
+        };
+      }
+      break;
   }
   
   // Si on ne peut pas attaquer, se déplacer vers la cible

@@ -348,6 +348,41 @@ export function endTurn(gameState: GameState, usedCharacterId?: string): GameSta
             // +1 PV régénéré par tour (permanent, cumulable)
             updatedChar.regeneration += SPECIAL_TILE_EFFECTS.REGENERATION;
             break;
+          case 'star':
+            // Bonus spécial : donne 3 bonus de base différents aléatoirement
+            const baseBonusTypes = ['heal', 'damage_boost', 'movement_boost', 'initiative_boost', 'armor', 'shield', 'regeneration'];
+            // Mélanger et prendre les 3 premiers
+            const shuffled = [...baseBonusTypes].sort(() => Math.random() - 0.5);
+            const selectedBonuses = shuffled.slice(0, 3);
+            
+            selectedBonuses.forEach(bonusType => {
+              switch (bonusType) {
+                case 'heal':
+                  updatedChar.maxHealth += SPECIAL_TILE_EFFECTS.HEAL_MAX_HP;
+                  updatedChar.health = Math.min(updatedChar.maxHealth, updatedChar.health + SPECIAL_TILE_EFFECTS.HEAL_AMOUNT);
+                  break;
+                case 'damage_boost':
+                  updatedChar.damageBoost += SPECIAL_TILE_EFFECTS.DAMAGE_BOOST;
+                  break;
+                case 'movement_boost':
+                  updatedChar.maxMovement += SPECIAL_TILE_EFFECTS.MOVEMENT_BOOST;
+                  updatedChar.movement += SPECIAL_TILE_EFFECTS.MOVEMENT_BOOST;
+                  break;
+                case 'initiative_boost':
+                  updatedChar.initiative = Math.max(1, updatedChar.initiative - SPECIAL_TILE_EFFECTS.INITIATIVE_BOOST);
+                  break;
+                case 'armor':
+                  updatedChar.armor += SPECIAL_TILE_EFFECTS.ARMOR;
+                  break;
+                case 'shield':
+                  updatedChar.shield += SPECIAL_TILE_EFFECTS.SHIELD;
+                  break;
+                case 'regeneration':
+                  updatedChar.regeneration += SPECIAL_TILE_EFFECTS.REGENERATION;
+                  break;
+              }
+            });
+            break;
         }
         
         // Marquer la case comme utilisée
@@ -419,7 +454,7 @@ export function endTurn(gameState: GameState, usedCharacterId?: string): GameSta
       }
     });
     
-    // Générer une case de chaque type
+    // Générer une case de chaque type (bonus de base)
     tileTypes.forEach(type => {
       let attempts = 0;
       while (attempts < 100) {
@@ -431,6 +466,28 @@ export function endTurn(gameState: GameState, usedCharacterId?: string): GameSta
           updatedSpecialTiles.push({
             position: { x, y },
             type,
+            used: false,
+          });
+          occupiedPositions.add(key);
+          break;
+        }
+        attempts++;
+      }
+    });
+    
+    // Générer une case étoile tous les 3 tours (au milieu du plateau)
+    if (newTurnCount % 3 === 0) {
+      let attempts = 0;
+      while (attempts < 50) {
+        // Zone centrale : x et y entre 6 et 9 (colonnes G-J, lignes 7-10)
+        const x = 6 + Math.floor(Math.random() * 4);
+        const y = 6 + Math.floor(Math.random() * 4);
+        const key = `${x},${y}`;
+        
+        if (!occupiedPositions.has(key)) {
+          updatedSpecialTiles.push({
+            position: { x, y },
+            type: 'star',
             used: false,
           });
           occupiedPositions.add(key);

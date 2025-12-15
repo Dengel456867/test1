@@ -74,15 +74,15 @@ function CharacterCard({
       </div>
       
       {/* Stats en colonnes */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 8px', fontSize: '11px' }}>
-        <div style={{ color: '#06b6d4' }}>❤ {char.health}/{char.maxHealth}</div>
-        <div style={{ color: '#eab308' }}>⚡ {char.initiative}</div>
-        <div style={{ color: '#a855f7' }}>👟 {char.movement}</div>
-        <div style={{ color: '#9ca3af' }}>⚔ {char.attacksRemaining}</div>
-        {char.shield > 0 && <div style={{ color: '#ffffff' }}>🛡 {char.shield}</div>}
-        {char.armor > 0 && <div style={{ color: '#f97316' }}>🦺 {char.armor}</div>}
-        {char.regeneration > 0 && <div style={{ color: '#166534' }}>+ {char.regeneration}/tour</div>}
-        {char.damageBoost > 0 && <div style={{ color: '#ef4444' }}>✊ +{char.damageBoost}</div>}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 12px', fontSize: '14px' }}>
+        <div><span style={{ color: '#06b6d4' }}>❤</span> <span style={{ color: '#fff' }}>{char.health}/{char.maxHealth}</span></div>
+        <div><span style={{ color: '#eab308' }}>⚡</span> <span style={{ color: '#fff' }}>{char.initiative}</span></div>
+        <div><span style={{ color: '#a855f7' }}>👟</span> <span style={{ color: '#fff' }}>{char.movement}</span></div>
+        <div><span style={{ color: '#9ca3af' }}>🗡</span> <span style={{ color: '#fff' }}>{char.attacksRemaining}</span></div>
+        {char.shield > 0 && <div><span style={{ color: '#ffffff' }}>🛡</span> <span style={{ color: '#fff' }}>{char.shield}</span></div>}
+        {char.armor > 0 && <div><span style={{ color: '#f97316' }}>🦺</span> <span style={{ color: '#fff' }}>{char.armor}</span></div>}
+        {char.regeneration > 0 && <div><span style={{ color: '#166534' }}>+</span> <span style={{ color: '#fff' }}>{char.regeneration}/t</span></div>}
+        {char.damageBoost > 0 && <div><span style={{ color: '#ef4444' }}>✊</span> <span style={{ color: '#fff' }}>+{char.damageBoost}</span></div>}
       </div>
     </div>
   );

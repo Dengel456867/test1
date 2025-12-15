@@ -1,7 +1,7 @@
 // Utilitaires pour le jeu
 
 import { Position, Character, CharacterType, SpecialTileType } from '../types/game';
-import { BOARD_SIZE, DAMAGE_RANGES } from './constants';
+import { BOARD_SIZE, BASE_DAMAGE, getMultiplier } from './constants';
 
 export function getDistance(pos1: Position, pos2: Position): number {
   return Math.abs(pos1.x - pos2.x) + Math.abs(pos1.y - pos2.y);
@@ -21,12 +21,16 @@ export function calculateDamage(
   defenderType: CharacterType,
   damageBoost: number = 0
 ): number {
-  const damageConfig = DAMAGE_RANGES[attackerType.toUpperCase() as keyof typeof DAMAGE_RANGES];
-  const defenderKey = `vs_${defenderType}` as keyof typeof damageConfig;
-  const range = damageConfig[defenderKey];
+  // Dégâts de base selon la classe de l'attaquant
+  const baseDamage = BASE_DAMAGE[attackerType.toUpperCase() as keyof typeof BASE_DAMAGE];
   
-  const baseDamage = randomRange(range.min, range.max);
-  return baseDamage + damageBoost;
+  // Multiplicateur selon l'avantage/désavantage
+  const multiplier = getMultiplier(attackerType, defenderType);
+  
+  // Calcul final : (base * multiplicateur) arrondi au supérieur + bonus
+  const finalDamage = Math.ceil(baseDamage * multiplier) + damageBoost;
+  
+  return finalDamage;
 }
 
 export function canAttack(attacker: Character, target: Character, isMelee: boolean): boolean {

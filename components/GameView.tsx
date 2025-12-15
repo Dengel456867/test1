@@ -59,25 +59,30 @@ function CharacterCard({
           {turnPosition + 1}
         </div>
       )}
-      <div className="flex items-center gap-2 mb-1">
+      {/* En-tête avec nom et type */}
+      <div className="flex items-center gap-2 mb-2">
         <span className="text-lg">{char.isAlive ? getEmoji(char.type) : '💀'}</span>
         <span className="font-bold text-sm">{getName(char.type)}</span>
-        <span className="text-xs text-gray-500">⚡{char.initiative}</span>
       </div>
-      <div className="h-1.5 bg-gray-700 rounded-full mb-1">
+      
+      {/* Barre de vie */}
+      <div className="h-1.5 bg-gray-700 rounded-full mb-2">
         <div 
           className={`h-full rounded-full ${healthPercent > 50 ? 'bg-green-500' : healthPercent > 25 ? 'bg-yellow-500' : 'bg-red-500'}`}
           style={{ width: `${healthPercent}%` }}
         />
       </div>
-      <div className="flex gap-2 text-xs text-gray-400 flex-wrap">
-        <span>❤️{char.health}/{char.maxHealth}</span>
-        <span>👟{char.movement}</span>
-        <span>⚔️{char.attacksRemaining}</span>
-        {char.shield > 0 && <span style={{color: '#60a5fa'}}>🛡{char.shield}</span>}
-        {char.armor > 0 && <span style={{color: '#f97316'}}>🦺{char.armor}</span>}
-        {char.regeneration > 0 && <span style={{color: '#22c55e'}}>+{char.regeneration}/t</span>}
-        {char.damageBoost > 0 && <span style={{color: '#ef4444'}}>✊+{char.damageBoost}</span>}
+      
+      {/* Stats en colonnes */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 8px', fontSize: '11px' }}>
+        <div style={{ color: '#06b6d4' }}>❤ {char.health}/{char.maxHealth}</div>
+        <div style={{ color: '#eab308' }}>⚡ {char.initiative}</div>
+        <div style={{ color: '#a855f7' }}>👟 {char.movement}</div>
+        <div style={{ color: '#9ca3af' }}>⚔ {char.attacksRemaining}</div>
+        {char.shield > 0 && <div style={{ color: '#ffffff' }}>🛡 {char.shield}</div>}
+        {char.armor > 0 && <div style={{ color: '#f97316' }}>🦺 {char.armor}</div>}
+        {char.regeneration > 0 && <div style={{ color: '#166534' }}>+ {char.regeneration}/tour</div>}
+        {char.damageBoost > 0 && <div style={{ color: '#ef4444' }}>✊ +{char.damageBoost}</div>}
       </div>
     </div>
   );

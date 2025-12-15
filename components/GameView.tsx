@@ -6,6 +6,7 @@ import { GameState, Character, Position } from '@/lib/types/game';
 import { initializeGame, moveCharacter, performAttack, endTurn } from '@/lib/game/gameLogic';
 import { getEnemyMove } from '@/lib/ai/enemyAI';
 import { APP_VERSION } from '@/lib/version';
+import { BASE_DAMAGE } from '@/lib/game/constants';
 
 interface GameViewProps {
   userId: string;
@@ -96,8 +97,8 @@ function CharacterCard({
         <div title="Nombre d'attaques restantes ce tour" style={{ cursor: 'help' }}>
           <span style={{ color: '#9ca3af' }}>🗡</span> <span style={{ color: '#fff' }}>{char.attacksRemaining}</span>
         </div>
-        <div title="Bonus de dégâts : ajouté à chaque attaque (permanent)" style={{ cursor: 'help', opacity: char.damageBoost > 0 ? 1 : 0.4 }}>
-          <span style={{ color: '#ef4444' }}>✊</span> <span style={{ color: '#fff' }}>+{char.damageBoost}</span>
+        <div title="Dégâts de base (avant multiplicateur d'avantage/désavantage)" style={{ cursor: 'help' }}>
+          <span style={{ color: '#ef4444' }}>✊</span> <span style={{ color: '#fff' }}>{BASE_DAMAGE[char.type.toUpperCase() as keyof typeof BASE_DAMAGE] + char.damageBoost}</span>
         </div>
       </div>
     </div>

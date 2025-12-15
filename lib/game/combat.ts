@@ -1,44 +1,33 @@
 import { Character, CharacterType, AttackResult, Position } from './types';
 import { getDistance } from './characters';
+import { BASE_DAMAGE, getMultiplier, ATTACK_RANGES } from './constants';
 
-// Matrice de dÃ©gÃ¢ts selon les types
-const DAMAGE_MATRIX: Record<CharacterType, Record<CharacterType, { dice: number; sides: number }>> = {
-  warrior: {
-    warrior: { dice: 1, sides: 6 },
-    mage: { dice: 1, sides: 4 },
-    thief: { dice: 1, sides: 10 },
-  },
-  mage: {
-    warrior: { dice: 1, sides: 10 },
-    mage: { dice: 1, sides: 6 },
-    thief: { dice: 1, sides: 4 },
-  },
-  thief: {
-    warrior: { dice: 1, sides: 4 },
-    mage: { dice: 1, sides: 10 },
-    thief: { dice: 1, sides: 6 },
-  },
-};
-
-function rollDice(dice: number, sides: number): number {
-  let total = 0;
-  for (let i = 0; i < dice; i++) {
-    total += Math.floor(Math.random() * sides) + 1;
-  }
-  return total;
-}
-
+// Calcul des dégâts avec le nouveau système de multiplicateurs
+// Base damage + multiplicateur selon avantage/désavantage
 export function calculateDamage(attacker: Character, target: Character): { damage: number; isCritical: boolean } {
-  const damageConfig = DAMAGE_MATRIX[attacker.type][target.type];
-  let damage = rollDice(damageConfig.dice, damageConfig.sides);
-  const isCritical = attacker.type === 'thief' && Math.random() < 0.5;
+  // Dégâts de base selon la classe de l'attaquant
+  const baseDamage = BASE_DAMAGE[attacker.type.toUpperCase() as keyof typeof BASE_DAMAGE];
+  
+  // Multiplicateur selon l'avantage/désavantage (même logique pour alliés et ennemis)
+  const multiplier = getMultiplier(attacker.type, target.type);
+  
+  // Calcul: (base * multiplicateur) arrondi au supérieur
+  let damage = Math.ceil(baseDamage * multiplier);
+  
+  // Critique pour le voleur en corps à corps (50% de chance)
+  const distance = getDistance(attacker.position, target.position);
+  const isMelee = distance <= 1;
+  const isCritical = attacker.type === 'thief' && isMelee && Math.random() < 0.5;
   
   if (isCritical) {
     damage *= 2;
   }
   
-  // Ajouter le bonus de dÃ©gÃ¢ts
+  // Ajouter le bonus de dégâts permanent
   damage += attacker.damageBoost;
+  
+  // Appliquer la réduction d'armure (minimum 0)
+  damage = Math.max(0, damage - (target.armor || 0));
   
   return { damage, isCritical };
 }
@@ -47,13 +36,13 @@ export function canAttack(attacker: Character, targetPos: Position, board: (Char
   const distance = getDistance(attacker.position, targetPos);
   
   if (attacker.type === 'warrior') {
-    // Guerrier: corps Ã  corps uniquement (1 case)
+    // Guerrier: corps à corps uniquement (1 case)
     return distance === 1;
   } else if (attacker.type === 'mage') {
     // Mage: zone de 4 cases
     return distance <= 4;
   } else if (attacker.type === 'thief') {
-    // Voleur: corps Ã  corps ou distance (4 max)
+    // Voleur: corps à corps ou distance (4 max)
     return distance >= 1 && distance <= 4;
   }
   
@@ -107,7 +96,25 @@ export function executeAttack(
   
   targets.forEach(target => {
     const { damage, isCritical } = calculateDamage(attacker, target);
-    target.health = Math.max(0, target.health - damage);
+    
+    // Appliquer les dégâts au bouclier d'abord, puis à la vie
+    let newShield = target.shield || 0;
+    let newHealth = target.health;
+    
+    if (damage > 0) {
+      if (newShield > 0) {
+        const shieldDamage = Math.min(newShield, damage);
+        newShield -= shieldDamage;
+        const remainingDamage = damage - shieldDamage;
+        newHealth = Math.max(0, newHealth - remainingDamage);
+      } else {
+        newHealth = Math.max(0, newHealth - damage);
+      }
+    }
+    
+    target.health = newHealth;
+    target.shield = newShield;
+    target.isAlive = newHealth > 0;
     
     attackResult.targets.push({
       character: target,
@@ -116,8 +123,7 @@ export function executeAttack(
     });
   });
   
-  // RÃ©initialiser le bonus de dÃ©gÃ¢ts aprÃ¨s l'attaque
-  attacker.damageBoost = 0;
+  // Le bonus de dégâts est permanent, on ne le réinitialise plus
   attacker.attacksRemaining--;
   
   return attackResult;

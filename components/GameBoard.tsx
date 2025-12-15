@@ -319,6 +319,82 @@ function KnightPiece({ color, emissive, emissiveIntensity, scale }: { color: str
   );
 }
 
+// Reine (Queen) pour le Royal
+function QueenPiece({ color, emissive, emissiveIntensity, scale }: { color: string; emissive: string; emissiveIntensity: number; scale: number }) {
+  return (
+    <group scale={[scale, scale, scale]}>
+      {/* Base large */}
+      <mesh position={[0, 0, 0]}>
+        <cylinderGeometry args={[0.32, 0.36, 0.12, 16]} />
+        <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
+      </mesh>
+      {/* Anneau noir horizontal sur la base */}
+      <mesh position={[0, 0.06, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.3, 0.02, 8, 24]} />
+        <meshStandardMaterial color="#111111" />
+      </mesh>
+      {/* Corps inférieur (évasé) */}
+      <mesh position={[0, 0.15, 0]}>
+        <cylinderGeometry args={[0.2, 0.3, 0.18, 16]} />
+        <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
+      </mesh>
+      {/* Bande noire de transition */}
+      <mesh position={[0, 0.24, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.2, 0.018, 8, 24]} />
+        <meshStandardMaterial color="#111111" />
+      </mesh>
+      {/* Corps principal (colonne élégante) */}
+      <mesh position={[0, 0.42, 0]}>
+        <cylinderGeometry args={[0.15, 0.18, 0.35, 16]} />
+        <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
+      </mesh>
+      {/* Collerette sous la couronne */}
+      <mesh position={[0, 0.6, 0]}>
+        <cylinderGeometry args={[0.22, 0.15, 0.08, 16]} />
+        <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
+      </mesh>
+      {/* Bande noire sous la couronne */}
+      <mesh position={[0, 0.64, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.21, 0.015, 8, 24]} />
+        <meshStandardMaterial color="#111111" />
+      </mesh>
+      {/* Couronne - pointes (8 pointes) */}
+      {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+        <mesh key={i} position={[Math.cos(i * Math.PI / 4) * 0.14, 0.78, Math.sin(i * Math.PI / 4) * 0.14]}>
+          <coneGeometry args={[0.04, 0.16, 4]} />
+          <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
+        </mesh>
+      ))}
+      {/* Boules sur les pointes */}
+      {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+        <mesh key={`ball-${i}`} position={[Math.cos(i * Math.PI / 4) * 0.14, 0.88, Math.sin(i * Math.PI / 4) * 0.14]}>
+          <sphereGeometry args={[0.035, 8, 8]} />
+          <meshStandardMaterial color="#111111" />
+        </mesh>
+      ))}
+      {/* Centre de la couronne */}
+      <mesh position={[0, 0.72, 0]}>
+        <cylinderGeometry args={[0.16, 0.2, 0.1, 16]} />
+        <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
+      </mesh>
+      {/* Boule centrale au sommet */}
+      <mesh position={[0, 0.82, 0]}>
+        <sphereGeometry args={[0.06, 12, 12]} />
+        <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
+      </mesh>
+      {/* Croix sur la boule centrale */}
+      <mesh position={[0, 0.92, 0]}>
+        <boxGeometry args={[0.02, 0.08, 0.02]} />
+        <meshStandardMaterial color="#111111" />
+      </mesh>
+      <mesh position={[0, 0.9, 0]}>
+        <boxGeometry args={[0.06, 0.02, 0.02]} />
+        <meshStandardMaterial color="#111111" />
+      </mesh>
+    </group>
+  );
+}
+
 // Personnage - Pièce d'échecs selon le type
 function CharacterModel({ character, isSelected, onClick }: { 
   character: Character; 
@@ -360,6 +436,9 @@ function CharacterModel({ character, isSelected, onClick }: {
       )}
       {character.type === 'thief' && (
         <KnightPiece color={teamColor} emissive={isSelected ? glowColor : teamColor} emissiveIntensity={emissiveIntensity} scale={scale} />
+      )}
+      {character.type === 'royal' && (
+        <QueenPiece color={teamColor} emissive={isSelected ? glowColor : teamColor} emissiveIntensity={emissiveIntensity} scale={scale} />
       )}
       
       {/* Indicateur de sélection */}

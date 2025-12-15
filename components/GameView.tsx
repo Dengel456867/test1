@@ -75,14 +75,30 @@ function CharacterCard({
       
       {/* Stats en colonnes */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 12px', fontSize: '14px' }}>
-        <div><span style={{ color: '#06b6d4' }}>❤</span> <span style={{ color: '#fff' }}>{char.health}/{char.maxHealth}</span></div>
-        <div><span style={{ color: '#eab308' }}>⚡</span> <span style={{ color: '#fff' }}>{char.initiative}</span></div>
-        <div><span style={{ color: '#a855f7' }}>👟</span> <span style={{ color: '#fff' }}>{char.movement}</span></div>
-        <div><span style={{ color: '#9ca3af' }}>🗡</span> <span style={{ color: '#fff' }}>{char.attacksRemaining}</span></div>
-        {char.shield > 0 && <div><span style={{ color: '#ffffff' }}>🛡</span> <span style={{ color: '#fff' }}>{char.shield}</span></div>}
-        {char.armor > 0 && <div><span style={{ color: '#f97316' }}>🦺</span> <span style={{ color: '#fff' }}>{char.armor}</span></div>}
-        {char.regeneration > 0 && <div><span style={{ color: '#166534' }}>+</span> <span style={{ color: '#fff' }}>{char.regeneration}/t</span></div>}
-        {char.damageBoost > 0 && <div><span style={{ color: '#ef4444' }}>✊</span> <span style={{ color: '#fff' }}>+{char.damageBoost}</span></div>}
+        <div title="Points de vie actuels / maximum" style={{ cursor: 'help' }}>
+          <span style={{ color: '#06b6d4' }}>❤</span> <span style={{ color: '#fff' }}>{char.health}/{char.maxHealth}</span>
+        </div>
+        <div title="Initiative : plus elle est basse, plus le personnage joue tôt dans le tour" style={{ cursor: 'help' }}>
+          <span style={{ color: '#eab308' }}>⚡</span> <span style={{ color: '#fff' }}>{char.initiative}</span>
+        </div>
+        <div title="Points de mouvement restants pour ce tour" style={{ cursor: 'help' }}>
+          <span style={{ color: '#a855f7' }}>👟</span> <span style={{ color: '#fff' }}>{char.movement}</span>
+        </div>
+        <div title="Nombre d'attaques restantes ce tour" style={{ cursor: 'help' }}>
+          <span style={{ color: '#9ca3af' }}>🗡</span> <span style={{ color: '#fff' }}>{char.attacksRemaining}</span>
+        </div>
+        <div title="Bouclier : absorbe les dégâts avant les points de vie" style={{ cursor: 'help', opacity: char.shield > 0 ? 1 : 0.4 }}>
+          <span style={{ color: '#ffffff' }}>🛡</span> <span style={{ color: '#fff' }}>{char.shield}</span>
+        </div>
+        <div title="Armure : réduit les dégâts reçus de ce montant" style={{ cursor: 'help', opacity: char.armor > 0 ? 1 : 0.4 }}>
+          <span style={{ color: '#f97316' }}>🦺</span> <span style={{ color: '#fff' }}>{char.armor}</span>
+        </div>
+        <div title="Régénération : PV récupérés au début de chaque tour" style={{ cursor: 'help', opacity: char.regeneration > 0 ? 1 : 0.4 }}>
+          <span style={{ color: '#166534' }}>+</span> <span style={{ color: '#fff' }}>{char.regeneration}/t</span>
+        </div>
+        <div title="Bonus de dégâts : ajouté à chaque attaque (permanent)" style={{ cursor: 'help', opacity: char.damageBoost > 0 ? 1 : 0.4 }}>
+          <span style={{ color: '#ef4444' }}>✊</span> <span style={{ color: '#fff' }}>+{char.damageBoost}</span>
+        </div>
       </div>
     </div>
   );

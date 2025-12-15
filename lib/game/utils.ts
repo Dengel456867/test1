@@ -83,10 +83,11 @@ export function generateSpecialTiles(): Array<{ position: Position; type: Specia
     '13,13', '12,13', '13,12', '12,12' // Ennemi (warrior, mage, thief, royal)
   ]);
   
-  const tileTypes: SpecialTileType[] = ['heal', 'damage_boost', 'movement_boost', 'initiative_boost', 'armor', 'shield', 'regeneration'];
+  // Bonus de base (7 de chaque type)
+  const baseBonusTypes: SpecialTileType[] = ['heal', 'damage_boost', 'movement_boost', 'initiative_boost', 'armor', 'shield', 'regeneration'];
   const counts = [7, 7, 7, 7, 7, 7, 7];
   
-  tileTypes.forEach((type, typeIndex) => {
+  baseBonusTypes.forEach((type, typeIndex) => {
     for (let i = 0; i < counts[typeIndex]; i++) {
       let position: Position;
       let key: string;
@@ -104,7 +105,42 @@ export function generateSpecialTiles(): Array<{ position: Position; type: Specia
     }
   });
   
+  // Bonus spéciaux étoile (2 au début, uniquement au milieu : x et y entre 6 et 9)
+  for (let i = 0; i < 2; i++) {
+    let position: Position;
+    let key: string;
+    
+    do {
+      position = {
+        x: 6 + Math.floor(Math.random() * 4), // 6, 7, 8 ou 9 (colonnes G-J)
+        y: 6 + Math.floor(Math.random() * 4), // 6, 7, 8 ou 9 (lignes 7-10)
+      };
+      key = `${position.x},${position.y}`;
+    } while (usedPositions.has(key));
+    
+    usedPositions.add(key);
+    tiles.push({ position, type: 'star' });
+  }
+  
   return tiles;
+}
+
+// Génère une case étoile au milieu du plateau
+export function generateStarTile(usedPositions: Set<string>): { position: Position; type: SpecialTileType } | null {
+  // Zone centrale : x et y entre 6 et 9 (colonnes G-J, lignes 7-10)
+  const attempts = 50;
+  for (let i = 0; i < attempts; i++) {
+    const position: Position = {
+      x: 6 + Math.floor(Math.random() * 4),
+      y: 6 + Math.floor(Math.random() * 4),
+    };
+    const key = `${position.x},${position.y}`;
+    
+    if (!usedPositions.has(key)) {
+      return { position, type: 'star' };
+    }
+  }
+  return null; // Pas de place disponible
 }
 
 export function initializeCharacters(): {

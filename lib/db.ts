@@ -1,5 +1,5 @@
-// Base de donnÃ©es en mÃ©moire (compatible Vercel serverless)
-// Note: Les donnÃ©es sont perdues entre les redÃ©marrages du serveur
+// Base de données en mémoire (compatible Vercel serverless)
+// Note: Les données sont perdues entre les redémarrages du serveur
 // Pour une vraie persistance, utilisez Vercel KV, Postgres, ou un service externe
 
 interface User {
@@ -27,21 +27,21 @@ interface UserStats {
   total_movements: number;
 }
 
-// Stockage en mÃ©moire
+// Stockage en mémoire
 const users: Map<number, User> = new Map();
 const games: Map<number, Game> = new Map();
 const userStats: Map<number, UserStats> = new Map();
 let userIdCounter = 1;
 let gameIdCounter = 1;
 
-// Initialiser la base de donnÃ©es (no-op pour in-memory)
+// Initialiser la base de données (no-op pour in-memory)
 export async function initDB() {
-  // Rien Ã  faire pour le stockage en mÃ©moire
+  // Rien à faire pour le stockage en mémoire
 }
 
 // Fonctions utilisateurs
 export async function createUser(username: string, passwordHash: string) {
-  // VÃ©rifier si l'utilisateur existe
+  // Vérifier si l'utilisateur existe
   const existingUsers = Array.from(users.values());
   for (const user of existingUsers) {
     if (user.username === username) {
@@ -58,7 +58,7 @@ export async function createUser(username: string, passwordHash: string) {
   
   users.set(user.id, user);
   
-  // CrÃ©er les stats initiales
+  // Créer les stats initiales
   userStats.set(user.id, {
     user_id: user.id,
     victories: 0,
@@ -93,7 +93,7 @@ export async function createGame(userId: number, won: boolean, turns: number, mo
   
   games.set(game.id, game);
   
-  // Mettre Ã  jour les statistiques
+  // Mettre à jour les statistiques
   const stats = userStats.get(userId);
   if (stats) {
     stats.victories += won ? 1 : 0;
@@ -117,7 +117,7 @@ export async function getUserStats(userId: number) {
   return userStats.get(userId) || null;
 }
 
-// Export pour compatibilitÃ©
+// Export pour compatibilité
 export function getDB() {
   return null; // Plus de SQLite
 }

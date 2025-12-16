@@ -54,21 +54,21 @@ export function initializeGame(): GameState {
   const playerTeam: Character[] = [];
   const enemyTeam: Character[] = [];
   
-  // Positionner l'Ã©quipe du joueur en bas (y proche de 15)
+  // Positionner l'équipe du joueur en bas (y proche de 15)
   const playerPositions: Position[] = [
     { x: 6, y: 13 },
     { x: 7, y: 14 },
     { x: 8, y: 13 },
   ];
   
-  // Positionner l'Ã©quipe ennemie en haut (y proche de 0)
+  // Positionner l'équipe ennemie en haut (y proche de 0)
   const enemyPositions: Position[] = [
     { x: 6, y: 2 },
     { x: 7, y: 1 },
     { x: 8, y: 2 },
   ];
   
-  // CrÃ©er les personnages du joueur
+  // Créer les personnages du joueur
   const playerTypes: Character['type'][] = ['warrior', 'mage', 'thief'];
   playerPositions.forEach((pos, index) => {
     const character = createCharacter(playerTypes[index], 'player', pos);
@@ -76,7 +76,7 @@ export function initializeGame(): GameState {
     board[pos.y][pos.x] = character;
   });
   
-  // CrÃ©er les personnages de l'adversaire
+  // Créer les personnages de l'adversaire
   const enemyTypes: Character['type'][] = ['warrior', 'mage', 'thief'];
   enemyPositions.forEach((pos, index) => {
     const character = createCharacter(enemyTypes[index], 'enemy', pos);
@@ -86,7 +86,7 @@ export function initializeGame(): GameState {
   
   const specialTiles = generateSpecialTiles();
   
-  // GÃ©nÃ©rer l'ordre de jeu basÃ© sur l'initiative
+  // Générer l'ordre de jeu basé sur l'initiative
   const turnOrder = generateTurnOrder(playerTeam, enemyTeam);
   const firstCharId = turnOrder[0];
   const firstChar = [...playerTeam, ...enemyTeam].find(c => c.id === firstCharId);

@@ -1,32 +1,32 @@
-Je veux faire un jeu en 3D isomÃ©trique de nom : "Test 1".
+Je veux faire un jeu en 3D isométrique de nom : "Test 1".
 Je veux pouvoir me connecter avec un nom d'utilisateur et un mot de passe.
-Le jeu lui-mÃªme :
+Le jeu lui-même :
 Avec un plateau de 16 cases par 16 cases.
-Il y a deux Ã©quipes, l'un qui est pilotÃ©e par une IA et l'autre par le joueur.
+Il y a deux équipes, l'un qui est pilotée par une IA et l'autre par le joueur.
 L'IA se nomme "l'adversaire".
-Dans chaque Ã©quipe il y a trois personnages (voleur, guerrier, mage).
-Les personnages commence proches les uns des autres dans une Ã©quipe et opposÃ©s sur la carte.
-Les icÃ´nes des personnages sont comme debout sur la carte en 3D isomÃ©trique.
-Chaque unitÃ© (personnage) a des points de vie (10) et des points de mouvement (5).
-L'action se dÃ©roule en tour par tour, d'abord le tour du joueur, puis celui de l'adversaire.
-Pendant son tour on a le droit d'utiliser une seule unitÃ©, d'abord de la bouger (case par case, le nombre de fois qu'elle a de point de mouvement ou moins de fois), puis d'attaquer. Ce qui fait que lorsqu'on attaque, le mouvement est considÃ©rÃ© comme terminÃ©.
-Le personnage n'est pas obligÃ© d'attaquer, ni de se dÃ©placer Ã  chaque tour, il peut finir son tour en appuyant sur un bouton de fin de tour.
-A la suite de son attaque (qui est la derniÃ¨re action d'un tour) son tour est automatiquement terminÃ©.
+Dans chaque équipe il y a trois personnages (voleur, guerrier, mage).
+Les personnages commence proches les uns des autres dans une équipe et opposés sur la carte.
+Les icônes des personnages sont comme debout sur la carte en 3D isométrique.
+Chaque unité (personnage) a des points de vie (10) et des points de mouvement (5).
+L'action se déroule en tour par tour, d'abord le tour du joueur, puis celui de l'adversaire.
+Pendant son tour on a le droit d'utiliser une seule unité, d'abord de la bouger (case par case, le nombre de fois qu'elle a de point de mouvement ou moins de fois), puis d'attaquer. Ce qui fait que lorsqu'on attaque, le mouvement est considéré comme terminé.
+Le personnage n'est pas obligé d'attaquer, ni de se déplacer à chaque tour, il peut finir son tour en appuyant sur un bouton de fin de tour.
+A la suite de son attaque (qui est la dernière action d'un tour) son tour est automatiquement terminé.
 Le guerrier peut attaquer que au corps  corp (une case de distance), et tape 1d6 dommage contre le guerrier adverse, 1d4 contre le mage adverse et 1d10 contre le voleur adverse. Le guerrier peut attaquer deux fois par tour.
-Le mage peut attaquer la zone tout autour de lui sur 4 cases de distance, alliÃ©s comme ennemis et fait 1d6 contre les mages (pas lui), 1d10 contre les guerriers et 1d4 contre les voleurs.
-Le voleur peut attaquer soit au corps Ã  corps et dans ce cas il fait 1d6 contre le voleur, 1d10 contre le mage et 1d4 contre le guerrier et il a une chance sur deux de faire un "critique" et de ce fait de doubler ses dÃ©gats. Soit il attaque Ã  distance (4 max) et il ne peut pas faire de critique.
-A chaque fois que un personnage attaque, on doit visualiser les dÃ©gats sur les cibles et tous les personnages concernÃ©s.
-Une fois que le joueur a terminÃ© de jouer un personnnage, c'est Ã  l'adversaire, puis au joueurs, etc.
-Il faut que tous les personnages aient des barres et leur statut (vivants ou morts - de 0 points de vie) affichÃ©s en permanence.
-La partie se termine quand une Ã©quipe complÃ¨te est morte.
-Un affichage de victoire a lieu et un compteur mÃ©morise par utilisateur le nombre de victoire.
-Pour bouger, le joueur clique gauche sur les cases au fur et Ã  mesure du mouvement et de la dÃ©croissance du nombre de points de mouvement du personnage.
-Pour attaquer, le joueur clique droit sur une case quelconque ou sur un personnage adverse ou mÃªme un personnage de son Ã©quipe et l'attaque est centrÃ©e sur la case cliquÃ©e (celle du personnage sur lequel le clic a Ã©tÃ© fait).
+Le mage peut attaquer la zone tout autour de lui sur 4 cases de distance, alliés comme ennemis et fait 1d6 contre les mages (pas lui), 1d10 contre les guerriers et 1d4 contre les voleurs.
+Le voleur peut attaquer soit au corps à corps et dans ce cas il fait 1d6 contre le voleur, 1d10 contre le mage et 1d4 contre le guerrier et il a une chance sur deux de faire un "critique" et de ce fait de doubler ses dégats. Soit il attaque à distance (4 max) et il ne peut pas faire de critique.
+A chaque fois que un personnage attaque, on doit visualiser les dégats sur les cibles et tous les personnages concernés.
+Une fois que le joueur a terminé de jouer un personnnage, c'est à l'adversaire, puis au joueurs, etc.
+Il faut que tous les personnages aient des barres et leur statut (vivants ou morts - de 0 points de vie) affichés en permanence.
+La partie se termine quand une équipe complète est morte.
+Un affichage de victoire a lieu et un compteur mémorise par utilisateur le nombre de victoire.
+Pour bouger, le joueur clique gauche sur les cases au fur et à mesure du mouvement et de la décroissance du nombre de points de mouvement du personnage.
+Pour attaquer, le joueur clique droit sur une case quelconque ou sur un personnage adverse ou même un personnage de son équipe et l'attaque est centrée sur la case cliquée (celle du personnage sur lequel le clic a été fait).
 Pour l'adversaire, tu utiliseras l'IA dont la clef API sera OPENAI_API_KEY qui est mise dans les variables d'environnement du projet sur vercel.
-Quand la partie est fini, le jeu propose de relancer une autre partie et aussi permet de voir les rÃ©sultats de ses 10 derniÃ¨res parties et les tats sur ses parties terminÃ©es (combien gagnÃ©es, combien perdues, combien de coups par partie gagnÃ©es/perdues, combien de mouvements par parties, gagnÃ©es/perdues et toute autre stat que tu trouveras pertinentes.
-Je veux que le jeu gÃ©nÃ¨re au dÃ©but de la partie, sur le damier 16x16, des cases spÃ©ciales. En voisi la liste (les cases spÃ©ciales redeviennent normales aprÃ¨s leur utilisation, une seule fois) :
+Quand la partie est fini, le jeu propose de relancer une autre partie et aussi permet de voir les résultats de ses 10 dernières parties et les tats sur ses parties terminées (combien gagnées, combien perdues, combien de coups par partie gagnées/perdues, combien de mouvements par parties, gagnées/perdues et toute autre stat que tu trouveras pertinentes.
+Je veux que le jeu génère au début de la partie, sur le damier 16x16, des cases spéciales. En voisi la liste (les cases spéciales redeviennent normales après leur utilisation, une seule fois) :
 10 cases qui soignent 3 points de vie quand on finit son tour dessus (cases vertes).
-10 cases qui augmentent de deux dÃ©gats l'attaque prochaine quand on finit son mouvement sur la case (cases rouges).
-10 cases qui donnent 3 points de mouvement supplÃ©mentaires au pour le tour juste suivant au personnage qui stoppe son mouvement dessus (cases violettes).
-Les cases spÃ©ciales ne doivent pas se recouvrir, elles sont aussi dientifiÃ©e d'une couleur spÃ©ciales dÃ©finies avant.
-Les cases qui augmentent les dÃ©gats sont cumulatives jusqu'Ã  la prochaine attaque du personnage sur une unitÃ© (adverse ou dans son camp) (s'il attaque dans le vide, cela ne consomme pas le ou les bonus de dÃ©gats qui ont Ã©tÃ© cumulÃ©s par les cases rouges).
+10 cases qui augmentent de deux dégats l'attaque prochaine quand on finit son mouvement sur la case (cases rouges).
+10 cases qui donnent 3 points de mouvement supplémentaires au pour le tour juste suivant au personnage qui stoppe son mouvement dessus (cases violettes).
+Les cases spéciales ne doivent pas se recouvrir, elles sont aussi dientifiée d'une couleur spéciales définies avant.
+Les cases qui augmentent les dégats sont cumulatives jusqu'à la prochaine attaque du personnage sur une unité (adverse ou dans son camp) (s'il attaque dans le vide, cela ne consomme pas le ou les bonus de dégats qui ont été cumulés par les cases rouges).

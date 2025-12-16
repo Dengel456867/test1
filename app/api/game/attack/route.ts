@@ -42,12 +42,12 @@ export async function POST(request: NextRequest) {
     const allCharacters = [...gameState.playerTeam, ...gameState.enemyTeam];
     const attackResult = executeAttack(character, pos, gameState.board, allCharacters);
     
-    // VÃ©rifier si le jeu est terminÃ©
+    // Vérifier si le jeu est terminé
     const { gameOver, winner } = checkGameOver(gameState);
     gameState.gameOver = gameOver;
     gameState.winner = winner;
     
-    // Finir le tour aprÃ¨s l'attaque
+    // Finir le tour après l'attaque
     gameState.currentTurn = 'enemy';
     gameState.turnCount++;
     

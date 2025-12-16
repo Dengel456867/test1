@@ -578,11 +578,15 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
           const isCurrent = index === gameState.currentTurnOrderIndex;
           const hasPlayed = index < gameState.currentTurnOrderIndex;
           const isPlayer = char.team === 'player';
+          // En mode JcJ, afficher "Ã‰quipe Bleue/Rouge" au lieu de "Vous/Ennemi"
+          const teamLabel = gameMode === 'pvp' 
+            ? (isPlayer ? '(Ã‰quipe Bleue)' : '(Ã‰quipe Rouge)') 
+            : (isPlayer ? '(Vous)' : '(Ennemi)');
           
           return (
             <div
               key={char.id}
-              title={`${getClassName(char.type)} ${isPlayer ? '(Vous)' : '(Ennemi)'} - ${char.health}/${char.maxHealth} PV`}
+              title={`${getClassName(char.type)} ${teamLabel} - ${char.health}/${char.maxHealth} PV`}
               style={{
                 width: '42px',
                 height: '42px',
@@ -675,13 +679,19 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
       {gameState.gameOver && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
           <div style={{ textAlign: 'center', padding: '40px', borderRadius: '20px', background: 'rgba(30,30,50,0.95)', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <div style={{ fontSize: '72px', marginBottom: '16px' }}>{gameState.winner === 'player' ? 'ðŸ†' : 'ðŸ’€'}</div>
-            <h2 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px', color: gameState.winner === 'player' ? '#fbbf24' : '#ef4444' }}>
-              {gameState.winner === 'player' ? 'VICTOIRE !' : 'DÃ‰FAITE'}
+            <div style={{ fontSize: '72px', marginBottom: '16px' }}>
+              {gameMode === 'pvp' 
+                ? (gameState.winner === 'player' ? 'ðŸ”µ' : 'ðŸ”´')
+                : (gameState.winner === 'player' ? 'ðŸ†' : 'ðŸ’€')}
+            </div>
+            <h2 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px', color: gameState.winner === 'player' ? (gameMode === 'pvp' ? '#3b82f6' : '#fbbf24') : '#ef4444' }}>
+              {gameMode === 'pvp'
+                ? (gameState.winner === 'player' ? 'Ã‰QUIPE BLEUE GAGNE !' : 'Ã‰QUIPE ROUGE GAGNE !')
+                : (gameState.winner === 'player' ? 'VICTOIRE !' : 'DÃ‰FAITE')}
             </h2>
             <p style={{ color: '#9ca3af', marginBottom: '24px' }}>
               {gameMode === 'pvp' 
-                ? (gameState.winner === 'player' ? 'Bleu gagne !' : 'Rouge gagne !')
+                ? (gameState.winner === 'player' ? 'L\'Ã©quipe bleue remporte la partie !' : 'L\'Ã©quipe rouge remporte la partie !')
                 : (gameState.winner === 'player' ? 'Vous avez gagnÃ© !' : 'Vous avez perdu...')}
             </p>
             <button

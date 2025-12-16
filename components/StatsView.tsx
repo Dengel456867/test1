@@ -23,7 +23,7 @@ export default function StatsView({ stats }: StatsViewProps) {
         </div>
         
         <div className="bg-red-900/30 p-4 rounded border border-red-500">
-          <div className="text-red-400 text-sm">DÃ©faites</div>
+          <div className="text-red-400 text-sm">Défaites</div>
           <div className="text-2xl font-bold text-red-400">{stats.losses}</div>
         </div>
         
@@ -53,7 +53,7 @@ export default function StatsView({ stats }: StatsViewProps) {
         </div>
         
         <div className="bg-gray-700 p-4 rounded">
-          <h3 className="text-lg font-bold text-white mb-4">Moyennes - DÃ©faites</h3>
+          <h3 className="text-lg font-bold text-white mb-4">Moyennes - Défaites</h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between text-gray-300">
               <span>Tours par partie:</span>
@@ -68,10 +68,10 @@ export default function StatsView({ stats }: StatsViewProps) {
       </div>
       
       <div className="bg-gray-700 p-4 rounded">
-        <h3 className="text-lg font-bold text-white mb-4">10 derniÃ¨res parties</h3>
+        <h3 className="text-lg font-bold text-white mb-4">10 dernières parties</h3>
         <div className="space-y-2">
           {stats.recentGames.length === 0 ? (
-            <div className="text-gray-400">Aucune partie enregistrÃ©e</div>
+            <div className="text-gray-400">Aucune partie enregistrée</div>
           ) : (
             stats.recentGames.map((game, index) => (
               <div
@@ -82,14 +82,14 @@ export default function StatsView({ stats }: StatsViewProps) {
               >
                 <div>
                   <span className={`font-semibold ${game.won ? 'text-green-400' : 'text-red-400'}`}>
-                    {game.won ? 'Victoire' : 'DÃ©faite'}
+                    {game.won ? 'Victoire' : 'Défaite'}
                   </span>
                   <span className="text-gray-400 text-sm ml-2">
                     {new Date(game.timestamp).toLocaleDateString()}
                   </span>
                 </div>
                 <div className="text-sm text-gray-300">
-                  {game.turns} tours â€¢ {game.moves} mouvements
+                  {game.turns} tours • {game.moves} mouvements
                 </div>
               </div>
             ))

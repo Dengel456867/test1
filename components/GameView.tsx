@@ -28,7 +28,7 @@ function CharacterCard({
   isCurrentTurn?: boolean;
   turnPosition?: number;
 }) {
-  const getEmoji = (type: string) => ({ warrior: '⚔️', mage: '🔮', thief: '🗡️', royal: '👑' }[type] || '👤');
+  const getEmoji = (type: string) => ({ warrior: 'âš”ï¸', mage: 'ðŸ”®', thief: 'ðŸ—¡ï¸', royal: 'ðŸ‘‘' }[type] || 'ðŸ‘¤');
   const getName = (type: string) => ({ warrior: 'Guerrier', mage: 'Mage', thief: 'Voleur', royal: 'Royal' }[type] || type);
   const healthPercent = (char.health / char.maxHealth) * 100;
   const color = isPlayer ? 'blue' : 'red';
@@ -60,9 +60,9 @@ function CharacterCard({
           {turnPosition + 1}
         </div>
       )}
-      {/* En-tête avec nom et type */}
+      {/* En-tÃªte avec nom et type */}
       <div className="flex items-center gap-2 mb-2">
-        <span className="text-lg">{char.isAlive ? getEmoji(char.type) : '💀'}</span>
+        <span className="text-lg">{char.isAlive ? getEmoji(char.type) : 'ðŸ’€'}</span>
         <span className="font-bold text-sm">{getName(char.type)}</span>
       </div>
       
@@ -77,28 +77,28 @@ function CharacterCard({
       {/* Stats en colonnes */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 12px', fontSize: '14px' }}>
         <div title="Points de vie actuels / maximum" style={{ cursor: 'help' }}>
-          <span style={{ color: '#06b6d4' }}>❤</span> <span style={{ color: '#fff' }}>{char.health}/{char.maxHealth}</span>
+          <span style={{ color: '#06b6d4' }}>â¤</span> <span style={{ color: '#fff' }}>{char.health}/{char.maxHealth}</span>
         </div>
-        <div title="Bouclier : absorbe les dégâts avant les points de vie" style={{ cursor: 'help', opacity: char.shield > 0 ? 1 : 0.4 }}>
-          <span style={{ color: '#ffffff' }}>🛡</span> <span style={{ color: '#fff' }}>{char.shield}</span>
+        <div title="Bouclier : absorbe les dÃ©gÃ¢ts avant les points de vie" style={{ cursor: 'help', opacity: char.shield > 0 ? 1 : 0.4 }}>
+          <span style={{ color: '#ffffff' }}>ðŸ›¡</span> <span style={{ color: '#fff' }}>{char.shield}</span>
         </div>
-        <div title="Armure : réduit les dégâts reçus de ce montant" style={{ cursor: 'help', opacity: char.armor > 0 ? 1 : 0.4 }}>
-          <span style={{ color: '#f97316' }}>🦺</span> <span style={{ color: '#fff' }}>{char.armor}</span>
+        <div title="Armure : rÃ©duit les dÃ©gÃ¢ts reÃ§us de ce montant" style={{ cursor: 'help', opacity: char.armor > 0 ? 1 : 0.4 }}>
+          <span style={{ color: '#f97316' }}>ðŸ¦º</span> <span style={{ color: '#fff' }}>{char.armor}</span>
         </div>
-        <div title="Régénération : PV récupérés au début de chaque tour" style={{ cursor: 'help', opacity: char.regeneration > 0 ? 1 : 0.4 }}>
+        <div title="RÃ©gÃ©nÃ©ration : PV rÃ©cupÃ©rÃ©s au dÃ©but de chaque tour" style={{ cursor: 'help', opacity: char.regeneration > 0 ? 1 : 0.4 }}>
           <span style={{ color: '#166534' }}>+</span> <span style={{ color: '#fff' }}>{char.regeneration}/t</span>
         </div>
         <div title="Points de mouvement maximum" style={{ cursor: 'help' }}>
-          <span style={{ color: '#a855f7' }}>👟</span> <span style={{ color: '#fff' }}>{char.maxMovement}</span>
+          <span style={{ color: '#a855f7' }}>ðŸ‘Ÿ</span> <span style={{ color: '#fff' }}>{char.maxMovement}</span>
         </div>
-        <div title="Initiative : plus elle est basse, plus le personnage joue tôt dans le tour" style={{ cursor: 'help' }}>
-          <span style={{ color: '#eab308' }}>⚡</span> <span style={{ color: '#fff' }}>{char.initiative}</span>
+        <div title="Initiative : plus elle est basse, plus le personnage joue tÃ´t dans le tour" style={{ cursor: 'help' }}>
+          <span style={{ color: '#eab308' }}>âš¡</span> <span style={{ color: '#fff' }}>{char.initiative}</span>
         </div>
         <div title="Nombre d'attaques par tour" style={{ cursor: 'help' }}>
-          <span style={{ color: '#9ca3af' }}>🗡</span> <span style={{ color: '#fff' }}>{char.type === 'warrior' ? 2 : 1}</span>
+          <span style={{ color: '#9ca3af' }}>ðŸ—¡</span> <span style={{ color: '#fff' }}>{char.type === 'warrior' ? 2 : 1}</span>
         </div>
-        <div title="Dégâts de base (avant multiplicateur d'avantage/désavantage)" style={{ cursor: 'help' }}>
-          <span style={{ color: '#ef4444' }}>✊</span> <span style={{ color: '#fff' }}>{BASE_DAMAGE[char.type.toUpperCase() as keyof typeof BASE_DAMAGE] + char.damageBoost}</span>
+        <div title="DÃ©gÃ¢ts de base (avant multiplicateur d'avantage/dÃ©savantage)" style={{ cursor: 'help' }}>
+          <span style={{ color: '#ef4444' }}>âœŠ</span> <span style={{ color: '#fff' }}>{BASE_DAMAGE[char.type.toUpperCase() as keyof typeof BASE_DAMAGE] + char.damageBoost}</span>
         </div>
       </div>
     </div>
@@ -118,9 +118,9 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [attackResult, setAttackResult] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  // Indique si le joueur a déjà attaqué ce tour (bloque le mouvement)
+  // Indique si le joueur a dÃ©jÃ  attaquÃ© ce tour (bloque le mouvement)
   const [hasAttacked, setHasAttacked] = useState<boolean>(false);
-  // Position d'origine du personnage au début du tour (pour mouvement hypothétique)
+  // Position d'origine du personnage au dÃ©but du tour (pour mouvement hypothÃ©tique)
   const [originalPosition, setOriginalPosition] = useState<Position | null>(null);
   // Points de mouvement d'origine
   const [originalMovement, setOriginalMovement] = useState<number>(0);
@@ -129,9 +129,9 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
   // Mode de jeu : 'vsAI' (contre IA) ou 'pvp' (joueur contre joueur)
   const [gameMode, setGameMode] = useState<'vsAI' | 'pvp'>('vsAI');
   
-  // Le personnage actuel est déterminé par l'ordre d'initiative
+  // Le personnage actuel est dÃ©terminÃ© par l'ordre d'initiative
   const currentCharacter = gameState ? getCurrentCharacter(gameState) : null;
-  // En mode PvP, les deux équipes sont contrôlables
+  // En mode PvP, les deux Ã©quipes sont contrÃ´lables
   const isPlayerTurn = gameMode === 'pvp' ? true : currentCharacter?.team === 'player';
   
   useEffect(() => {
@@ -144,18 +144,18 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
     setTurnTimer(TURN_TIMER);
   }, []);
   
-  // Réinitialiser originalPosition et originalMovement quand le personnage actif change
+  // RÃ©initialiser originalPosition et originalMovement quand le personnage actif change
   useEffect(() => {
     if (!gameState || !currentCharacter) return;
     
-    // Réinitialiser pour le nouveau personnage actif
+    // RÃ©initialiser pour le nouveau personnage actif
     setOriginalPosition(currentCharacter.position);
     setOriginalMovement(currentCharacter.movement);
     setHasAttacked(false);
     setTurnTimer(TURN_TIMER);
   }, [gameState?.currentTurnOrderIndex, gameState?.turnCount]);
   
-  // Gérer le tour de l'ennemi (quand c'est le tour d'un personnage ennemi) - seulement en mode vs IA
+  // GÃ©rer le tour de l'ennemi (quand c'est le tour d'un personnage ennemi) - seulement en mode vs IA
   useEffect(() => {
     if (!gameState || gameState.gameOver || isProcessing) return;
     if (gameMode === 'pvp') return; // En mode PvP, pas d'IA
@@ -168,7 +168,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
     const executeEnemyTurn = async () => {
       await new Promise(r => setTimeout(r, 1000));
       
-      // L'IA joue avec le personnage actuel (déterminé par l'ordre d'initiative)
+      // L'IA joue avec le personnage actuel (dÃ©terminÃ© par l'ordre d'initiative)
       const move = await getEnemyMove(gameState);
       let currentState = gameState;
       
@@ -195,7 +195,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
       setGameState(finalState);
       setIsProcessing(false);
       
-      // Réinitialiser pour le prochain personnage
+      // RÃ©initialiser pour le prochain personnage
       setHasAttacked(false);
       setTurnTimer(TURN_TIMER);
       
@@ -217,7 +217,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
     const interval = setInterval(() => {
       setTurnTimer(prev => {
         if (prev <= 1) {
-          // Temps écoulé - fin automatique du tour
+          // Temps Ã©coulÃ© - fin automatique du tour
           clearInterval(interval);
           setGameState(endTurn(gameState, currentCharacter?.id));
           setHasAttacked(false);
@@ -243,7 +243,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
   const switchGameMode = (newMode: 'vsAI' | 'pvp') => {
     if (newMode === gameMode) return;
     setGameMode(newMode);
-    // Réinitialiser la partie
+    // RÃ©initialiser la partie
     const newGame = initializeGame();
     setGameState(newGame);
     const firstChar = getCurrentCharacter(newGame);
@@ -259,7 +259,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
     return (
       <div style={{ width: '100vw', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a1a' }}>
         <div className="text-center">
-          <div className="text-6xl mb-4">⚔️</div>
+          <div className="text-6xl mb-4">âš”ï¸</div>
           <p className="text-gray-400">Chargement...</p>
         </div>
       </div>
@@ -287,13 +287,13 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
         setAttackResult(result);
         setTimeout(() => setAttackResult(null), 1500);
         
-        setHasAttacked(true); // Bloque le mouvement après attaque
+        setHasAttacked(true); // Bloque le mouvement aprÃ¨s attaque
         
-        // Trouver le personnage mis à jour
+        // Trouver le personnage mis Ã  jour
         const updated = [...newState.playerTeam, ...newState.enemyTeam].find(c => c.id === currentCharacter.id);
         const newAttacksLeft = (updated?.attacksRemaining ?? attacksRemaining) - 1;
         
-        // Mettre à jour les attaques restantes du personnage
+        // Mettre Ã  jour les attaques restantes du personnage
         let finalState = newState;
         if (updated) {
           const updatedChar = { ...updated, attacksRemaining: newAttacksLeft };
@@ -316,14 +316,14 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
           }
         }
         
-        // Si c'est un guerrier avec des attaques restantes, vérifier s'il y a des cibles au corps à corps
+        // Si c'est un guerrier avec des attaques restantes, vÃ©rifier s'il y a des cibles au corps Ã  corps
         let shouldEndTurn = newAttacksLeft <= 0;
         
         if (!shouldEndTurn && currentCharacter.type === 'warrior' && updated) {
-          // Chercher des cibles adjacentes (ennemis OU alliés, distance = 1)
+          // Chercher des cibles adjacentes (ennemis OU alliÃ©s, distance = 1)
           const allCharacters = [...finalState.playerTeam, ...finalState.enemyTeam];
           const hasAdjacentTarget = allCharacters.some(char => {
-            // Exclure le guerrier lui-même et les morts
+            // Exclure le guerrier lui-mÃªme et les morts
             if (char.id === updated.id || !char.isAlive) return false;
             const distance = Math.abs(char.position.x - updated.position.x) + 
                            Math.abs(char.position.y - updated.position.y);
@@ -331,7 +331,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
           });
           
           if (!hasAdjacentTarget) {
-            shouldEndTurn = true; // Pas de cible au corps à corps, fin du tour
+            shouldEndTurn = true; // Pas de cible au corps Ã  corps, fin du tour
           }
         }
         
@@ -344,7 +344,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
         }
       }
     } else {
-      // MOUVEMENT HYPOTHÉTIQUE - bloqué si on a déjà attaqué
+      // MOUVEMENT HYPOTHÃ‰TIQUE - bloquÃ© si on a dÃ©jÃ  attaquÃ©
       if (hasAttacked) return;
       
       // Utiliser la position d'origine pour calculer la distance
@@ -352,18 +352,18 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
       const maxRange = originalMovement || currentCharacter.maxMovement;
       const distanceFromOrigin = Math.abs(position.x - originPos.x) + Math.abs(position.y - originPos.y);
       
-      // Vérifier si la case est dans la portée depuis la position d'origine
+      // VÃ©rifier si la case est dans la portÃ©e depuis la position d'origine
       if (distanceFromOrigin > maxRange) return;
       
-      // Vérifier si la case est la position actuelle (ne rien faire)
+      // VÃ©rifier si la case est la position actuelle (ne rien faire)
       if (position.x === currentCharacter.position.x && position.y === currentCharacter.position.y) return;
       
-      // Vérifier si la case est libre OU si c'est la position d'origine (on peut y retourner)
+      // VÃ©rifier si la case est libre OU si c'est la position d'origine (on peut y retourner)
       const isOriginPos = position.x === originPos.x && position.y === originPos.y;
       const cellContent = gameState.board[position.y]?.[position.x];
       if (cellContent !== null && !isOriginPos) return;
       
-      // Déplacer le personnage de façon hypothétique
+      // DÃ©placer le personnage de faÃ§on hypothÃ©tique
       const newBoard = gameState.board.map(row => [...row]);
       newBoard[currentCharacter.position.y][currentCharacter.position.x] = null;
       
@@ -375,7 +375,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
       
       newBoard[position.y][position.x] = updatedCharacter;
       
-      // Mettre à jour dans la bonne équipe
+      // Mettre Ã  jour dans la bonne Ã©quipe
       const teamKey = currentCharacter.team === 'player' ? 'playerTeam' : 'enemyTeam';
       const updatedTeam = gameState[teamKey].map(c =>
         c.id === currentCharacter.id ? updatedCharacter : c
@@ -389,18 +389,18 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
     }
   };
 
-  // Fonction pour obtenir l'icône de classe
+  // Fonction pour obtenir l'icÃ´ne de classe
   const getClassIcon = (type: string) => {
     switch (type) {
-      case 'warrior': return '♜'; // Tour (rook)
-      case 'mage': return '♝'; // Fou (bishop)
-      case 'thief': return '♞'; // Cavalier (knight)
-      case 'royal': return '♛'; // Reine (queen)
+      case 'warrior': return 'â™œ'; // Tour (rook)
+      case 'mage': return 'â™'; // Fou (bishop)
+      case 'thief': return 'â™ž'; // Cavalier (knight)
+      case 'royal': return 'â™›'; // Reine (queen)
       default: return '?';
     }
   };
 
-  // Fonction pour obtenir le nom de classe en français
+  // Fonction pour obtenir le nom de classe en franÃ§ais
   const getClassName = (type: string) => {
     switch (type) {
       case 'warrior': return 'Guerrier';
@@ -451,7 +451,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
               border: `2px solid ${turnTimer <= 10 ? 'rgba(239,68,68,0.6)' : 'rgba(59,130,246,0.4)'}`,
               animation: turnTimer <= 5 ? 'pulse 0.5s infinite' : 'none'
             }}>
-              ⏱️ {turnTimer}s
+              â±ï¸ {turnTimer}s
             </div>
           )}
           {currentCharacter && (
@@ -464,13 +464,13 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
               color: isPlayerTurn ? '#93c5fd' : '#fca5a5', 
               border: `1px solid ${isPlayerTurn ? 'rgba(59,130,246,0.5)' : 'rgba(239,68,68,0.5)'}` 
             }}>
-              {isPlayerTurn ? '🎮' : '🤖'} {currentCharacter.type === 'warrior' ? 'Guerrier' : currentCharacter.type === 'mage' ? 'Mage' : currentCharacter.type === 'thief' ? 'Voleur' : 'Royal'}
+              {isPlayerTurn ? 'ðŸŽ®' : 'ðŸ¤–'} {currentCharacter.type === 'warrior' ? 'Guerrier' : currentCharacter.type === 'mage' ? 'Mage' : currentCharacter.type === 'thief' ? 'Voleur' : 'Royal'}
               {' '}({gameState.currentTurnOrderIndex + 1}/{gameState.turnOrder.length})
             </div>
           )}
         </div>
         
-        {/* Droite - Contrôles */}
+        {/* Droite - ContrÃ´les */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, justifyContent: 'flex-end' }}>
           <button
             onClick={() => {
@@ -483,10 +483,10 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
             disabled={!canPlayerAct}
             style={{ padding: '6px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', background: canPlayerAct ? 'linear-gradient(135deg, #6366f1, #ec4899)' : '#374151', color: 'white', border: 'none', cursor: canPlayerAct ? 'pointer' : 'not-allowed', opacity: canPlayerAct ? 1 : 0.5 }}
           >
-            Fin tour {currentCharacter?.type === 'warrior' && currentCharacter.attacksRemaining > 0 ? `(${currentCharacter.attacksRemaining}⚔️)` : ''}
+            Fin tour {currentCharacter?.type === 'warrior' && currentCharacter.attacksRemaining > 0 ? `(${currentCharacter.attacksRemaining}âš”ï¸)` : ''}
           </button>
           <button onClick={onLogout} style={{ padding: '6px 12px', borderRadius: '8px', background: 'rgba(255,255,255,0.1)', color: '#f87171', border: 'none', cursor: 'pointer' }}>
-            🚪
+            ðŸšª
           </button>
         </div>
       </div>
@@ -494,7 +494,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
       {/* Left Panel - Player Team */}
       <div style={{ padding: '12px', overflowY: 'auto', borderRight: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)' }}>
         <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#60a5fa', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-          {gameMode === 'pvp' ? '🔵 Équipe Bleue' : '🎮 Votre équipe'}
+          {gameMode === 'pvp' ? 'ðŸ”µ Ã‰quipe Bleue' : 'ðŸŽ® Votre Ã©quipe'}
         </div>
         {gameState.playerTeam.map(char => {
           const turnPos = gameState.turnOrder.indexOf(char.id);
@@ -525,16 +525,16 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
         {!isPlayerTurn && !gameState.gameOver && (
           <div style={{ position: 'absolute', top: '16px', left: '50%', transform: 'translateX(-50%)', zIndex: 20 }}>
             <div style={{ padding: '8px 24px', borderRadius: '20px', background: 'rgba(239,68,68,0.9)', color: 'white', fontWeight: 'bold', animation: 'pulse 1s infinite' }}>
-              🤖 L'adversaire joue...
+              ðŸ¤– L'adversaire joue...
             </div>
           </div>
         )}
         
         {attackResult && (
           <div style={{ position: 'absolute', top: '60px', left: '50%', transform: 'translateX(-50%)', zIndex: 30, padding: '16px 24px', borderRadius: '12px', background: 'rgba(234,88,12,0.95)', color: 'white', textAlign: 'center' }}>
-            <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>⚔️ ATTAQUE !</div>
+            <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>âš”ï¸ ATTAQUE !</div>
             {attackResult.targets?.map((t: any, i: number) => (
-              <div key={i} style={{ fontSize: '14px' }}>-{t.damage} PV {t.isCritical && '💥'}</div>
+              <div key={i} style={{ fontSize: '14px' }}>-{t.damage} PV {t.isCritical && 'ðŸ’¥'}</div>
             ))}
           </div>
         )}
@@ -543,7 +543,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
       {/* Right Panel - Enemy Team */}
       <div style={{ padding: '12px', overflowY: 'auto', borderLeft: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)' }}>
         <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#f87171', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-          {gameMode === 'pvp' ? '🔴 Équipe Rouge' : '🤖 Adversaire'}
+          {gameMode === 'pvp' ? 'ðŸ”´ Ã‰quipe Rouge' : 'ðŸ¤– Adversaire'}
         </div>
         {gameState.enemyTeam.map(char => {
           const turnPos = gameState.turnOrder.indexOf(char.id);
@@ -646,7 +646,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
             boxShadow: gameMode === 'pvp' ? '0 0 12px rgba(16,185,129,0.5)' : 'none'
           }}
         >
-          👥 JcJ
+          ðŸ‘¥ JcJ
         </button>
         <button
           onClick={() => switchGameMode('vsAI')}
@@ -667,7 +667,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
             boxShadow: gameMode === 'vsAI' ? '0 0 12px rgba(245,158,11,0.5)' : 'none'
           }}
         >
-          🤖 vs IA
+          ðŸ¤– vs IA
         </button>
       </div>
       
@@ -675,14 +675,14 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
       {gameState.gameOver && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
           <div style={{ textAlign: 'center', padding: '40px', borderRadius: '20px', background: 'rgba(30,30,50,0.95)', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <div style={{ fontSize: '72px', marginBottom: '16px' }}>{gameState.winner === 'player' ? '🏆' : '💀'}</div>
+            <div style={{ fontSize: '72px', marginBottom: '16px' }}>{gameState.winner === 'player' ? 'ðŸ†' : 'ðŸ’€'}</div>
             <h2 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px', color: gameState.winner === 'player' ? '#fbbf24' : '#ef4444' }}>
-              {gameState.winner === 'player' ? 'VICTOIRE !' : 'DÉFAITE'}
+              {gameState.winner === 'player' ? 'VICTOIRE !' : 'DÃ‰FAITE'}
             </h2>
             <p style={{ color: '#9ca3af', marginBottom: '24px' }}>
               {gameMode === 'pvp' 
                 ? (gameState.winner === 'player' ? 'Bleu gagne !' : 'Rouge gagne !')
-                : (gameState.winner === 'player' ? 'Vous avez gagné !' : 'Vous avez perdu...')}
+                : (gameState.winner === 'player' ? 'Vous avez gagnÃ© !' : 'Vous avez perdu...')}
             </p>
             <button
               onClick={() => {
@@ -696,7 +696,7 @@ export default function GameView({ userId, onGameEnd, onLogout }: GameViewProps)
               }}
               style={{ padding: '12px 32px', borderRadius: '12px', background: 'linear-gradient(135deg, #6366f1, #ec4899)', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '16px' }}
             >
-              🔄 Rejouer
+              ðŸ”„ Rejouer
             </button>
           </div>
         </div>

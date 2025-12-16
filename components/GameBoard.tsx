@@ -451,7 +451,8 @@ function CharacterModel({ character, isSelected, onClick }: {
       )}
       
       {/* Barre de vie - Billboard pour toujours faire face Ã  la camÃ©ra */}
-      <Billboard position={[0, 1.45, 0]} follow={true} lockX={false} lockY={false} lockZ={false}>
+      {/* Position plus haute pour le Royal (couronne) */}
+      <Billboard position={[0, character.type === 'royal' ? 1.65 : 1.45, 0]} follow={true} lockX={false} lockY={false} lockZ={false}>
         <mesh position={[0, 0, 0.01]}>
           <planeGeometry args={[0.5, 0.06]} />
           <meshBasicMaterial color="#1f2937" />

@@ -1,4 +1,4 @@
-// IA adverse - stratégie simple sans OpenAI
+// IA adverse - stratÃ©gie simple sans OpenAI
 
 import { GameState, Character, Position } from '../types/game';
 import { ATTACK_RANGES } from '../game/constants';
@@ -16,7 +16,7 @@ function getDistance(pos1: Position, pos2: Position): number {
 }
 
 export async function getEnemyMove(gameState: GameState): Promise<AIMove> {
-  // Vérifications de base
+  // VÃ©rifications de base
   if (gameState.currentTurn !== 'enemy' || gameState.gameOver) {
     return { action: 'end_turn' };
   }
@@ -54,7 +54,7 @@ export async function getEnemyMove(gameState: GameState): Promise<AIMove> {
   // Logique par type de personnage
   switch (currentCharacter.type) {
     case 'mage':
-      // Le mage attaque en zone autour de lui (portée 3)
+      // Le mage attaque en zone autour de lui (portÃ©e 3)
       if (closestDistance <= ATTACK_RANGES.MAGE) {
         return {
           action: 'attack',
@@ -66,7 +66,7 @@ export async function getEnemyMove(gameState: GameState): Promise<AIMove> {
       break;
       
     case 'warrior':
-      // Le guerrier doit être au corps à corps (portée 1)
+      // Le guerrier doit Ãªtre au corps Ã  corps (portÃ©e 1)
       if (closestDistance <= ATTACK_RANGES.WARRIOR) {
         return {
           action: 'attack',
@@ -78,8 +78,8 @@ export async function getEnemyMove(gameState: GameState): Promise<AIMove> {
       break;
       
     case 'thief':
-      // Le voleur peut attaquer jusqu'à 4 cases de distance
-      // Corps à corps si distance <= 1, distance sinon
+      // Le voleur peut attaquer jusqu'Ã  4 cases de distance
+      // Corps Ã  corps si distance <= 1, distance sinon
       if (closestDistance <= ATTACK_RANGES.THIEF) {
         const isMelee = closestDistance <= 1;
         return {
@@ -92,7 +92,7 @@ export async function getEnemyMove(gameState: GameState): Promise<AIMove> {
       break;
       
     case 'royal':
-      // Le royal doit être au corps à corps (portée 1)
+      // Le royal doit Ãªtre au corps Ã  corps (portÃ©e 1)
       if (closestDistance <= ATTACK_RANGES.ROYAL) {
         return {
           action: 'attack',
@@ -104,7 +104,7 @@ export async function getEnemyMove(gameState: GameState): Promise<AIMove> {
       break;
   }
   
-  // Si on ne peut pas attaquer, se déplacer vers la cible
+  // Si on ne peut pas attaquer, se dÃ©placer vers la cible
   if (currentCharacter.movement > 0) {
     const movePos = findBestMove(currentCharacter, closestTarget.position, gameState);
     if (movePos) {
@@ -137,13 +137,13 @@ function findBestMove(
       const newX = position.x + dx;
       const newY = position.y + dy;
       
-      // Vérifier les limites du plateau
+      // VÃ©rifier les limites du plateau
       if (newX < 0 || newX >= 16 || newY < 0 || newY >= 16) continue;
       
-      // Vérifier si la case est libre
+      // VÃ©rifier si la case est libre
       if (gameState.board[newY]?.[newX] !== null) continue;
       
-      // Calculer la distance à la cible
+      // Calculer la distance Ã  la cible
       const distToTarget = getDistance({ x: newX, y: newY }, targetPos);
       if (distToTarget < bestDist) {
         bestDist = distToTarget;

@@ -2,7 +2,7 @@
 
 import { GameStats, UserStats } from '../types/game';
 
-// Stockage en mÃ©moire (en production, utiliser une vraie base de donnÃ©es)
+// Stockage en mémoire (en production, utiliser une vraie base de données)
 const gameStats: Map<string, GameStats[]> = new Map();
 
 export function saveGameStats(stats: GameStats): void {

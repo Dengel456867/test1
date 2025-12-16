@@ -23,9 +23,9 @@ export interface Character {
   movementBoost: number;
   attacksRemaining: number;
   initiative: number; // Initiative pour l'ordre de jeu (plus bas = joue en premier)
-  armor: number; // Réduction de dégâts subis (permanent)
-  shield: number; // Points de bouclier (absorbent les dégâts avant la vie)
-  regeneration: number; // PV régénérés par tour
+  armor: number; // RÃ©duction de dÃ©gÃ¢ts subis (permanent)
+  shield: number; // Points de bouclier (absorbent les dÃ©gÃ¢ts avant la vie)
+  regeneration: number; // PV rÃ©gÃ©nÃ©rÃ©s par tour
 }
 
 export interface SpecialTile {
@@ -39,7 +39,7 @@ export interface GameState {
   playerTeam: Character[];
   enemyTeam: Character[];
   specialTiles: SpecialTile[];
-  currentTurn: Team; // Conservé pour compatibilité, basé sur le personnage actif
+  currentTurn: Team; // ConservÃ© pour compatibilitÃ©, basÃ© sur le personnage actif
   currentCharacterIndex: number;
   selectedCharacter: Character | null;
   gameOver: boolean;
@@ -47,7 +47,7 @@ export interface GameState {
   turnCount: number; // Tour global
   moveCount: number;
   movementCount: number;
-  // Système de tour global basé sur l'initiative
+  // SystÃ¨me de tour global basÃ© sur l'initiative
   turnOrder: string[]; // IDs des personnages dans l'ordre d'initiative
   currentTurnOrderIndex: number; // Index dans turnOrder
 }

@@ -25,7 +25,7 @@ export function createCharacter(
     initiative: stats.initiative,
     armor: type === 'warrior' ? 1 : 0,       // Guerrier commence avec 1 armure
     shield: 0,
-    regeneration: type === 'mage' ? 1 : 0,   // Mage commence avec 1 rÃ©gÃ©nÃ©ration
+    regeneration: type === 'mage' ? 1 : 0,   // Mage commence avec 1 régénération
   };
 
   return baseCharacter;

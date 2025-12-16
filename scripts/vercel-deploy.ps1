@@ -14,26 +14,33 @@ try {
     
     if ($project) {
         Write-Host "Projet trouve: $($project.name) (ID: $($project.id))" -ForegroundColor Green
+        Write-Host "Repo GitHub: $($project.link.org)/$($project.link.repo)" -ForegroundColor Gray
         
-        # Declencher un deploiement
-        Write-Host "Declenchement du deploiement..." -ForegroundColor Cyan
+        # Recuperer le dernier deploiement pour forcer un redeploy
+        Write-Host "Recherche du dernier deploiement..." -ForegroundColor Cyan
+        $deployments = Invoke-RestMethod -Uri "https://api.vercel.com/v6/deployments?projectId=$($project.id)&limit=1" -Method Get -Headers $headers
         
-        $deployBody = @{
-            name = $config.vercel.projectName
-            project = $project.id
-            target = "production"
-            gitSource = @{
-                type = "github"
-                ref = "main"
-                repoId = $project.link.repoId
-            }
-        } | ConvertTo-Json -Depth 4
-        
-        $deployment = Invoke-RestMethod -Uri "https://api.vercel.com/v13/deployments" -Method Post -Headers $headers -Body $deployBody
-        
-        Write-Host "Deploiement declenche avec succes!" -ForegroundColor Green
-        Write-Host "URL: https://$($deployment.url)" -ForegroundColor Cyan
-        Write-Host "Status: $($deployment.readyState)" -ForegroundColor Yellow
+        if ($deployments.deployments.Count -gt 0) {
+            $lastDeploy = $deployments.deployments[0]
+            Write-Host "Dernier deploiement: $($lastDeploy.url) - $($lastDeploy.state)" -ForegroundColor Gray
+            
+            # Redeploy depuis le dernier deploiement
+            Write-Host "Declenchement du redeploiement..." -ForegroundColor Cyan
+            
+            $redeployBody = @{
+                deploymentId = $lastDeploy.uid
+                name = $config.vercel.projectName
+                target = "production"
+            } | ConvertTo-Json
+            
+            $deployment = Invoke-RestMethod -Uri "https://api.vercel.com/v13/deployments?forceNew=1" -Method Post -Headers $headers -Body $redeployBody
+            
+            Write-Host "Deploiement declenche avec succes!" -ForegroundColor Green
+            Write-Host "URL: https://$($deployment.url)" -ForegroundColor Cyan
+            Write-Host "Status: $($deployment.readyState)" -ForegroundColor Yellow
+        } else {
+            Write-Host "Aucun deploiement trouve pour ce projet" -ForegroundColor Red
+        }
     } else {
         Write-Host "Projet '$($config.vercel.projectName)' non trouve sur Vercel" -ForegroundColor Red
         Write-Host "Projets disponibles:" -ForegroundColor Yellow

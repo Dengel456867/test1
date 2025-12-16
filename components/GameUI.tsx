@@ -13,7 +13,7 @@ export default function GameUI({ gameState, onEndTurn }: GameUIProps) {
 
   return (
     <div className="absolute bottom-0 left-0 right-0 z-10">
-      {/* Version en haut Ã  droite */}
+      {/* Version en haut à droite */}
       <div className="absolute top-4 right-4 bg-purple-600 px-3 py-1 rounded-full text-white text-sm font-mono shadow-lg">
         v{APP_VERSION}
       </div>
@@ -25,7 +25,7 @@ export default function GameUI({ gameState, onEndTurn }: GameUIProps) {
           <div className="flex items-center gap-4">
             <h1 className="text-xl font-bold text-white">Test 1</h1>
             <span className="text-lg text-yellow-400">
-              Tour: {gameState.currentTurn === 'player' ? 'ðŸŽ® Joueur' : 'ðŸ¤– Adversaire'}
+              Tour: {gameState.currentTurn === 'player' ? '🎮 Joueur' : '🤖 Adversaire'}
             </span>
           </div>
           <button
@@ -37,28 +37,28 @@ export default function GameUI({ gameState, onEndTurn }: GameUIProps) {
           </button>
         </div>
 
-        {/* Personnage sÃ©lectionnÃ© */}
+        {/* Personnage sélectionné */}
         {selectedCharacter && (
           <div className="mb-3 p-3 bg-blue-900/80 rounded-lg inline-block">
             <div className="flex items-center gap-4">
               <span className="font-bold text-lg">{getCharacterEmoji(selectedCharacter.type)} {selectedCharacter.type}</span>
-              <span className="text-green-400">â¤ï¸ {selectedCharacter.health}/{selectedCharacter.maxHealth}</span>
-              <span className="text-blue-400">ðŸ‘Ÿ {selectedCharacter.movement}/{selectedCharacter.maxMovement}</span>
-              <span className="text-orange-400">âš”ï¸ {selectedCharacter.attacksRemaining}</span>
+              <span className="text-green-400">❤️ {selectedCharacter.health}/{selectedCharacter.maxHealth}</span>
+              <span className="text-blue-400">👟 {selectedCharacter.movement}/{selectedCharacter.maxMovement}</span>
+              <span className="text-orange-400">⚔️ {selectedCharacter.attacksRemaining}</span>
               {selectedCharacter.damageBoost > 0 && (
-                <span className="text-red-400">ðŸ’¥ +{selectedCharacter.damageBoost}</span>
+                <span className="text-red-400">💥 +{selectedCharacter.damageBoost}</span>
               )}
               {selectedCharacter.movementBoost > 0 && (
-                <span className="text-purple-400">ðŸƒ +{selectedCharacter.movementBoost}</span>
+                <span className="text-purple-400">🏃 +{selectedCharacter.movementBoost}</span>
               )}
             </div>
           </div>
         )}
 
-        {/* Ã‰quipes cÃ´te Ã  cÃ´te */}
+        {/* Équipes côte à côte */}
         <div className="grid grid-cols-2 gap-4">
-          <TeamPanel title="ðŸŽ® Joueur" characters={gameState.playerTeam} isPlayer={true} />
-          <TeamPanel title="ðŸ¤– Adversaire" characters={gameState.enemyTeam} isPlayer={false} />
+          <TeamPanel title="🎮 Joueur" characters={gameState.playerTeam} isPlayer={true} />
+          <TeamPanel title="🤖 Adversaire" characters={gameState.enemyTeam} isPlayer={false} />
         </div>
       </div>
     </div>
@@ -67,10 +67,10 @@ export default function GameUI({ gameState, onEndTurn }: GameUIProps) {
 
 function getCharacterEmoji(type: string): string {
   switch (type.toLowerCase()) {
-    case 'warrior': return 'âš”ï¸';
-    case 'mage': return 'ðŸ”®';
-    case 'thief': return 'ðŸ—¡ï¸';
-    default: return 'ðŸ‘¤';
+    case 'warrior': return '⚔️';
+    case 'mage': return '🔮';
+    case 'thief': return '🗡️';
+    default: return '👤';
   }
 }
 
@@ -105,7 +105,7 @@ function CharacterStatus({ character }: { character: Character }) {
           style={{ width: `${Math.max(0, healthPercent)}%` }}
         />
       </div>
-      {isDead && <span className="text-red-400 text-xs">ðŸ’€</span>}
+      {isDead && <span className="text-red-400 text-xs">💀</span>}
     </div>
   );
 }

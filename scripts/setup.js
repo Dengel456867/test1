@@ -5,12 +5,12 @@ const path = require('path');
 
 const config = require('./config.json');
 
-// Fonction pour crÃ©er un repository GitHub
+// Fonction pour créer un repository GitHub
 async function createGitHubRepo() {
   return new Promise((resolve, reject) => {
     const data = JSON.stringify({
       name: config.github.repoName,
-      description: 'Jeu 3D isomÃ©trique - Test 1',
+      description: 'Jeu 3D isométrique - Test 1',
       private: false,
       auto_init: false
     });
@@ -32,10 +32,10 @@ async function createGitHubRepo() {
       res.on('data', (chunk) => body += chunk);
       res.on('end', () => {
         if (res.statusCode === 201 || res.statusCode === 422) {
-          console.log('Repository GitHub crÃ©Ã© ou existe dÃ©jÃ ');
+          console.log('Repository GitHub créé ou existe déjà');
           resolve(JSON.parse(body));
         } else {
-          console.error('Erreur crÃ©ation repo GitHub:', res.statusCode, body);
+          console.error('Erreur création repo GitHub:', res.statusCode, body);
           reject(new Error(`GitHub API error: ${res.statusCode}`));
         }
       });
@@ -47,7 +47,7 @@ async function createGitHubRepo() {
   });
 }
 
-// Fonction pour crÃ©er un projet Vercel
+// Fonction pour créer un projet Vercel
 async function createVercelProject() {
   return new Promise((resolve, reject) => {
     const data = JSON.stringify({
@@ -71,10 +71,10 @@ async function createVercelProject() {
       res.on('data', (chunk) => body += chunk);
       res.on('end', () => {
         if (res.statusCode === 200 || res.statusCode === 201 || res.statusCode === 409) {
-          console.log('Projet Vercel crÃ©Ã© ou existe dÃ©jÃ ');
+          console.log('Projet Vercel créé ou existe déjà');
           resolve(JSON.parse(body));
         } else {
-          console.error('Erreur crÃ©ation projet Vercel:', res.statusCode, body);
+          console.error('Erreur création projet Vercel:', res.statusCode, body);
           reject(new Error(`Vercel API error: ${res.statusCode}`));
         }
       });
@@ -86,22 +86,22 @@ async function createVercelProject() {
   });
 }
 
-// ExÃ©cution
+// Exécution
 async function setup() {
   try {
-    console.log('CrÃ©ation du repository GitHub...');
+    console.log('Création du repository GitHub...');
     await createGitHubRepo();
     
-    console.log('CrÃ©ation du projet Vercel...');
+    console.log('Création du projet Vercel...');
     await createVercelProject();
     
-    console.log('Configuration terminÃ©e!');
-    console.log('\nTokens sauvegardÃ©s dans scripts/config.json');
+    console.log('Configuration terminée!');
+    console.log('\nTokens sauvegardés dans scripts/config.json');
     console.log('Vous pouvez maintenant:');
     console.log('1. Initialiser Git: git init');
     console.log('2. Ajouter le remote: git remote add origin https://github.com/VOTRE_USERNAME/test1.git');
     console.log('3. Faire le premier commit et push');
-    console.log('4. Lier le projet Ã  Vercel: vercel link');
+    console.log('4. Lier le projet à Vercel: vercel link');
   } catch (error) {
     console.error('Erreur lors de la configuration:', error.message);
   }

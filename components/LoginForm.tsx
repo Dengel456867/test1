@@ -14,14 +14,14 @@ export default function LoginForm() {
   const [checking, setChecking] = useState(true);
   const router = useRouter();
 
-  // VÃ©rifier si un utilisateur est dÃ©jÃ  connectÃ©
+  // Vérifier si un utilisateur est déjà connecté
   useEffect(() => {
     const savedUser = localStorage.getItem('test1_user');
     if (savedUser) {
       try {
         const user = JSON.parse(savedUser);
         if (user.username) {
-          // Auto-login avec l'utilisateur sauvegardÃ©
+          // Auto-login avec l'utilisateur sauvegardé
           router.push('/game');
           return;
         }
@@ -49,7 +49,7 @@ export default function LoginForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'OpÃ©ration Ã©chouÃ©e');
+        throw new Error(data.error || 'Opération échouée');
       }
 
       if (isLogin) {
@@ -61,7 +61,7 @@ export default function LoginForm() {
         }));
         router.push('/game');
       } else {
-        setSuccess('âœ¨ Compte crÃ©Ã© avec succÃ¨s ! Connectez-vous.');
+        setSuccess('✨ Compte créé avec succès ! Connectez-vous.');
         setIsLogin(true);
         setPassword('');
       }
@@ -72,12 +72,12 @@ export default function LoginForm() {
     }
   };
 
-  // Ã‰cran de chargement pendant la vÃ©rification
+  // Écran de chargement pendant la vérification
   if (checking) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center animate-slide-up">
-          <div className="text-6xl mb-4 animate-float">ðŸŽ®</div>
+          <div className="text-6xl mb-4 animate-float">🎮</div>
           <h1 className="font-title text-3xl text-white">TEST 1</h1>
           <p className="text-gray-400 mt-2">Chargement...</p>
         </div>
@@ -98,11 +98,11 @@ export default function LoginForm() {
       <div className="glass-strong p-8 w-full max-w-md animate-slide-up relative z-10">
         {/* Logo / Title */}
         <div className="text-center mb-8">
-          <div className="text-6xl mb-4 animate-float">ðŸŽ®</div>
+          <div className="text-6xl mb-4 animate-float">🎮</div>
           <h1 className="font-title text-4xl font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
             TEST 1
           </h1>
-          <p className="text-gray-400 mt-2 text-sm">Jeu tactique isomÃ©trique</p>
+          <p className="text-gray-400 mt-2 text-sm">Jeu tactique isométrique</p>
           <span className="inline-block mt-2 px-2 py-0.5 bg-purple-600/30 rounded text-xs text-purple-300 font-mono">
             v{APP_VERSION}
           </span>
@@ -136,7 +136,7 @@ export default function LoginForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              ðŸ‘¤ Nom d'utilisateur
+              👤 Nom d'utilisateur
             </label>
             <input
               type="text"
@@ -151,14 +151,14 @@ export default function LoginForm() {
 
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              ðŸ”’ Mot de passe
+              🔒 Mot de passe
             </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+              placeholder="••••••••"
               className="input-cyber"
               autoComplete={isLogin ? "current-password" : "new-password"}
             />
@@ -167,7 +167,7 @@ export default function LoginForm() {
           {/* Messages */}
           {error && (
             <div className="bg-red-500/20 border border-red-500/50 text-red-300 px-4 py-3 rounded-xl text-sm animate-slide-up">
-              âŒ {error}
+              ❌ {error}
             </div>
           )}
           
@@ -192,9 +192,9 @@ export default function LoginForm() {
                 Chargement...
               </span>
             ) : isLogin ? (
-              'ðŸš€ Jouer'
+              '🚀 Jouer'
             ) : (
-              'âœ¨ CrÃ©er mon compte'
+              '✨ Créer mon compte'
             )}
           </button>
         </form>
@@ -202,8 +202,8 @@ export default function LoginForm() {
         {/* Footer info */}
         <p className="text-center text-gray-500 text-xs mt-6">
           {isLogin 
-            ? 'Votre session sera mÃ©morisÃ©e' 
-            : 'CrÃ©ez un compte pour sauvegarder vos stats'}
+            ? 'Votre session sera mémorisée' 
+            : 'Créez un compte pour sauvegarder vos stats'}
         </p>
       </div>
     </div>

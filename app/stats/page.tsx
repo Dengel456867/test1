@@ -68,7 +68,7 @@ export default function StatsPage() {
               </div>
               <div className="bg-red-100 p-4 rounded">
                 <div className="text-2xl font-bold text-red-600">{stats.defeats}</div>
-                <div className="text-sm text-gray-600">DÃ©faites</div>
+                <div className="text-sm text-gray-600">Défaites</div>
               </div>
               <div className="bg-green-100 p-4 rounded">
                 <div className="text-2xl font-bold text-green-600">{stats.total_games}</div>
@@ -83,12 +83,12 @@ export default function StatsPage() {
             </div>
           )}
 
-          <h2 className="text-2xl font-bold mb-4">10 derniÃ¨res parties</h2>
+          <h2 className="text-2xl font-bold mb-4">10 dernières parties</h2>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="bg-gray-200">
-                  <th className="p-2 text-left">RÃ©sultat</th>
+                  <th className="p-2 text-left">Résultat</th>
                   <th className="p-2 text-left">Tours</th>
                   <th className="p-2 text-left">Mouvements</th>
                   <th className="p-2 text-left">Date</th>
@@ -99,7 +99,7 @@ export default function StatsPage() {
                   <tr key={game.id} className="border-b">
                     <td className="p-2">
                       <span className={`px-2 py-1 rounded ${game.won ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                        {game.won ? 'Victoire' : 'DÃ©faite'}
+                        {game.won ? 'Victoire' : 'Défaite'}
                       </span>
                     </td>
                     <td className="p-2">{game.turns}</td>

@@ -16,7 +16,7 @@ interface GameBoardProps {
   onCharacterClick?: (character: Character) => void;
 }
 
-// Tuile plate avec symboles pour les cases spÃ©ciales
+// Tuile plate avec symboles pour les cases spéciales
 function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRightClick }: {
   position: Position;
   isSpecial: boolean;
@@ -25,17 +25,17 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
   onClick: () => void;
   onRightClick: () => void;
 }) {
-  // Symbole et couleur selon le type de case spÃ©ciale
+  // Symbole et couleur selon le type de case spéciale
   const getSpecialInfo = () => {
     switch (specialType) {
-      case 'heal': return { symbol: 'â¤', color: '#06b6d4' }; // Coeur turquoise
-      case 'damage_boost': return { symbol: 'âœŠ', color: '#ef4444' }; // Poing rouge
-      case 'movement_boost': return { symbol: 'ðŸ‘Ÿ', color: '#a855f7' }; // Chaussure violette
-      case 'initiative_boost': return { symbol: 'âš¡', color: '#eab308' }; // Ã‰clair jaune
-      case 'armor': return { symbol: 'ðŸ¦º', color: '#f97316' }; // Armure/gilet orange
-      case 'shield': return { symbol: 'ðŸ›¡', color: '#ffffff' }; // Bouclier blanc
-      case 'regeneration': return { symbol: '+', color: '#166534', isOutline: true }; // Croix contour vert foncÃ©
-      case 'star': return { symbol: 'â­', color: '#fbbf24' }; // Ã‰toile jaune
+      case 'heal': return { symbol: '❤', color: '#06b6d4' }; // Coeur turquoise
+      case 'damage_boost': return { symbol: '✊', color: '#ef4444' }; // Poing rouge
+      case 'movement_boost': return { symbol: '👟', color: '#a855f7' }; // Chaussure violette
+      case 'initiative_boost': return { symbol: '⚡', color: '#eab308' }; // Éclair jaune
+      case 'armor': return { symbol: '🦺', color: '#f97316' }; // Armure/gilet orange
+      case 'shield': return { symbol: '🛡', color: '#ffffff' }; // Bouclier blanc
+      case 'regeneration': return { symbol: '+', color: '#166534', isOutline: true }; // Croix contour vert foncé
+      case 'star': return { symbol: '⭐', color: '#fbbf24' }; // Étoile jaune
       default: return null;
     }
   };
@@ -64,7 +64,7 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
   const xPos = position.x - 7.5;
   const yPos = position.y - 7.5;
   
-  // Cas: Case surlignÃ©e (mouvement) ET spÃ©ciale -> fond bleu avec symbole
+  // Cas: Case surlignée (mouvement) ET spéciale -> fond bleu avec symbole
   if (isHighlighted && isSpecial && specialInfo) {
     const isOutline = 'isOutline' in specialInfo && specialInfo.isOutline;
     return (
@@ -78,7 +78,7 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
           <planeGeometry args={[0.95, 0.95]} />
           <meshStandardMaterial color={highlightColor} emissive={highlightColor} emissiveIntensity={0.15} transparent opacity={0.85} />
         </mesh>
-        {/* Symbole de la case spÃ©ciale */}
+        {/* Symbole de la case spéciale */}
         <Text
           position={[0, 0.05, 0]}
           rotation={[-Math.PI / 2, 0, 0]}
@@ -96,7 +96,7 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
     );
   }
   
-  // Cas: Case spÃ©ciale (non surlignÃ©e) -> fond normal avec symbole simple
+  // Cas: Case spéciale (non surlignée) -> fond normal avec symbole simple
   if (isSpecial && specialInfo) {
     const isOutline = 'isOutline' in specialInfo && specialInfo.isOutline;
     return (
@@ -110,7 +110,7 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
           <planeGeometry args={[0.95, 0.95]} />
           <meshStandardMaterial color={baseColor} />
         </mesh>
-        {/* Symbole colorÃ© simple */}
+        {/* Symbole coloré simple */}
         <Text
           position={[0, 0.05, 0]}
           rotation={[-Math.PI / 2, 0, 0]}
@@ -128,7 +128,7 @@ function Tile({ position, isSpecial, specialType, isHighlighted, onClick, onRigh
     );
   }
   
-  // Cas normal: case simple (surlignÃ©e ou non)
+  // Cas normal: case simple (surlignée ou non)
   const tileColor = isHighlighted ? highlightColor : baseColor;
   const emissiveIntensity = isHighlighted ? 0.15 : 0; // Moins lumineux
   
@@ -170,19 +170,19 @@ function RookPiece({ color, emissive, emissiveIntensity, scale }: { color: strin
         <cylinderGeometry args={[0.22, 0.28, 0.35, 16]} />
         <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
       </mesh>
-      {/* Haut Ã©vasÃ© */}
+      {/* Haut évasé */}
       <mesh position={[0, 0.5, 0]}>
         <cylinderGeometry args={[0.28, 0.22, 0.15, 16]} />
         <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
       </mesh>
-      {/* CrÃ©neaux (4) */}
+      {/* Créneaux (4) */}
       {[0, 1, 2, 3].map((i) => (
         <mesh key={i} position={[Math.cos(i * Math.PI / 2) * 0.18, 0.65, Math.sin(i * Math.PI / 2) * 0.18]}>
           <boxGeometry args={[0.12, 0.15, 0.12]} />
           <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
         </mesh>
       ))}
-      {/* DÃ©tails noirs sur les crÃ©neaux */}
+      {/* Détails noirs sur les créneaux */}
       {[0, 1, 2, 3].map((i) => (
         <mesh key={`detail-${i}`} position={[Math.cos(i * Math.PI / 2) * 0.18, 0.72, Math.sin(i * Math.PI / 2) * 0.18]}>
           <boxGeometry args={[0.06, 0.02, 0.06]} />
@@ -207,7 +207,7 @@ function BishopPiece({ color, emissive, emissiveIntensity, scale }: { color: str
         <torusGeometry args={[0.27, 0.02, 8, 24]} />
         <meshStandardMaterial color="#111111" />
       </mesh>
-      {/* Corps infÃ©rieur */}
+      {/* Corps inférieur */}
       <mesh position={[0, 0.15, 0]}>
         <cylinderGeometry args={[0.18, 0.26, 0.2, 16]} />
         <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
@@ -222,7 +222,7 @@ function BishopPiece({ color, emissive, emissiveIntensity, scale }: { color: str
         <sphereGeometry args={[0.2, 16, 16]} />
         <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
       </mesh>
-      {/* Fente diagonale (reprÃ©sentÃ©e par un anneau) - noir */}
+      {/* Fente diagonale (représentée par un anneau) - noir */}
       <mesh position={[0, 0.45, 0]} rotation={[Math.PI / 2, 0, Math.PI / 4]}>
         <torusGeometry args={[0.12, 0.025, 8, 16]} />
         <meshStandardMaterial color="#111111" />
@@ -255,22 +255,22 @@ function KnightPiece({ color, emissive, emissiveIntensity, scale }: { color: str
         <cylinderGeometry args={[0.2, 0.26, 0.12, 16]} />
         <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
       </mesh>
-      {/* Corps du cheval (simplifiÃ©) */}
+      {/* Corps du cheval (simplifié) */}
       <mesh position={[0, 0.35, 0.05]} rotation={[0.3, 0, 0]}>
         <boxGeometry args={[0.2, 0.35, 0.25]} />
         <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
       </mesh>
-      {/* CriniÃ¨re noire sur le dos */}
+      {/* Crinière noire sur le dos */}
       <mesh position={[0, 0.48, -0.02]} rotation={[0.3, 0, 0]}>
         <boxGeometry args={[0.04, 0.2, 0.08]} />
         <meshStandardMaterial color="#111111" />
       </mesh>
-      {/* TÃªte du cheval */}
+      {/* Tête du cheval */}
       <mesh position={[0, 0.55, 0.18]} rotation={[0.8, 0, 0]}>
         <boxGeometry args={[0.15, 0.25, 0.18]} />
         <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
       </mesh>
-      {/* CriniÃ¨re sur la tÃªte */}
+      {/* Crinière sur la tête */}
       <mesh position={[0, 0.62, 0.08]} rotation={[0.5, 0, 0]}>
         <boxGeometry args={[0.04, 0.15, 0.06]} />
         <meshStandardMaterial color="#111111" />
@@ -307,7 +307,7 @@ function KnightPiece({ color, emissive, emissiveIntensity, scale }: { color: str
         <coneGeometry args={[0.04, 0.1, 4]} />
         <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
       </mesh>
-      {/* IntÃ©rieur des oreilles noir */}
+      {/* Intérieur des oreilles noir */}
       <mesh position={[-0.055, 0.66, 0.13]} rotation={[0.3, 0, -0.2]}>
         <coneGeometry args={[0.02, 0.06, 4]} />
         <meshStandardMaterial color="#111111" />
@@ -334,7 +334,7 @@ function QueenPiece({ color, emissive, emissiveIntensity, scale }: { color: stri
         <torusGeometry args={[0.3, 0.02, 8, 24]} />
         <meshStandardMaterial color="#111111" />
       </mesh>
-      {/* Corps infÃ©rieur (Ã©vasÃ©) */}
+      {/* Corps inférieur (évasé) */}
       <mesh position={[0, 0.15, 0]}>
         <cylinderGeometry args={[0.2, 0.3, 0.18, 16]} />
         <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
@@ -344,7 +344,7 @@ function QueenPiece({ color, emissive, emissiveIntensity, scale }: { color: stri
         <torusGeometry args={[0.2, 0.018, 8, 24]} />
         <meshStandardMaterial color="#111111" />
       </mesh>
-      {/* Corps principal (colonne Ã©lÃ©gante) */}
+      {/* Corps principal (colonne élégante) */}
       <mesh position={[0, 0.42, 0]}>
         <cylinderGeometry args={[0.15, 0.18, 0.35, 16]} />
         <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} />
@@ -396,7 +396,7 @@ function QueenPiece({ color, emissive, emissiveIntensity, scale }: { color: stri
   );
 }
 
-// Personnage - PiÃ¨ce d'Ã©checs selon le type
+// Personnage - Pièce d'échecs selon le type
 function CharacterModel({ character, isSelected, onClick }: { 
   character: Character; 
   isSelected: boolean;
@@ -428,7 +428,7 @@ function CharacterModel({ character, isSelected, onClick }: {
       position={[character.position.x - 7.5, 0.15, character.position.y - 7.5]}
       onClick={handleClick}
     >
-      {/* PiÃ¨ce selon le type */}
+      {/* Pièce selon le type */}
       {character.type === 'warrior' && (
         <RookPiece color={teamColor} emissive={isSelected ? glowColor : teamColor} emissiveIntensity={emissiveIntensity} scale={scale} />
       )}
@@ -442,7 +442,7 @@ function CharacterModel({ character, isSelected, onClick }: {
         <QueenPiece color={teamColor} emissive={isSelected ? glowColor : teamColor} emissiveIntensity={emissiveIntensity} scale={scale} />
       )}
       
-      {/* Indicateur de sÃ©lection */}
+      {/* Indicateur de sélection */}
       {isSelected && (
         <mesh position={[0, 1.35, 0]}>
           <coneGeometry args={[0.12, 0.18, 4]} />
@@ -450,7 +450,7 @@ function CharacterModel({ character, isSelected, onClick }: {
         </mesh>
       )}
       
-      {/* Barre de vie - Billboard pour toujours faire face Ã  la camÃ©ra */}
+      {/* Barre de vie - Billboard pour toujours faire face à la caméra */}
       {/* Position plus haute pour le Royal (couronne) */}
       <Billboard position={[0, character.type === 'royal' ? 1.65 : 1.45, 0]} follow={true} lockX={false} lockY={false} lockZ={false}>
         <mesh position={[0, 0, 0.01]}>
@@ -486,7 +486,7 @@ function BoardBorder() {
   );
 }
 
-// CoordonnÃ©es du plateau (A-P en colonnes, 1-16 en lignes)
+// Coordonnées du plateau (A-P en colonnes, 1-16 en lignes)
 function BoardCoordinates() {
   const columns = 'ABCDEFGHIJKLMNOP'.split('');
   const rows = Array.from({ length: 16 }, (_, i) => i + 1);
@@ -523,7 +523,7 @@ function BoardCoordinates() {
         </Text>
       ))}
       
-      {/* Lignes 1-16 Ã  gauche du plateau */}
+      {/* Lignes 1-16 à gauche du plateau */}
       {rows.map((num, i) => (
         <Text
           key={`row-left-${num}`}
@@ -538,7 +538,7 @@ function BoardCoordinates() {
         </Text>
       ))}
       
-      {/* Lignes 1-16 Ã  droite du plateau */}
+      {/* Lignes 1-16 à droite du plateau */}
       {rows.map((num, i) => (
         <Text
           key={`row-right-${num}`}
@@ -565,7 +565,7 @@ export default function GameBoard({
   hasAttacked,
   onCharacterClick 
 }: GameBoardProps) {
-  // Cases oÃ¹ le personnage sÃ©lectionnÃ© peut se dÃ©placer (basÃ© sur la position d'origine)
+  // Cases où le personnage sélectionné peut se déplacer (basé sur la position d'origine)
   const getHighlightedTiles = (): Set<string> => {
     if (!selectedCharacter || hasAttacked) return new Set();
     
@@ -582,9 +582,9 @@ export default function GameBoard({
         const distance = Math.abs(x - originPos.x) + Math.abs(y - originPos.y);
         // Exclure la position actuelle du personnage
         const isCurrentPos = x === selectedCharacter.position.x && y === selectedCharacter.position.y;
-        // La case d'origine doit toujours Ãªtre accessible (pour revenir)
+        // La case d'origine doit toujours être accessible (pour revenir)
         const isOriginPos = x === originPos.x && y === originPos.y;
-        // La case est valide si: dans la portÃ©e ET (vide OU c'est l'origine) ET pas la position actuelle
+        // La case est valide si: dans la portée ET (vide OU c'est l'origine) ET pas la position actuelle
         const isTileEmpty = !gameState.board[y][x];
         
         if (distance <= range && !isCurrentPos && (isTileEmpty || isOriginPos)) {

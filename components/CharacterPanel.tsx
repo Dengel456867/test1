@@ -63,7 +63,7 @@ export default function CharacterPanel({ characters, teamName, currentCharacter 
               
               {character.damageBoost > 0 && (
                 <div className="text-xs text-red-400 mt-1">
-                  Bonus dÃ©gÃ¢ts: +{character.damageBoost}
+                  Bonus dégâts: +{character.damageBoost}
                 </div>
               )}
               

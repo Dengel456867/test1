@@ -39,14 +39,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid move' }, { status: 400 });
     }
     
-    // DÃ©placer le personnage
+    // Déplacer le personnage
     gameState.board[character.position.y][character.position.x] = null;
     character.position = pos;
     character.movement--;
     gameState.board[pos.y][pos.x] = character;
     gameState.movementCount++;
     
-    // VÃ©rifier les cases spÃ©ciales
+    // Vérifier les cases spéciales
     const specialTile = checkSpecialTile(pos, gameState.specialTiles);
     if (specialTile) {
       const updated = applySpecialTile(character, specialTile);

@@ -2,19 +2,19 @@ import { Character, CharacterType, AttackResult, Position } from './types';
 import { getDistance } from './characters';
 import { BASE_DAMAGE, getMultiplier, ATTACK_RANGES } from './constants';
 
-// Calcul des dégâts avec le nouveau système de multiplicateurs
-// Base damage + multiplicateur selon avantage/désavantage
+// Calcul des dÃ©gÃ¢ts avec le nouveau systÃ¨me de multiplicateurs
+// Base damage + multiplicateur selon avantage/dÃ©savantage
 export function calculateDamage(attacker: Character, target: Character): { damage: number; isCritical: boolean } {
-  // Dégâts de base selon la classe de l'attaquant
+  // DÃ©gÃ¢ts de base selon la classe de l'attaquant
   const baseDamage = BASE_DAMAGE[attacker.type.toUpperCase() as keyof typeof BASE_DAMAGE];
   
-  // Multiplicateur selon l'avantage/désavantage (même logique pour alliés et ennemis)
+  // Multiplicateur selon l'avantage/dÃ©savantage (mÃªme logique pour alliÃ©s et ennemis)
   const multiplier = getMultiplier(attacker.type, target.type);
   
-  // Calcul: (base * multiplicateur) arrondi au supérieur
+  // Calcul: (base * multiplicateur) arrondi au supÃ©rieur
   let damage = Math.ceil(baseDamage * multiplier);
   
-  // Critique pour le voleur en corps à corps (50% de chance)
+  // Critique pour le voleur en corps Ã  corps (50% de chance)
   const distance = getDistance(attacker.position, target.position);
   const isMelee = distance <= 1;
   const isCritical = attacker.type === 'thief' && isMelee && Math.random() < 0.5;
@@ -23,10 +23,10 @@ export function calculateDamage(attacker: Character, target: Character): { damag
     damage *= 2;
   }
   
-  // Ajouter le bonus de dégâts permanent
+  // Ajouter le bonus de dÃ©gÃ¢ts permanent
   damage += attacker.damageBoost;
   
-  // Appliquer la réduction d'armure (minimum 0)
+  // Appliquer la rÃ©duction d'armure (minimum 0)
   damage = Math.max(0, damage - (target.armor || 0));
   
   return { damage, isCritical };
@@ -36,16 +36,16 @@ export function canAttack(attacker: Character, targetPos: Position, board: (Char
   const distance = getDistance(attacker.position, targetPos);
   
   if (attacker.type === 'warrior') {
-    // Guerrier: corps à corps uniquement (1 case)
+    // Guerrier: corps Ã  corps uniquement (1 case)
     return distance === 1;
   } else if (attacker.type === 'mage') {
     // Mage: zone de 4 cases
     return distance <= 4;
   } else if (attacker.type === 'thief') {
-    // Voleur: corps à corps ou distance (4 max)
+    // Voleur: corps Ã  corps ou distance (4 max)
     return distance >= 1 && distance <= 4;
   } else if (attacker.type === 'royal') {
-    // Royal: corps à corps uniquement (1 case)
+    // Royal: corps Ã  corps uniquement (1 case)
     return distance === 1;
   }
   
@@ -100,7 +100,7 @@ export function executeAttack(
   targets.forEach(target => {
     const { damage, isCritical } = calculateDamage(attacker, target);
     
-    // Appliquer les dégâts au bouclier d'abord, puis à la vie
+    // Appliquer les dÃ©gÃ¢ts au bouclier d'abord, puis Ã  la vie
     let newShield = target.shield || 0;
     let newHealth = target.health;
     
@@ -126,7 +126,7 @@ export function executeAttack(
     });
   });
   
-  // Le bonus de dégâts est permanent, on ne le réinitialise plus
+  // Le bonus de dÃ©gÃ¢ts est permanent, on ne le rÃ©initialise plus
   attacker.attacksRemaining--;
   
   return attackResult;

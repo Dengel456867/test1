@@ -1,4 +1,4 @@
-// SystÃ¨me d'authentification simple
+// Système d'authentification simple
 
 import bcrypt from 'bcryptjs';
 
@@ -9,8 +9,8 @@ export interface User {
   createdAt: Date;
 }
 
-// En production, utiliser une vraie base de donnÃ©es
-// Pour l'instant, on utilise un stockage en mÃ©moire
+// En production, utiliser une vraie base de données
+// Pour l'instant, on utilise un stockage en mémoire
 const users: Map<string, User> = new Map();
 
 export async function hashPassword(password: string): Promise<string> {
@@ -22,7 +22,7 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 }
 
 export async function createUser(username: string, password: string): Promise<User> {
-  // VÃ©rifier si l'utilisateur existe dÃ©jÃ 
+  // Vérifier si l'utilisateur existe déjà
   const existingUsers = Array.from(users.values());
   for (const user of existingUsers) {
     if (user.username === username) {

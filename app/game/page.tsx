@@ -15,7 +15,7 @@ export default function GamePage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Vérifier la session utilisateur
+    // VÃ©rifier la session utilisateur
     const savedUser = localStorage.getItem('test1_user');
     if (savedUser) {
       try {
@@ -40,7 +40,7 @@ export default function GamePage() {
   };
 
   const handleGameEnd = (won: boolean, stats: any) => {
-    // Sauvegarder les stats si nécessaire
+    // Sauvegarder les stats si nÃ©cessaire
     console.log('Game ended:', { won, stats });
   };
 
@@ -48,7 +48,7 @@ export default function GamePage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center animate-slide-up">
-          <div className="text-6xl mb-4 animate-float">🎮</div>
+          <div className="text-6xl mb-4 animate-float">ðŸŽ®</div>
           <p className="text-gray-400">Chargement...</p>
         </div>
       </div>

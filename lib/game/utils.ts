@@ -11,7 +11,7 @@ export function isValidPosition(pos: Position): boolean {
   return pos.x >= 0 && pos.x < BOARD_SIZE && pos.y >= 0 && pos.y < BOARD_SIZE;
 }
 
-// Génère un nombre aléatoire entre min et max inclus
+// GÃ©nÃ¨re un nombre alÃ©atoire entre min et max inclus
 export function randomRange(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -21,13 +21,13 @@ export function calculateDamage(
   defenderType: CharacterType,
   damageBoost: number = 0
 ): number {
-  // Dégâts de base selon la classe de l'attaquant
+  // DÃ©gÃ¢ts de base selon la classe de l'attaquant
   const baseDamage = BASE_DAMAGE[attackerType.toUpperCase() as keyof typeof BASE_DAMAGE];
   
-  // Multiplicateur selon l'avantage/désavantage
+  // Multiplicateur selon l'avantage/dÃ©savantage
   const multiplier = getMultiplier(attackerType, defenderType);
   
-  // Calcul final : (base * multiplicateur) arrondi au supérieur + bonus
+  // Calcul final : (base * multiplicateur) arrondi au supÃ©rieur + bonus
   const finalDamage = Math.ceil(baseDamage * multiplier) + damageBoost;
   
   return finalDamage;
@@ -46,16 +46,16 @@ export function getAttackTargets(
   isAreaAttack: boolean
 ): Character[] {
   if (isAreaAttack) {
-    // Attaque de zone : tous les personnages dans la portée
+    // Attaque de zone : tous les personnages dans la portÃ©e
     return allCharacters.filter(char => {
-      if (char.id === attacker.id) return false; // Le mage ne s'attaque pas lui-même
+      if (char.id === attacker.id) return false; // Le mage ne s'attaque pas lui-mÃªme
       const distance = getDistance(attacker.position, char.position);
       return distance <= attackRange;
     });
   } else {
-    // Attaque ciblée : le personnage le plus proche dans la portée
+    // Attaque ciblÃ©e : le personnage le plus proche dans la portÃ©e
     const targets = allCharacters.filter(char => {
-      if (char.team === attacker.team) return false; // Pas d'attaques alliées pour les attaques ciblées
+      if (char.team === attacker.team) return false; // Pas d'attaques alliÃ©es pour les attaques ciblÃ©es
       const distance = getDistance(attacker.position, char.position);
       return distance <= attackRange;
     });
@@ -77,7 +77,7 @@ export function generateSpecialTiles(): Array<{ position: Position; type: Specia
   const tiles: Array<{ position: Position; type: SpecialTileType }> = [];
   const usedPositions = new Set<string>();
   
-  // Positions de départ des personnages - à exclure
+  // Positions de dÃ©part des personnages - Ã  exclure
   const startingPositions = new Set([
     '2,2', '3,2', '2,3', '3,3',      // Joueur (warrior, mage, thief, royal)
     '13,13', '12,13', '13,12', '12,12' // Ennemi (warrior, mage, thief, royal)
@@ -105,7 +105,7 @@ export function generateSpecialTiles(): Array<{ position: Position; type: Specia
     }
   });
   
-  // Bonus spéciaux étoile (2 au début, uniquement au milieu : x et y entre 6 et 9)
+  // Bonus spÃ©ciaux Ã©toile (2 au dÃ©but, uniquement au milieu : x et y entre 6 et 9)
   for (let i = 0; i < 2; i++) {
     let position: Position;
     let key: string;
@@ -125,7 +125,7 @@ export function generateSpecialTiles(): Array<{ position: Position; type: Specia
   return tiles;
 }
 
-// Génère une case étoile au milieu du plateau
+// GÃ©nÃ¨re une case Ã©toile au milieu du plateau
 export function generateStarTile(usedPositions: Set<string>): { position: Position; type: SpecialTileType } | null {
   // Zone centrale : x et y entre 6 et 9 (colonnes G-J, lignes 7-10)
   const attempts = 50;
@@ -182,7 +182,7 @@ export function initializeCharacters(): {
       initiative: 11,
       armor: 0,
       shield: 0,
-      regeneration: 1, // Mage commence avec 1 régénération
+      regeneration: 1, // Mage commence avec 1 rÃ©gÃ©nÃ©ration
     },
     {
       id: 'player-thief',
@@ -257,7 +257,7 @@ export function initializeCharacters(): {
       initiative: 11,
       armor: 0,
       shield: 0,
-      regeneration: 1, // Mage commence avec 1 régénération
+      regeneration: 1, // Mage commence avec 1 rÃ©gÃ©nÃ©ration
     },
     {
       id: 'enemy-thief',
@@ -300,21 +300,21 @@ export function initializeCharacters(): {
   return { playerTeam, enemyTeam };
 }
 
-// Génère l'ordre de jeu basé sur l'initiative
+// GÃ©nÃ¨re l'ordre de jeu basÃ© sur l'initiative
 export function generateTurnOrder(playerTeam: Character[], enemyTeam: Character[]): string[] {
   const allCharacters = [...playerTeam, ...enemyTeam].filter(c => c.isAlive);
   
   // Trier par initiative (plus bas = joue en premier)
-  // En cas d'égalité: joueur d'abord, puis aléatoire si même équipe
+  // En cas d'Ã©galitÃ©: joueur d'abord, puis alÃ©atoire si mÃªme Ã©quipe
   allCharacters.sort((a, b) => {
     if (a.initiative !== b.initiative) {
       return a.initiative - b.initiative;
     }
-    // Initiative égale
+    // Initiative Ã©gale
     if (a.team !== b.team) {
       return a.team === 'player' ? -1 : 1; // Joueur d'abord
     }
-    // Même équipe, même initiative: aléatoire
+    // MÃªme Ã©quipe, mÃªme initiative: alÃ©atoire
     return Math.random() - 0.5;
   });
   

@@ -1,8 +1,8 @@
 # Test 1
 
-Projet initialisÃ© avec Vercel et GitHub.
+Projet initialisé avec Vercel et GitHub.
 
-## DÃ©veloppement
+## Développement
 
 ```bash
 npm run dev
@@ -10,9 +10,9 @@ npm run dev
 
 Ouvrez [http://localhost:3000](http://localhost:3000) dans votre navigateur.
 
-## DÃ©ploiement
+## Déploiement
 
-Le projet est configurÃ© pour Ãªtre dÃ©ployÃ© automatiquement sur Vercel.
+Le projet est configuré pour être déployé automatiquement sur Vercel.
 
 
 

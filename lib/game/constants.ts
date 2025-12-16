@@ -30,7 +30,7 @@ export const CHARACTER_STATS = {
   },
 };
 
-// Nombre de cases spéciales
+// Nombre de cases spÃ©ciales
 export const SPECIAL_TILES_COUNT = {
   HEAL: 7,
   DAMAGE_BOOST: 7,
@@ -41,27 +41,27 @@ export const SPECIAL_TILES_COUNT = {
   REGENERATION: 7,
 };
 
-// Effets des cases spéciales (tous permanents jusqu'à fin de partie)
+// Effets des cases spÃ©ciales (tous permanents jusqu'Ã  fin de partie)
 export const SPECIAL_TILE_EFFECTS = {
   HEAL_MAX_HP: 3,        // +3 PV max (permanent)
-  HEAL_AMOUNT: 2,        // Soigne 2 PV (changé de 6 à 2)
-  DAMAGE_BOOST: 1,       // +1 dégâts (permanent)
+  HEAL_AMOUNT: 2,        // Soigne 2 PV (changÃ© de 6 Ã  2)
+  DAMAGE_BOOST: 1,       // +1 dÃ©gÃ¢ts (permanent)
   MOVEMENT_BOOST: 1,     // +1 mouvement (permanent)
   INITIATIVE_BOOST: 1,   // -1 initiative (permanent)
-  ARMOR: 1,              // -1 dégâts subis (permanent, cumulable)
+  ARMOR: 1,              // -1 dÃ©gÃ¢ts subis (permanent, cumulable)
   SHIELD: 4,             // +4 points de bouclier
-  REGENERATION: 1,       // +1 PV régénéré par tour (permanent, cumulable)
+  REGENERATION: 1,       // +1 PV rÃ©gÃ©nÃ©rÃ© par tour (permanent, cumulable)
 };
 
-// Portées d'attaque
+// PortÃ©es d'attaque
 export const ATTACK_RANGES = {
-  WARRIOR: 1,        // Corps à corps uniquement
+  WARRIOR: 1,        // Corps Ã  corps uniquement
   MAGE: 3,           // Zone autour du mage (AOE)
-  THIEF: 4,          // Jusqu'à 4 cases
-  ROYAL: 1,          // Corps à corps uniquement
+  THIEF: 4,          // Jusqu'Ã  4 cases
+  ROYAL: 1,          // Corps Ã  corps uniquement
 };
 
-// Dégâts de base par classe
+// DÃ©gÃ¢ts de base par classe
 export const BASE_DAMAGE = {
   WARRIOR: 5,
   MAGE: 5,
@@ -69,11 +69,11 @@ export const BASE_DAMAGE = {
   ROYAL: 7,
 };
 
-// Multiplicateurs de dégâts
+// Multiplicateurs de dÃ©gÃ¢ts
 export const DAMAGE_MULTIPLIERS = {
-  ADVANTAGE: 1.5,      // x1.5 arrondi au supérieur
+  ADVANTAGE: 1.5,      // x1.5 arrondi au supÃ©rieur
   NEUTRAL: 1.0,        // x1
-  DISADVANTAGE: 0.7,   // x0.7 arrondi au supérieur
+  DISADVANTAGE: 0.7,   // x0.7 arrondi au supÃ©rieur
 };
 
 // Triangle d'avantages :
@@ -97,19 +97,19 @@ export const getMultiplier = (attackerType: string, defenderType: string): numbe
   
   if (attacker === defender) return DAMAGE_MULTIPLIERS.NEUTRAL;
   
-  // Guerrier a l'avantage sur Voleur, désavantage sur Mage
+  // Guerrier a l'avantage sur Voleur, dÃ©savantage sur Mage
   if (attacker === 'warrior') {
     if (defender === 'thief') return DAMAGE_MULTIPLIERS.ADVANTAGE;
     if (defender === 'mage') return DAMAGE_MULTIPLIERS.DISADVANTAGE;
   }
   
-  // Voleur a l'avantage sur Mage, désavantage sur Guerrier
+  // Voleur a l'avantage sur Mage, dÃ©savantage sur Guerrier
   if (attacker === 'thief') {
     if (defender === 'mage') return DAMAGE_MULTIPLIERS.ADVANTAGE;
     if (defender === 'warrior') return DAMAGE_MULTIPLIERS.DISADVANTAGE;
   }
   
-  // Mage a l'avantage sur Guerrier, désavantage sur Voleur
+  // Mage a l'avantage sur Guerrier, dÃ©savantage sur Voleur
   if (attacker === 'mage') {
     if (defender === 'warrior') return DAMAGE_MULTIPLIERS.ADVANTAGE;
     if (defender === 'thief') return DAMAGE_MULTIPLIERS.DISADVANTAGE;
@@ -118,7 +118,7 @@ export const getMultiplier = (attackerType: string, defenderType: string): numbe
   return DAMAGE_MULTIPLIERS.NEUTRAL;
 };
 
-// Ancien format pour compatibilité (sera supprimé)
+// Ancien format pour compatibilitÃ© (sera supprimÃ©)
 export const DAMAGE_RANGES = {
   WARRIOR: {
     vs_warrior: { min: 5, max: 5 },
@@ -145,6 +145,6 @@ export const ATTACKS_PER_TURN = {
   ROYAL: 1,
 };
 
-// Ancien format pour compatibilité (sera supprimé)
+// Ancien format pour compatibilitÃ© (sera supprimÃ©)
 export const DAMAGE_DICE = DAMAGE_RANGES;
 export const THIEF_CRIT_CHANCE = 0.5;

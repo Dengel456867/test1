@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { loginUser } from '@/lib/auth';
 import { initDB } from '@/lib/db';
 
-// Compte admin hardcodÃ©
+// Compte admin hardcodé
 const ADMIN_USERNAME = 'admin';
 const ADMIN_PASSWORD = '0000';
 
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // VÃ©rifier le compte admin en premier
+    // Vérifier le compte admin en premier
     if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
       const adminResult = {
         token: 'admin-token-' + Date.now(),
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
       return response;
     }
     
-    // Sinon, login normal via la base de donnÃ©es
+    // Sinon, login normal via la base de données
     await initDB();
     const result = await loginUser(username, password);
     

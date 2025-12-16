@@ -16,19 +16,19 @@ export async function getAIMove(gameState: GameState): Promise<AIMove> {
     return { characterId: '', action: 'end_turn' };
   }
   
-  // SÃ©lectionner le personnage avec le plus de points de vie
+  // Sélectionner le personnage avec le plus de points de vie
   const selectedCharacter = aliveEnemies.reduce((best, current) => 
     current.health > best.health ? current : best
   );
   
-  // StratÃ©gie simple: essayer d'attaquer, sinon se rapprocher
+  // Stratégie simple: essayer d'attaquer, sinon se rapprocher
   const playerCharacters = gameState.playerTeam.filter(c => c.health > 0);
   
   if (playerCharacters.length === 0) {
     return { characterId: selectedCharacter.id, action: 'end_turn' };
   }
   
-  // Chercher une cible Ã  portÃ©e d'attaque
+  // Chercher une cible à portée d'attaque
   for (const target of playerCharacters) {
     const distance = getDistance(selectedCharacter.position, target.position);
     

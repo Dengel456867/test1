@@ -6,7 +6,7 @@ export const BOARD_SIZE = 16;
 export const CHARACTER_STATS = {
   WARRIOR: {
     health: 15,
-    movement: 4,
+    movement: 3,
     attacksPerTurn: 2,
     initiative: 10,
   },

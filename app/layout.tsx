@@ -3,7 +3,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Test 1',
-  description: 'Jeu 3D isomÃ©trique',
+  description: 'Jeu 3D isométrique',
 }
 
 export default function RootLayout({

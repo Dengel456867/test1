@@ -252,9 +252,9 @@ function Push-AllFilesToGitHub {
     foreach ($file in $files) {
         $relativePath = $file.FullName.Substring($projectRoot.Length + 1).Replace("\", "/")
         
-        # Lire le contenu du fichier
+        # Lire le contenu du fichier en UTF-8
         try {
-            $content = Get-Content -Path $file.FullName -Raw -ErrorAction Stop
+            $content = Get-Content -Path $file.FullName -Raw -Encoding UTF8 -ErrorAction Stop
             if ($null -eq $content) { $content = "" }
         } catch {
             continue

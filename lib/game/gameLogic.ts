@@ -20,7 +20,7 @@ export function initializeGame(): GameState {
     board[char.position.y][char.position.x] = char;
   });
   
-  // Générer l'ordre de jeu basé sur l'initiative
+  // GÃ©nÃ©rer l'ordre de jeu basÃ© sur l'initiative
   const turnOrder = generateTurnOrder(playerTeam, enemyTeam);
   const firstCharId = turnOrder[0];
   const firstChar = [...playerTeam, ...enemyTeam].find(c => c.id === firstCharId);
@@ -61,18 +61,18 @@ export function moveCharacter(
   }
   
   const distance = getDistance(character.position, newPosition);
-  const availableMovement = character.movement; // movementBoost n'est plus utilisé (bonus permanent via maxMovement)
+  const availableMovement = character.movement; // movementBoost n'est plus utilisÃ© (bonus permanent via maxMovement)
   
   if (distance > availableMovement || distance === 0) {
     return gameState;
   }
   
-  // Vérifier si la case est libre
+  // VÃ©rifier si la case est libre
   if (gameState.board[newPosition.y][newPosition.x] !== null) {
     return gameState;
   }
   
-  // Mettre à jour la position
+  // Mettre Ã  jour la position
   const newBoard = gameState.board.map(row => [...row]);
   newBoard[character.position.y][character.position.x] = null;
   newBoard[newPosition.y][newPosition.x] = character;
@@ -83,9 +83,9 @@ export function moveCharacter(
     movement: character.movement - distance,
   };
   
-  // NOTE: Les cases spéciales ne s'activent qu'en fin de tour (dans endTurn)
+  // NOTE: Les cases spÃ©ciales ne s'activent qu'en fin de tour (dans endTurn)
   
-  // Mettre à jour l'équipe
+  // Mettre Ã  jour l'Ã©quipe
   const team = character.team === 'player' ? 'playerTeam' : 'enemyTeam';
   const updatedTeam = gameState[team].map(c =>
     c.id === characterId ? updatedCharacter : c
@@ -118,13 +118,13 @@ export function performAttack(
   
   // Logique d'attaque selon le type de personnage
   if (attacker.type === 'warrior') {
-    // GUERRIER: Corps à corps uniquement (1 case de distance)
+    // GUERRIER: Corps Ã  corps uniquement (1 case de distance)
     const distanceToTarget = getDistance(attacker.position, targetPosition);
     if (distanceToTarget > 1) {
       return { gameState, attackResult: null }; // Trop loin
     }
     
-    // Trouver le personnage sur la case ciblée
+    // Trouver le personnage sur la case ciblÃ©e
     const targetChar = allCharacters.find(
       c => c.position.x === targetPosition.x && c.position.y === targetPosition.y && c.id !== attacker.id
     );
@@ -135,20 +135,20 @@ export function performAttack(
       return { gameState, attackResult: null }; // Pas de cible
     }
   } else if (attacker.type === 'thief') {
-    // VOLEUR: Peut attaquer jusqu'à 4 cases de distance
+    // VOLEUR: Peut attaquer jusqu'Ã  4 cases de distance
     const distanceToTarget = getDistance(attacker.position, targetPosition);
     if (distanceToTarget > ATTACK_RANGES.THIEF) {
       return { gameState, attackResult: null }; // Trop loin
     }
     
-    // Trouver le personnage sur la case ciblée
+    // Trouver le personnage sur la case ciblÃ©e
     const targetChar = allCharacters.find(
       c => c.position.x === targetPosition.x && c.position.y === targetPosition.y && c.id !== attacker.id
     );
     
     if (targetChar) {
       targets = [targetChar];
-      // Déterminer si c'est du corps à corps pour le critique
+      // DÃ©terminer si c'est du corps Ã  corps pour le critique
       isMelee = distanceToTarget <= 1;
     } else {
       return { gameState, attackResult: null }; // Pas de cible
@@ -156,22 +156,22 @@ export function performAttack(
   } else if (attacker.type === 'mage') {
     // MAGE: Attaque de zone - touche TOUS les personnages dans un rayon de 3 cases autour du mage
     targets = allCharacters.filter(char => {
-      if (char.id === attacker.id) return false; // Le mage ne s'attaque pas lui-même
+      if (char.id === attacker.id) return false; // Le mage ne s'attaque pas lui-mÃªme
       const distance = getDistance(attacker.position, char.position);
       return distance <= ATTACK_RANGES.MAGE; // 3 cases
     });
     
     if (targets.length === 0) {
-      return { gameState, attackResult: null }; // Personne à portée
+      return { gameState, attackResult: null }; // Personne Ã  portÃ©e
     }
   } else if (attacker.type === 'royal') {
-    // ROYAL: Corps à corps uniquement (1 case de distance)
+    // ROYAL: Corps Ã  corps uniquement (1 case de distance)
     const distanceToTarget = getDistance(attacker.position, targetPosition);
     if (distanceToTarget > 1) {
       return { gameState, attackResult: null }; // Trop loin
     }
     
-    // Trouver le personnage sur la case ciblée
+    // Trouver le personnage sur la case ciblÃ©e
     const targetChar = allCharacters.find(
       c => c.position.x === targetPosition.x && c.position.y === targetPosition.y && c.id !== attacker.id
     );
@@ -187,27 +187,27 @@ export function performAttack(
     return { gameState, attackResult: null };
   }
   
-  // Calculer les dégâts
+  // Calculer les dÃ©gÃ¢ts
   const attackResults = targets.map(target => {
     let damage = calculateDamage(attacker.type, target.type, attacker.damageBoost);
     let isCritical = false;
     
-    // Critique pour le voleur en corps à corps uniquement (50% de chance)
+    // Critique pour le voleur en corps Ã  corps uniquement (50% de chance)
     if (attacker.type === 'thief' && isMelee && Math.random() < 0.5) {
       damage *= 2;
       isCritical = true;
     }
     
-    // Appliquer la réduction d'armure (minimum 0 dégâts)
+    // Appliquer la rÃ©duction d'armure (minimum 0 dÃ©gÃ¢ts)
     const damageAfterArmor = Math.max(0, damage - (target.armor || 0));
     
-    // Appliquer les dégâts au bouclier d'abord, puis à la vie
+    // Appliquer les dÃ©gÃ¢ts au bouclier d'abord, puis Ã  la vie
     let newShield = target.shield || 0;
     let newHealth = target.health;
     
     if (damageAfterArmor > 0) {
       if (newShield > 0) {
-        // Le bouclier absorbe les dégâts en premier
+        // Le bouclier absorbe les dÃ©gÃ¢ts en premier
         const shieldDamage = Math.min(newShield, damageAfterArmor);
         newShield -= shieldDamage;
         const remainingDamage = damageAfterArmor - shieldDamage;
@@ -226,20 +226,20 @@ export function performAttack(
     
     return {
       character: updatedTarget,
-      damage: damageAfterArmor, // Afficher les dégâts après armure
+      damage: damageAfterArmor, // Afficher les dÃ©gÃ¢ts aprÃ¨s armure
       isCritical,
     };
   });
   
-  // Mettre à jour les personnages (y compris les alliés touchés par le mage)
+  // Mettre Ã  jour les personnages (y compris les alliÃ©s touchÃ©s par le mage)
   const newBoard = gameState.board.map(row => [...row]);
   
-  // D'abord appliquer les dégâts à tous les personnages touchés
+  // D'abord appliquer les dÃ©gÃ¢ts Ã  tous les personnages touchÃ©s
   let updatedPlayerTeam = gameState.playerTeam.map(char => {
     const result = attackResults.find(r => r.character.id === char.id);
     if (result) {
       const updated = result.character;
-      // Si le personnage est mort, libérer la case
+      // Si le personnage est mort, libÃ©rer la case
       if (!updated.isAlive) {
         newBoard[updated.position.y][updated.position.x] = null;
       } else {
@@ -254,7 +254,7 @@ export function performAttack(
     const result = attackResults.find(r => r.character.id === char.id);
     if (result) {
       const updated = result.character;
-      // Si le personnage est mort, libérer la case
+      // Si le personnage est mort, libÃ©rer la case
       if (!updated.isAlive) {
         newBoard[updated.position.y][updated.position.x] = null;
       } else {
@@ -265,7 +265,7 @@ export function performAttack(
     return char;
   });
   
-  // Le bonus de dégâts est maintenant permanent, on ne le réinitialise plus
+  // Le bonus de dÃ©gÃ¢ts est maintenant permanent, on ne le rÃ©initialise plus
   
   const attackResult: AttackResult = {
     attacker: attacker,
@@ -279,7 +279,7 @@ export function performAttack(
     enemyTeam: updatedEnemyTeam,
   };
   
-  // Vérifier si le jeu est terminé
+  // VÃ©rifier si le jeu est terminÃ©
   const playerAlive = updatedPlayerTeam.some(c => c.isAlive);
   const enemyAlive = updatedEnemyTeam.some(c => c.isAlive);
   
@@ -297,13 +297,13 @@ export function endTurn(gameState: GameState, usedCharacterId?: string): GameSta
   let updatedSpecialTiles = [...gameState.specialTiles];
   let newBoard = gameState.board.map(row => [...row]);
   
-  // Appliquer les effets des cases spéciales au personnage qui vient de jouer
+  // Appliquer les effets des cases spÃ©ciales au personnage qui vient de jouer
   if (usedCharacterId) {
     const allChars = [...updatedPlayerTeam, ...updatedEnemyTeam];
     const character = allChars.find(c => c.id === usedCharacterId);
     
     if (character) {
-      // Trouver si le personnage est sur une case spéciale non utilisée
+      // Trouver si le personnage est sur une case spÃ©ciale non utilisÃ©e
       const tileIndex = updatedSpecialTiles.findIndex(
         tile => tile.position.x === character.position.x &&
                 tile.position.y === character.position.y &&
@@ -324,7 +324,7 @@ export function endTurn(gameState: GameState, usedCharacterId?: string): GameSta
             );
             break;
           case 'damage_boost':
-            // +1 dégâts permanent
+            // +1 dÃ©gÃ¢ts permanent
             updatedChar.damageBoost += SPECIAL_TILE_EFFECTS.DAMAGE_BOOST;
             break;
           case 'movement_boost':
@@ -337,7 +337,7 @@ export function endTurn(gameState: GameState, usedCharacterId?: string): GameSta
             updatedChar.initiative = Math.max(1, updatedChar.initiative - SPECIAL_TILE_EFFECTS.INITIATIVE_BOOST);
             break;
           case 'armor':
-            // +1 réduction de dégâts (permanent, cumulable)
+            // +1 rÃ©duction de dÃ©gÃ¢ts (permanent, cumulable)
             updatedChar.armor += SPECIAL_TILE_EFFECTS.ARMOR;
             break;
           case 'shield':
@@ -345,13 +345,13 @@ export function endTurn(gameState: GameState, usedCharacterId?: string): GameSta
             updatedChar.shield += SPECIAL_TILE_EFFECTS.SHIELD;
             break;
           case 'regeneration':
-            // +1 PV régénéré par tour (permanent, cumulable)
+            // +1 PV rÃ©gÃ©nÃ©rÃ© par tour (permanent, cumulable)
             updatedChar.regeneration += SPECIAL_TILE_EFFECTS.REGENERATION;
             break;
           case 'star':
-            // Bonus spécial : donne 3 bonus de base différents aléatoirement
+            // Bonus spÃ©cial : donne 3 bonus de base diffÃ©rents alÃ©atoirement
             const baseBonusTypes = ['heal', 'damage_boost', 'movement_boost', 'initiative_boost', 'armor', 'shield', 'regeneration'];
-            // Mélanger et prendre les 3 premiers
+            // MÃ©langer et prendre les 3 premiers
             const shuffled = [...baseBonusTypes].sort(() => Math.random() - 0.5);
             const selectedBonuses = shuffled.slice(0, 3);
             
@@ -385,10 +385,10 @@ export function endTurn(gameState: GameState, usedCharacterId?: string): GameSta
             break;
         }
         
-        // Marquer la case comme utilisée
+        // Marquer la case comme utilisÃ©e
         updatedSpecialTiles[tileIndex] = { ...specialTile, used: true };
         
-        // Mettre à jour le personnage dans la bonne équipe
+        // Mettre Ã  jour le personnage dans la bonne Ã©quipe
         if (character.team === 'player') {
           updatedPlayerTeam = updatedPlayerTeam.map(c => c.id === usedCharacterId ? updatedChar : c);
         } else {
@@ -413,10 +413,10 @@ export function endTurn(gameState: GameState, usedCharacterId?: string): GameSta
     nextIndex = 0;
     newTurnCount++;
     
-    // Régénérer l'ordre de tour pour le nouveau tour global
+    // RÃ©gÃ©nÃ©rer l'ordre de tour pour le nouveau tour global
     newTurnOrder = generateTurnOrder(updatedPlayerTeam, updatedEnemyTeam);
     
-    // Réinitialiser le mouvement et les attaques pour tous les personnages vivants
+    // RÃ©initialiser le mouvement et les attaques pour tous les personnages vivants
     updatedPlayerTeam = updatedPlayerTeam.map(char => ({
       ...char,
       movement: char.isAlive ? char.maxMovement : char.movement,
@@ -429,19 +429,19 @@ export function endTurn(gameState: GameState, usedCharacterId?: string): GameSta
       attacksRemaining: char.isAlive ? (char.type === 'warrior' ? 2 : 1) : 0,
     }));
     
-    // Mettre à jour le plateau avec les personnages réinitialisés
+    // Mettre Ã  jour le plateau avec les personnages rÃ©initialisÃ©s
     [...updatedPlayerTeam, ...updatedEnemyTeam].forEach(char => {
       if (char.isAlive) {
         newBoard[char.position.y][char.position.x] = char;
       }
     });
     
-    // Faire apparaître une nouvelle case bonus de chaque type
+    // Faire apparaÃ®tre une nouvelle case bonus de chaque type
     const tileTypes: Array<'heal' | 'damage_boost' | 'movement_boost' | 'initiative_boost' | 'armor' | 'shield' | 'regeneration'> = [
       'heal', 'damage_boost', 'movement_boost', 'initiative_boost', 'armor', 'shield', 'regeneration'
     ];
     
-    // Positions occupées (personnages + cases bonus existantes)
+    // Positions occupÃ©es (personnages + cases bonus existantes)
     const occupiedPositions = new Set<string>();
     [...updatedPlayerTeam, ...updatedEnemyTeam].forEach(char => {
       if (char.isAlive) {
@@ -454,7 +454,7 @@ export function endTurn(gameState: GameState, usedCharacterId?: string): GameSta
       }
     });
     
-    // Générer une case de chaque type (bonus de base)
+    // GÃ©nÃ©rer une case de chaque type (bonus de base)
     tileTypes.forEach(type => {
       let attempts = 0;
       while (attempts < 100) {
@@ -475,7 +475,7 @@ export function endTurn(gameState: GameState, usedCharacterId?: string): GameSta
       }
     });
     
-    // Générer une case étoile tous les 3 tours (au milieu du plateau)
+    // GÃ©nÃ©rer une case Ã©toile tous les 3 tours (au milieu du plateau)
     if (newTurnCount % 3 === 0) {
       let attempts = 0;
       while (attempts < 50) {
@@ -498,11 +498,11 @@ export function endTurn(gameState: GameState, usedCharacterId?: string): GameSta
     }
   }
   
-  // Trouver le prochain personnage et appliquer la régénération
+  // Trouver le prochain personnage et appliquer la rÃ©gÃ©nÃ©ration
   const nextCharId = newTurnOrder[nextIndex];
   let nextChar = [...updatedPlayerTeam, ...updatedEnemyTeam].find(c => c.id === nextCharId);
   
-  // Appliquer la régénération au personnage qui va jouer
+  // Appliquer la rÃ©gÃ©nÃ©ration au personnage qui va jouer
   if (nextChar && nextChar.isAlive && nextChar.regeneration > 0) {
     const healedChar = {
       ...nextChar,

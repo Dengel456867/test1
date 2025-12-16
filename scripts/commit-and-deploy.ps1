@@ -137,7 +137,7 @@ function Test-Tokens {
 function Set-GitHubFile {
     param(
         [string]$FilePath,
-        [string]$Content,
+        [string]$FullPath,
         [string]$Message,
         [string]$Sha = $null
     )
@@ -148,9 +148,13 @@ function Set-GitHubFile {
         "Accept" = "application/vnd.github.v3+json"
     }
     
+    # Lire le fichier en bytes pour preserver l'encodage UTF-8
+    $bytes = [System.IO.File]::ReadAllBytes($FullPath)
+    $base64Content = [Convert]::ToBase64String($bytes)
+    
     $body = @{
         message = $Message
-        content = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($Content))
+        content = $base64Content
     }
     
     if ($Sha) {
@@ -252,20 +256,12 @@ function Push-AllFilesToGitHub {
     foreach ($file in $files) {
         $relativePath = $file.FullName.Substring($projectRoot.Length + 1).Replace("\", "/")
         
-        # Lire le contenu du fichier en UTF-8
-        try {
-            $content = Get-Content -Path $file.FullName -Raw -Encoding UTF8 -ErrorAction Stop
-            if ($null -eq $content) { $content = "" }
-        } catch {
-            continue
-        }
-        
         # Verifier si le fichier existe deja sur GitHub
         $existingFile = Get-GitHubFile -FilePath $relativePath
         $sha = if ($existingFile) { $existingFile.sha } else { $null }
         
-        # Upload le fichier
-        $result = Set-GitHubFile -FilePath $relativePath -Content $content -Message $Message -Sha $sha
+        # Upload le fichier (lecture en bytes pour preserver UTF-8)
+        $result = Set-GitHubFile -FilePath $relativePath -FullPath $file.FullName -Message $Message -Sha $sha
         
         if ($result) {
             $uploadedCount++
